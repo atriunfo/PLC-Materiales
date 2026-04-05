@@ -1,0 +1,394 @@
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#c8f7dc;min-height:100vh;font-size:14px;padding:0 0 40px}
+:root{--verde:#2e7d52;--verde-claro:#e8f5ee;--verde-medio:#c8e6d4;--verde-oscuro:#1b5e3a;--rojo:#c82333;--amarillo:#e6a800}
+
+.hdr{background:var(--verde);color:#fff;text-align:center;padding:16px 18px 13px}
+.hdr-t{font-size:15px;font-weight:900;letter-spacing:.4px;margin-bottom:6px}
+.hdr-m{font-size:12px;line-height:2;font-weight:700}
+.hdr-b{display:inline-block;margin-top:8px;background:rgba(255,255,255,.2);border-radius:4px;padding:5px 20px;font-size:13px;font-weight:900;letter-spacing:.5px}
+
+.timer-bar{position:sticky;top:0;z-index:100;background:var(--verde);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 18px}
+.tb-l{font-size:12px;font-weight:700}
+.tb-clk{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;min-width:90px;text-align:center}
+.tb-clk.warn{color:#ffe082}.tb-clk.danger{color:#ff8a80;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-r{font-size:11px;text-align:right;opacity:.85}
+
+.tabs{display:flex;background:var(--verde-oscuro);overflow-x:auto;gap:2px;padding:0 10px}
+.tab{padding:10px 15px;color:rgba(255,255,255,.6);font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s}
+.tab:hover{color:#fff}.tab.on{color:#fff;border-bottom-color:#ffc107}
+
+.prog-wrap{max-width:780px;margin:10px auto 0;padding:0 12px}
+.prog-bar{height:6px;background:#a5d6b8;border-radius:4px;overflow:hidden}
+.prog-f{height:100%;background:#ffc107;border-radius:4px;transition:width .4s}
+.prog-lbl{font-size:11px;color:#2e7d52;margin-top:4px;text-align:right;font-weight:600}
+
+.content{max-width:780px;margin:0 auto;padding:14px 12px}
+
+.ex-card{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(46,125,82,.12);overflow:hidden;border-top:3px solid var(--verde)}
+.ex-hdr{background:var(--verde);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.ex-num{background:rgba(255,255,255,.2);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;flex-shrink:0}
+.ex-tit{font-size:14px;font-weight:700;line-height:1.4}
+.ex-sub{font-size:11px;opacity:.85;margin-top:2px}
+.ex-body{padding:18px}
+
+.bloque-cat{display:inline-block;background:var(--amarillo);color:#212529;font-size:10.5px;font-weight:700;padding:2px 10px;border-radius:12px;margin-bottom:12px;letter-spacing:.3px}
+
+.bloque{background:#f4fbf7;border-radius:8px;padding:14px;margin-bottom:14px;border-left:4px solid var(--verde)}
+.bloque-tit{font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.bloque p{font-size:13px;line-height:1.75;color:#333}
+
+.dtbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.dtbl th{background:var(--verde);color:#fff;padding:7px 10px;text-align:left;font-size:11.5px}
+.dtbl td{padding:8px 10px;border-bottom:1px solid #c8e6d4}
+.dtbl tr:nth-child(even) td{background:#f0faf4}
+
+.formula-box{background:#1a2e1a;border-radius:8px;padding:14px;margin-bottom:14px}
+.formula-box-lbl{font-size:11px;font-weight:700;color:#90ee90;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.txt-formula{width:100%;background:transparent;border:none;border-bottom:1px solid #3a6a3a;color:#a8f0a8;font-family:monospace;font-size:13px;padding:4px 2px;margin-bottom:6px;resize:none;outline:none;overflow:hidden;line-height:1.5;min-height:28px}
+.txt-formula::placeholder{color:#4a7a4a}
+.txt-resp{width:100%;border:none;border-bottom:1.5px solid #a5d6b8;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;padding:4px 2px;margin-bottom:4px;resize:none;outline:none;overflow:hidden;background:transparent;line-height:1.5;min-height:28px;color:#1a2e1a}
+.txt-resp::placeholder{color:#bbb}
+.resp-lbl{font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:none;border-radius:6px;font-size:13.5px;font-weight:700;cursor:pointer;transition:filter .15s}
+.btn:hover{filter:brightness(.87)}
+.btn-verde{background:var(--verde);color:#fff}
+.btn-gray{background:#6c757d;color:#fff}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn-row{display:flex;justify-content:space-between;margin-top:18px;gap:10px}
+
+.instr{background:#e8f5ee;border-left:4px solid var(--verde);padding:13px 15px;border-radius:0 6px 6px 0;margin:14px 12px;font-size:13px;line-height:1.85;color:#1b3a2a}
+
+.screen{display:none}.screen.on{display:block}
+.fgrp{margin-bottom:15px}
+.fgrp label{display:block;font-size:11px;font-weight:700;color:#495057;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.finput{width:100%;padding:10px 13px;border:1.5px solid #c8e6d4;border-radius:6px;font-size:14px}
+.finput:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(46,125,82,.14)}
+.err-msg{color:var(--rojo);font-size:12.5px;margin-bottom:10px}
+
+.doc-bar{background:#1b5e3a;color:#fff;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:3px solid #28a745}
+.doc-dt{font-weight:700;font-size:13px;color:#a8f0c6}
+.doc-ds{font-size:11px;color:#c8f5d8;margin-top:2px;font-family:monospace}
+
+@media print{
+  body>*:not(#print-zone){display:none!important}
+  #print-zone{display:block!important}
+  @page{size:letter;margin:12mm 14mm 15mm 14mm}
+  body{background:#fff;font-family:Arial,sans-serif;font-size:9pt;color:#000}
+  .p-hdr{background:#2e7d52!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;text-align:center;padding:10pt 8pt;margin-bottom:8pt}
+  .p-hdr-t{font-size:12pt;font-weight:900;margin-bottom:3pt}
+  .p-hdr-m{font-size:8.5pt;line-height:1.9;font-weight:700}
+  .p-hdr-b{font-size:10pt;font-weight:900;margin-top:5pt;display:block}
+  .p-alumno{background:#e8f5ee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-radius:4pt;padding:8pt 10pt;font-size:8.5pt;line-height:1.9;margin-bottom:8pt;display:flex;gap:16pt}
+  .p-alumno span{flex:1}
+  .p-ex{margin-bottom:12pt;page-break-inside:avoid}
+  .p-ex-hdr{background:#2e7d52!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;padding:5pt 8pt;border-radius:3pt 3pt 0 0;font-size:9pt;font-weight:700}
+  .p-ex-body{border:1pt solid #a5d6b8;border-top:none;padding:8pt 10pt;border-radius:0 0 3pt 3pt}
+  .p-datos{font-size:8pt;margin-bottom:6pt;background:#f0faf4!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5pt 8pt;border-radius:2pt}
+  .p-datos b{color:#2e7d52}
+  .p-pregunta{font-size:8.5pt;font-weight:700;color:#2e7d52;margin-bottom:6pt}
+  .p-formula{background:#f4fbf7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5pt 8pt;border-radius:2pt;margin-bottom:5pt}
+  .p-formula-lbl{font-size:7.5pt;color:#2e7d52;margin-bottom:3pt;font-weight:700}
+  .p-linea{border-bottom:1pt solid #aaa;min-height:16pt;padding:2pt 0;margin-bottom:3pt}
+  .p-footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:7pt;color:#aaa;border-top:1pt solid #ddd;padding-top:3pt}
+  .p-cat{display:inline-block;background:#e6a800!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#212529!important;font-size:7pt;font-weight:700;padding:1pt 6pt;border-radius:8pt;margin-bottom:4pt}
+}
+#print-zone{display:none}
+</style>
+
+<div id="print-zone">
+  <div class="p-hdr">
+    <div class="p-hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+    <div class="p-hdr-m">Asignatura: INSTRUMENTACIÓN INDUSTRIAL &nbsp;|&nbsp; Grupo: AEF1038-MtA<br>
+    Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026 &nbsp;|&nbsp; Docente: ALEJANDRO TRIUNFO CRUZ</div>
+    <span class="p-hdr-b">EJERCICIOS — SENSORES Y TRANSMISORES</span>
+  </div>
+  <div class="p-alumno">
+    <span><b>Nombre:</b> <span id="p-name2"></span></span>
+    <span><b>No. Control:</b> <span id="p-ctrl2"></span></span>
+    <span><b>Fecha:</b> <span id="p-fecha2"></span></span>
+  </div>
+  <div id="p-ejercicios"></div>
+  <div class="p-footer">TecNM Campus Culiacán · Ejercicios Instrumentación · AEF1038-MtA · Enero–Junio 2026</div>
+</div>
+
+<div id="root">
+  <div id="doc-bar" class="doc-bar" style="display:none">
+    <div>
+      <div class="doc-dt">🔐 Modo Docente — Alejandro Triunfo Cruz</div>
+      <div class="doc-ds">ejercicios_instrumentacion_AEF1038.html?docente=KEY2204</div>
+    </div>
+    <button style="background:#dc3545;color:#fff;border:none;border-radius:6px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer" onclick="docenteReset()">🔄 Reiniciar</button>
+  </div>
+
+  <div id="scr-blocked" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: INSTRUMENTACIÓN INDUSTRIAL &nbsp;|&nbsp; Grupo: AEF1038-MtA<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026</div>
+      <div class="hdr-b">EJERCICIOS — SENSORES Y TRANSMISORES</div>
+    </div>
+    <div style="max-width:500px;margin:20px auto;background:#fff;border-radius:10px;padding:22px;box-shadow:0 2px 12px rgba(46,125,82,.12);text-align:center">
+      <div style="font-size:52px;margin-bottom:12px">🔒</div>
+      <div style="font-size:19px;font-weight:700;color:#dc3545;margin-bottom:8px">Ejercicio ya completado</div>
+      <div style="font-size:13.5px;color:#6c757d;line-height:1.75">Ya realizaste estos ejercicios en este dispositivo.<br>Solicita ayuda a tu docente si crees que hay un error.</div>
+    </div>
+  </div>
+
+  <div id="scr-start" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: INSTRUMENTACIÓN INDUSTRIAL &nbsp;|&nbsp; Grupo: AEF1038-MtA<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026 &nbsp;|&nbsp; Docente: ALEJANDRO TRIUNFO CRUZ</div>
+      <div class="hdr-b">EJERCICIOS — SENSORES Y TRANSMISORES</div>
+    </div>
+    <div class="instr">
+      📋 <strong>Instrucciones:</strong><br>
+      • Resuelve los <strong>10 ejercicios</strong> sobre sensores de temperatura, nivel y transmisores.<br>
+      • Tienes <strong>20 minutos</strong> para completar todos los ejercicios.<br>
+      • Usa el espacio de fórmulas y respuesta en cada ejercicio.<br>
+      • Al finalizar, imprime tu trabajo en PDF con el botón correspondiente.<br>
+      • Una vez iniciado, <strong>no podrás volver a empezar</strong> en este dispositivo.
+    </div>
+    <div style="max-width:500px;margin:0 auto;padding:0 12px">
+      <div style="background:#fff;border-radius:10px;padding:22px;box-shadow:0 2px 12px rgba(46,125,82,.12);border-top:3px solid var(--verde)">
+        <div class="fgrp"><label>Nombre completo</label><input type="text" id="inp-name" class="finput" placeholder="Ej. García López Juan Carlos"></div>
+        <div class="fgrp"><label>Número de control</label><input type="text" id="inp-ctrl" class="finput" placeholder="Ej. 22460001" maxlength="12"></div>
+        <div id="start-err" class="err-msg" style="display:none"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px">
+          <button class="btn btn-verde" onclick="startEx()">Iniciar ejercicios ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scr-ex" class="screen">
+    <div class="timer-bar">
+      <div class="tb-l">
+        <div id="tb-ex">Ejercicio 1 de 10</div>
+        <div id="tb-name" style="font-size:11px;opacity:.8;margin-top:2px"></div>
+      </div>
+      <div class="tb-clk" id="tb-clk">20:00</div>
+      <div class="tb-r">⏱ Tiempo<br>restante</div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-f" id="prog-f" style="width:10%"></div></div>
+      <div class="prog-lbl" id="prog-lbl">Ejercicio 1 de 10</div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+
+  <div id="scr-fin" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: INSTRUMENTACIÓN INDUSTRIAL &nbsp;|&nbsp; Grupo: AEF1038-MtA<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026</div>
+      <div class="hdr-b">EJERCICIOS COMPLETADOS</div>
+    </div>
+    <div style="max-width:500px;margin:20px auto;background:#fff;border-radius:10px;padding:26px;box-shadow:0 2px 12px rgba(46,125,82,.12);text-align:center;border-top:3px solid var(--verde)">
+      <div style="font-size:52px;margin-bottom:12px">✅</div>
+      <div style="font-size:19px;font-weight:700;color:var(--verde);margin-bottom:8px">¡Ejercicios enviados!</div>
+      <div id="fin-info" style="font-size:13px;color:#555;line-height:1.85;margin-bottom:20px"></div>
+      <button class="btn btn-verde" onclick="window.print()" style="margin-bottom:8px">🖨️ Imprimir / Guardar PDF</button>
+      <p style="font-size:11.5px;color:#6c757d">Selecciona <strong>"Guardar como PDF"</strong> en el diálogo de impresión</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const CFG={pwd:'KEY2204',sk:'inst_ej_AEF1038_v1',sec:20*60};
+
+const EX=[
+{num:1,cat:"RTD / PT100",tit:"Resistencia del PT100 en función de la temperatura",sub:"Ecuación lineal de Callendar-Van Dusen",
+ datos:[{l:"Resistencia a 0°C (R₀)",v:"100 Ω"},{l:"Coeficiente α",v:"0.00385 Ω/Ω·°C"},{l:"Ecuación",v:"R(T) = R₀ × (1 + α × T)"}],
+ pregunta:"Calcula la resistencia del PT100 a las siguientes temperaturas:<br><strong>a)</strong> T = 75°C &nbsp; <strong>b)</strong> T = 150°C &nbsp; <strong>c)</strong> T = 250°C",
+ nlineas:4,nformulas:4},
+{num:2,cat:"RTD / PT100",tit:"Temperatura a partir de la resistencia medida",sub:"Ecuación lineal inversa del PT100",
+ datos:[{l:"Resistencia medida",v:"138.5 Ω"},{l:"R₀",v:"100 Ω"},{l:"Coeficiente α",v:"0.00385 Ω/Ω·°C"},{l:"Ecuación inversa",v:"T = (R - R₀) / (R₀ × α)"},{l:"Rango de operación segura",v:"0°C a 300°C"}],
+ pregunta:"<strong>a)</strong> Determina la temperatura del proceso. <strong>b)</strong> Verifica si está dentro del rango de operación segura del sensor.",
+ nlineas:4,nformulas:2},
+{num:3,cat:"RTD / PT100",tit:"Comparación RTD PT100 vs Termopar tipo K",sub:"Selección de sensor para proceso industrial",
+ datos:[{l:"Rango requerido",v:"0°C a 200°C"},{l:"Precisión requerida",v:"±0.5°C"},{l:"PT100 — Sensibilidad",v:"0.385 Ω/°C"},{l:"Termopar tipo K — Sensibilidad",v:"40.6 µV/°C"},{l:"PT100 — Linealidad",v:"Alta"},{l:"Termopar tipo K — Linealidad",v:"Moderada"}],
+ pregunta:"Analiza y determina cuál sensor es más adecuado. Justifica tu respuesta considerando <strong>sensibilidad, linealidad y tiempo de respuesta</strong>.",
+ nlineas:6,nformulas:0},
+{num:4,cat:"Termopares",tit:"Voltaje generado por efecto Seebeck — Termopar tipo J",sub:"Cálculo de voltaje de salida",
+ datos:[{l:"Tipo de termopar",v:"J (hierro-constantán)"},{l:"Sensibilidad",v:"51.7 µV/°C"},{l:"Temperatura junta caliente",v:"320°C"},{l:"Temperatura junta fría (referencia)",v:"25°C"},{l:"Ecuación",v:"V = S × (T_caliente - T_fría)"}],
+ pregunta:"<strong>a)</strong> Calcula el voltaje de salida en µV. <strong>b)</strong> Convierte el resultado a mV.",
+ nlineas:4,nformulas:3},
+{num:5,cat:"Termopares",tit:"Determinación de temperatura — Termopar tipo K",sub:"Temperatura de junta caliente",
+ datos:[{l:"Voltaje generado",v:"12.207 mV"},{l:"Sensibilidad tipo K",v:"40.6 µV/°C"},{l:"Temperatura junta de referencia",v:"0°C"},{l:"Ecuación inversa",v:"T = V(µV) / S"}],
+ pregunta:"<strong>a)</strong> Convierte el voltaje a µV. <strong>b)</strong> Determina la temperatura de la junta caliente. <strong>c)</strong> Menciona un proceso industrial que genere esa temperatura.",
+ nlineas:5,nformulas:3},
+{num:6,cat:"Sensores de Nivel",tit:"Sensor de presión diferencial para medición de nivel",sub:"Cálculo de presión diferencial máxima",
+ datos:[{l:"Altura máxima del tanque",v:"3.5 m"},{l:"Fluido",v:"Agua"},{l:"Densidad (ρ)",v:"1,000 kg/m³"},{l:"Gravedad (g)",v:"9.81 m/s²"},{l:"Ecuación",v:"ΔP = ρ × g × h"}],
+ pregunta:"<strong>a)</strong> Calcula la presión diferencial máxima en Pa. <strong>b)</strong> Convierte el resultado a kPa. <strong>c)</strong> ¿Qué rango de transmisor de presión seleccionarías?",
+ nlineas:4,nformulas:3},
+{num:7,cat:"Sensores de Nivel",tit:"Selección de sensor de nivel para ácido sulfúrico",sub:"Análisis de sensores para fluidos corrosivos",
+ datos:[{l:"Fluido",v:"Ácido sulfúrico al 30%"},{l:"Rango de medición",v:"0 a 5 m"},{l:"Opciones disponibles",v:"Ultrasónico, Capacitivo, Flotador, Presión diferencial"}],
+ pregunta:"Analiza cada opción y selecciona el sensor más adecuado. Justifica considerando: <strong>tipo de fluido, rango, contacto con el fluido y confiabilidad</strong>.",
+ nlineas:7,nformulas:0},
+{num:8,cat:"Transmisores 4-20 mA",tit:"Transmisor de temperatura 4-20 mA",sub:"Cálculo de corriente de salida y temperatura",
+ datos:[{l:"Rango del transmisor",v:"0°C a 200°C"},{l:"Señal de salida",v:"4 mA a 20 mA"},{l:"Ecuación",v:"I = 4 + [(T - T_min)/(T_max - T_min)] × 16 mA"}],
+ pregunta:"Calcula la corriente de salida para: <strong>a)</strong> T = 50°C &nbsp; <strong>b)</strong> T = 100°C &nbsp; <strong>c)</strong> T = 175°C<br>Además: <strong>d)</strong> ¿Qué temperatura corresponde a I = 12.8 mA?",
+ nlineas:4,nformulas:5},
+{num:9,cat:"Transmisores 0-10 V",tit:"Transmisor de temperatura 0-10 V",sub:"Cálculo de voltaje de salida y temperatura",
+ datos:[{l:"Rango del transmisor",v:"-50°C a 150°C"},{l:"Señal de salida",v:"0 V a 10 V"},{l:"Ecuación",v:"V = [(T - T_min)/(T_max - T_min)] × 10 V"}],
+ pregunta:"Calcula el voltaje de salida para: <strong>a)</strong> T = -25°C &nbsp; <strong>b)</strong> T = 0°C &nbsp; <strong>c)</strong> T = 75°C &nbsp; <strong>d)</strong> T = 150°C<br>Además: <strong>e)</strong> ¿Qué temperatura corresponde a V = 6.5 V?",
+ nlineas:4,nformulas:6},
+{num:10,cat:"Conversión 4-20 mA → 0-10 V",tit:"Conversión señal 4-20 mA a 0-10 V y lectura en PLC",sub:"Resistencia de conversión y resolución digital",
+ datos:[{l:"Señal del transmisor",v:"4 mA a 20 mA"},{l:"Resistencia de conversión",v:"500 Ω"},{l:"Ley de Ohm",v:"V = I × R"},{l:"Rango entrada PLC",v:"0 a 10 V"},{l:"Resolución ADC del PLC",v:"10 bits = 1024 niveles"},{l:"Rango temperatura",v:"0°C a 200°C"}],
+ pregunta:"<strong>a)</strong> Calcula el voltaje para I = 4 mA, 12 mA y 20 mA.<br><strong>b)</strong> ¿Qué temperatura corresponde cuando el PLC lee V = 7.5 V?<br><strong>c)</strong> Calcula el valor digital en el PLC cuando V = 7.5 V con resolución de 10 bits.",
+ nlineas:5,nformulas:5}
+];
+
+let S={name:'',ctrl:'',cur:0,tLeft:CFG.sec,tid:null,finAt:null,docente:false,
+  resp:EX.map(e=>({formulas:Array(e.nformulas).fill(''),lineas:Array(e.nlineas).fill('')}))};
+const store={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
+function $id(id){return document.getElementById(id)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$id('scr-'+id).classList.add('on')}
+
+(function(){
+  let docOk=false;
+  try{const p=new URLSearchParams(window.location.search);if(p.get('docente')===CFG.pwd)docOk=true}catch{}
+  if(docOk){activateDocente();return}
+  if(store.get(CFG.sk))show('blocked');else show('start');
+})();
+
+function activateDocente(){S.docente=true;$id('doc-bar').style.display='flex';show('start')}
+function docenteReset(){
+  if(!confirm('¿Reiniciar para nuevo alumno?'))return;
+  store.del(CFG.sk);clearInterval(S.tid);
+  S={name:'',ctrl:'',cur:0,tLeft:CFG.sec,tid:null,finAt:null,docente:true,
+    resp:EX.map(e=>({formulas:Array(e.nformulas).fill(''),lineas:Array(e.nlineas).fill('')}))};
+  $id('inp-name').value='';$id('inp-ctrl').value='';show('start');
+}
+function startEx(){
+  const n=$id('inp-name').value.trim(),c=$id('inp-ctrl').value.trim();
+  const err=$id('start-err');
+  if(!n||!c){err.textContent='⚠ Ingresa tu nombre completo y número de control.';err.style.display='block';return}
+  err.style.display='none';
+  S.name=n;S.ctrl=c;S.cur=0;S.tLeft=CFG.sec;
+  show('ex');renderTabs();renderEx();runTimer();
+}
+function runTimer(){
+  clearInterval(S.tid);
+  S.tid=setInterval(()=>{S.tLeft--;updateClock();if(S.tLeft<=0){clearInterval(S.tid);finalize(true)}},1000);
+}
+function updateClock(){
+  const m=String(Math.floor(S.tLeft/60)).padStart(2,'0'),s=String(S.tLeft%60).padStart(2,'0');
+  const el=$id('tb-clk');el.textContent=`${m}:${s}`;
+  el.className='tb-clk'+(S.tLeft<=60?' danger':S.tLeft<=300?' warn':'');
+}
+function renderTabs(){
+  const t=$id('tabs');t.innerHTML='';
+  EX.forEach((e,i)=>{
+    const d=document.createElement('div');
+    d.className='tab'+(i===S.cur?' on':'');
+    d.textContent=`Ej.${e.num}`;
+    d.onclick=()=>{saveAnswers();S.cur=i;renderTabs();renderEx();restoreAnswers()};
+    t.appendChild(d);
+  });
+}
+function renderEx(){
+  const e=EX[S.cur];
+  const pct=((S.cur+1)/EX.length*100).toFixed(0);
+  $id('prog-f').style.width=pct+'%';
+  $id('prog-lbl').textContent=`Ejercicio ${S.cur+1} de ${EX.length}`;
+  $id('tb-ex').textContent=`Ejercicio ${S.cur+1} de ${EX.length}`;
+  $id('tb-name').textContent=S.name;
+  let datosHtml='';
+  if(e.datos.length>0){
+    datosHtml=`<div class="bloque"><div class="bloque-tit">📋 Datos del problema</div>
+    <table class="dtbl"><thead><tr><th>Dato</th><th>Valor</th></tr></thead><tbody>
+    ${e.datos.map(d=>`<tr><td>${d.l}</td><td><b>${d.v}</b></td></tr>`).join('')}
+    </tbody></table></div>`;
+  }
+  let formulasHtml='';
+  if(e.nformulas>0){
+    const flineas=Array(e.nformulas).fill(0).map((_,i)=>
+      `<textarea class="txt-formula" rows="1" placeholder="Fórmula / cálculo ${i+1}..." oninput="autoResize(this)"></textarea>`
+    ).join('');
+    formulasHtml=`<div class="formula-box"><div class="formula-box-lbl">✏️ Desarrollo y fórmulas</div>${flineas}</div>`;
+  }
+  let lineasHtml='';
+  if(e.nlineas>0){
+    const lins=Array(e.nlineas).fill(0).map(()=>
+      `<textarea class="txt-resp" rows="1" placeholder="Escribe tu respuesta aquí..." oninput="autoResize(this)"></textarea>`
+    ).join('');
+    lineasHtml=`<div style="margin-bottom:14px"><div class="resp-lbl">📝 Respuesta y conclusión</div><div>${lins}</div></div>`;
+  }
+  const isLast=S.cur===EX.length-1,isPrev=S.cur>0;
+  $id('content').innerHTML=`
+  <div class="ex-card">
+    <div class="ex-hdr"><div class="ex-num">${e.num}</div><div><div class="ex-tit">${e.tit}</div><div class="ex-sub">${e.sub}</div></div></div>
+    <div class="ex-body">
+      <span class="bloque-cat">📁 ${e.cat}</span>
+      ${datosHtml}
+      <div class="bloque" style="border-left-color:#e6a800;background:#fffdf0">
+        <div class="bloque-tit" style="color:#856404">❓ Lo que debes resolver</div>
+        <p>${e.pregunta}</p>
+      </div>
+      ${formulasHtml}${lineasHtml}
+      <div class="btn-row">
+        <button class="btn btn-gray" onclick="navEx(-1)" ${isPrev?'':'disabled'}>← Anterior</button>
+        ${isLast?`<button class="btn btn-verde" onclick="confirmFin()">✓ Finalizar y guardar</button>`:`<button class="btn btn-verde" onclick="navEx(1)">Siguiente →</button>`}
+      </div>
+    </div>
+  </div>`;
+  restoreAnswers();
+}
+function saveAnswers(){
+  document.querySelectorAll('.txt-formula').forEach((el,i)=>{if(S.resp[S.cur])S.resp[S.cur].formulas[i]=el.value});
+  document.querySelectorAll('.txt-resp').forEach((el,i)=>{if(S.resp[S.cur])S.resp[S.cur].lineas[i]=el.value});
+}
+function restoreAnswers(){
+  const r=S.resp[S.cur];if(!r)return;
+  document.querySelectorAll('.txt-formula').forEach((el,i)=>{el.value=r.formulas[i]||'';autoResize(el)});
+  document.querySelectorAll('.txt-resp').forEach((el,i)=>{el.value=r.lineas[i]||'';autoResize(el)});
+}
+function navEx(d){
+  saveAnswers();
+  S.cur=Math.max(0,Math.min(EX.length-1,S.cur+d));
+  renderTabs();renderEx();window.scrollTo(0,0);
+}
+function confirmFin(){if(!confirm('¿Finalizar y guardar tus ejercicios?\n\nEsta acción no se puede deshacer.'))return;saveAnswers();finalize(false)}
+function finalize(timeout){
+  clearInterval(S.tid);S.finAt=new Date();
+  store.set(CFG.sk,JSON.stringify({name:S.name,ctrl:S.ctrl,at:S.finAt.toISOString()}));
+  buildPrintZone();
+  const dt=S.finAt.toLocaleString('es-MX',{dateStyle:'long',timeStyle:'medium'});
+  $id('fin-info').innerHTML=`<strong>Alumno:</strong> ${S.name}<br><strong>No. Control:</strong> ${S.ctrl}<br><strong>Fecha:</strong> ${dt}${timeout?'<br><span style="color:#c82333;font-weight:700">⏱ Tiempo agotado</span>':''}`;
+  show('fin');window.scrollTo(0,0);
+}
+function buildPrintZone(){
+  $id('p-name2').textContent=S.name;
+  $id('p-ctrl2').textContent=S.ctrl;
+  $id('p-fecha2').textContent=S.finAt?S.finAt.toLocaleString('es-MX'):'—';
+  const pe=$id('p-ejercicios');pe.innerHTML='';
+  EX.forEach((e,idx)=>{
+    const r=S.resp[idx]||{formulas:[],lineas:[]};
+    const div=document.createElement('div');div.className='p-ex';
+    let datosP='';
+    if(e.datos.length>0) datosP=`<div class="p-datos"><b>Datos: </b>${e.datos.map(d=>`${d.l}: <b>${d.v}</b>`).join(' | ')}</div>`;
+    let formP='';
+    if(e.nformulas>0){
+      const lineas=r.formulas.map(v=>
+        `<div class="p-linea" style="font-family:monospace;font-size:8pt;color:#1a2e1a">${v||''}</div>`
+      ).join('');
+      formP=`<div class="p-formula"><div class="p-formula-lbl">Desarrollo y fórmulas:</div>${lineas}</div>`;
+    }
+    let linP='';
+    if(e.nlineas>0){
+      const lineas=r.lineas.map(v=>
+        `<div class="p-linea" style="font-size:8.5pt;color:#1b3a2a">${v||''}</div>`
+      ).join('');
+      linP=`<div>${lineas}</div>`;
+    }
+    div.innerHTML=`
+      <div class="p-ex-hdr"><span class="p-cat">${e.cat}</span> &nbsp; Ejercicio ${e.num}: ${e.tit}</div>
+      <div class="p-ex-body">${datosP}<div class="p-pregunta">${e.pregunta.replace(/<[^>]+>/g,' ')}</div>${formP}${linP}</div>`;
+    pe.appendChild(div);
+  });
+}
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+</script>
