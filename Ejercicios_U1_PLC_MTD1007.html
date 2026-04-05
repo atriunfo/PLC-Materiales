@@ -1,0 +1,418 @@
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#c8f7dc;min-height:100vh;font-size:14px;padding:0 0 40px}
+:root{--verde:#2e7d52;--verde-claro:#e8f5ee;--verde-medio:#c8e6d4;--verde-oscuro:#1b5e3a;--rojo:#c82333;--amarillo:#e6a800;--azul-txt:#155724}
+
+.hdr{background:var(--verde);color:#fff;text-align:center;padding:16px 18px 13px}
+.hdr-t{font-size:15px;font-weight:900;letter-spacing:.4px;margin-bottom:6px}
+.hdr-m{font-size:12px;line-height:2;font-weight:700}
+.hdr-b{display:inline-block;margin-top:8px;background:rgba(255,255,255,.2);border-radius:4px;padding:5px 20px;font-size:13px;font-weight:900;letter-spacing:.5px}
+
+.timer-bar{position:sticky;top:0;z-index:100;background:var(--verde);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 18px}
+.tb-l{font-size:12px;font-weight:700}
+.tb-clk{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;min-width:90px;text-align:center}
+.tb-clk.warn{color:#ffe082}.tb-clk.danger{color:#ff8a80;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-r{font-size:11px;text-align:right;opacity:.85}
+
+.tabs{display:flex;background:var(--verde-oscuro);overflow-x:auto;gap:2px;padding:0 10px}
+.tab{padding:10px 15px;color:rgba(255,255,255,.6);font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s}
+.tab:hover{color:#fff}.tab.on{color:#fff;border-bottom-color:#ffc107}
+
+.prog-wrap{max-width:780px;margin:10px auto 0;padding:0 12px}
+.prog-bar{height:6px;background:#a5d6b8;border-radius:4px;overflow:hidden}
+.prog-f{height:100%;background:#ffc107;border-radius:4px;transition:width .4s}
+.prog-lbl{font-size:11px;color:#2e7d52;margin-top:4px;text-align:right;font-weight:600}
+
+.content{max-width:780px;margin:0 auto;padding:14px 12px}
+
+.ex-card{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(46,125,82,.12);overflow:hidden;border-top:3px solid var(--verde)}
+.ex-hdr{background:var(--verde);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.ex-num{background:rgba(255,255,255,.2);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;flex-shrink:0}
+.ex-tit{font-size:14px;font-weight:700;line-height:1.4}
+.ex-sub{font-size:11px;opacity:.85;margin-top:2px}
+.ex-body{padding:18px}
+
+.bloque-cat{display:inline-block;background:var(--amarillo);color:#212529;font-size:10.5px;font-weight:700;padding:2px 10px;border-radius:12px;margin-bottom:12px;letter-spacing:.3px}
+
+.bloque{background:#f4fbf7;border-radius:8px;padding:14px;margin-bottom:14px;border-left:4px solid var(--verde)}
+.bloque-tit{font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.bloque p{font-size:13px;line-height:1.75;color:#333}
+
+.dtbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.dtbl th{background:var(--verde);color:#fff;padding:7px 10px;text-align:left;font-size:11.5px}
+.dtbl td{padding:8px 10px;border-bottom:1px solid #c8e6d4}
+.dtbl tr:nth-child(even) td{background:#f0faf4}
+
+.formula-box{background:#1a2e1a;border-radius:8px;padding:14px;margin-bottom:14px}
+.formula-box-lbl{font-size:11px;font-weight:700;color:#90ee90;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.txt-formula{width:100%;background:transparent;border:none;border-bottom:1px solid #3a6a3a;color:#a8f0a8;font-family:monospace;font-size:13px;padding:4px 2px;margin-bottom:6px;resize:none;outline:none;overflow:hidden;line-height:1.5;min-height:28px}
+.txt-formula::placeholder{color:#4a7a4a}
+.txt-resp{width:100%;border:none;border-bottom:1.5px solid #a5d6b8;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;padding:4px 2px;margin-bottom:4px;resize:none;outline:none;overflow:hidden;background:transparent;line-height:1.5;min-height:28px;color:#1a2e1a}
+.txt-resp::placeholder{color:#bbb}
+
+.resp-lbl{font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.lineas{display:flex;flex-direction:column;gap:6px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:none;border-radius:6px;font-size:13.5px;font-weight:700;cursor:pointer;transition:filter .15s}
+.btn:hover{filter:brightness(.87)}
+.btn-verde{background:var(--verde);color:#fff}
+.btn-grn{background:#1a7a3a;color:#fff}
+.btn-gray{background:#6c757d;color:#fff}
+.btn-ylw{background:#e6a800;color:#fff}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn-row{display:flex;justify-content:space-between;margin-top:18px;gap:10px}
+
+.instr{background:#e8f5ee;border-left:4px solid var(--verde);padding:13px 15px;border-radius:0 6px 6px 0;margin:14px 12px;font-size:13px;line-height:1.85;color:#1b3a2a}
+
+.screen{display:none}.screen.on{display:block}
+.fgrp{margin-bottom:15px}
+.fgrp label{display:block;font-size:11px;font-weight:700;color:#495057;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.finput{width:100%;padding:10px 13px;border:1.5px solid #c8e6d4;border-radius:6px;font-size:14px}
+.finput:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(46,125,82,.14)}
+.err-msg{color:var(--rojo);font-size:12.5px;margin-bottom:10px}
+
+.doc-bar{background:#1b5e3a;color:#fff;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:3px solid #28a745}
+.doc-dt{font-weight:700;font-size:13px;color:#a8f0c6}
+.doc-ds{font-size:11px;color:#c8f5d8;margin-top:2px;font-family:monospace}
+
+/* IMPRESIÓN */
+@media print{
+  body>*:not(#print-zone){display:none!important}
+  #print-zone{display:block!important}
+  @page{size:letter;margin:12mm 14mm 15mm 14mm}
+  body{background:#fff;font-family:Arial,sans-serif;font-size:9pt;color:#000}
+  .p-hdr{background:#2e7d52!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;text-align:center;padding:10pt 8pt;margin-bottom:8pt}
+  .p-hdr-t{font-size:12pt;font-weight:900;margin-bottom:3pt}
+  .p-hdr-m{font-size:8.5pt;line-height:1.9;font-weight:700}
+  .p-hdr-b{font-size:10pt;font-weight:900;margin-top:5pt;display:block}
+  .p-alumno{background:#e8f5ee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-radius:4pt;padding:8pt 10pt;font-size:8.5pt;line-height:1.9;margin-bottom:8pt;display:flex;gap:16pt}
+  .p-alumno span{flex:1}
+  .p-ex{margin-bottom:12pt;page-break-inside:avoid}
+  .p-ex-hdr{background:#2e7d52!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;padding:5pt 8pt;border-radius:3pt 3pt 0 0;font-size:9pt;font-weight:700}
+  .p-ex-body{border:1pt solid #a5d6b8;border-top:none;padding:8pt 10pt;border-radius:0 0 3pt 3pt}
+  .p-datos{font-size:8pt;margin-bottom:6pt;background:#f0faf4!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5pt 8pt;border-radius:2pt}
+  .p-datos b{color:#2e7d52}
+  .p-pregunta{font-size:8.5pt;font-weight:700;color:#2e7d52;margin-bottom:6pt}
+  .p-lineas{margin-top:4pt}
+  .p-linea{border-bottom:1pt solid #aaa;height:16pt;margin-bottom:3pt}
+  .p-formula{background:#f4fbf7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:5pt 8pt;border-radius:2pt;margin-bottom:5pt}
+  .p-formula-lbl{font-size:7.5pt;color:#2e7d52;margin-bottom:3pt;font-weight:700}
+  .p-formula-linea{border-bottom:1pt solid #bbb;height:14pt;margin-bottom:2pt}
+  .p-footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:7pt;color:#aaa;border-top:1pt solid #ddd;padding-top:3pt}
+  .p-cat{display:inline-block;background:#e6a800!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#212529!important;font-size:7pt;font-weight:700;padding:1pt 6pt;border-radius:8pt;margin-bottom:4pt}
+}
+#print-zone{display:none}
+</style>
+
+<!-- ZONA IMPRESIÓN -->
+<div id="print-zone">
+  <div class="p-hdr">
+    <div class="p-hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+    <div class="p-hdr-m">
+      Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>
+      Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026 &nbsp;|&nbsp; Docente: ALEJANDRO TRIUNFO CRUZ
+    </div>
+    <span class="p-hdr-b">EJERCICIOS — UNIDAD 1 — PLC SIEMENS S7-1214C</span>
+  </div>
+  <div class="p-alumno">
+    <span><b>Nombre:</b> <span id="p-name2"></span></span>
+    <span><b>No. Control:</b> <span id="p-ctrl2"></span></span>
+    <span><b>Fecha:</b> <span id="p-fecha2"></span></span>
+  </div>
+  <div id="p-ejercicios"></div>
+  <div class="p-footer">TecNM Campus Culiacán · Ejercicios PLC S7-1214C · MTD1007-MtB · Enero–Junio 2026</div>
+</div>
+
+<!-- INTERFAZ -->
+<div id="root">
+  <div id="doc-bar" class="doc-bar" style="display:none">
+    <div>
+      <div class="doc-dt">🔐 Modo Docente — Alejandro Triunfo Cruz</div>
+      <div class="doc-ds">ejercicios_plc_MTD1007.html?docente=KEY2204</div>
+    </div>
+    <button style="background:#dc3545;color:#fff;border:none;border-radius:6px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer" onclick="docenteReset()">🔄 Reiniciar</button>
+  </div>
+
+  <!-- BLOCKED -->
+  <div id="scr-blocked" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026</div>
+      <div class="hdr-b">EJERCICIOS — UNIDAD 1 — PLC S7-1214C</div>
+    </div>
+    <div style="max-width:500px;margin:20px auto;background:#fff;border-radius:10px;padding:22px;box-shadow:0 2px 12px rgba(46,125,82,.12);text-align:center">
+      <div style="font-size:52px;margin-bottom:12px">🔒</div>
+      <div style="font-size:19px;font-weight:700;color:#dc3545;margin-bottom:8px">Ejercicio ya completado</div>
+      <div style="font-size:13.5px;color:#6c757d;line-height:1.75">Ya realizaste estos ejercicios en este dispositivo.<br>Solicita ayuda a tu docente si crees que hay un error.</div>
+    </div>
+  </div>
+
+  <!-- START -->
+  <div id="scr-start" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026 &nbsp;|&nbsp; Docente: ALEJANDRO TRIUNFO CRUZ</div>
+      <div class="hdr-b">EJERCICIOS — UNIDAD 1 — PLC SIEMENS S7-1214C</div>
+    </div>
+
+    <div class="instr">
+      📋 <strong>Instrucciones:</strong><br>
+      • Resuelve los <strong>10 ejercicios</strong> sobre el PLC Siemens S7-1214C.<br>
+      • Tienes <strong>20 minutos</strong> para completar todos los ejercicios.<br>
+      • Usa el espacio de respuesta en cada ejercicio para tus cálculos y conclusiones.<br>
+      • Al finalizar, imprime tu trabajo en PDF con el botón correspondiente.<br>
+      • Una vez iniciado, <strong>no podrás volver a empezar</strong> en este dispositivo.
+    </div>
+    <div style="max-width:500px;margin:0 auto;padding:0 12px">
+      <div style="background:#fff;border-radius:10px;padding:22px;box-shadow:0 2px 12px rgba(46,125,82,.12);border-top:3px solid var(--verde)">
+        <div class="fgrp"><label>Nombre completo</label><input type="text" id="inp-name" class="finput" placeholder="Ej. García López Juan Carlos"></div>
+        <div class="fgrp"><label>Número de control</label><input type="text" id="inp-ctrl" class="finput" placeholder="Ej. 22460001" maxlength="12"></div>
+        <div id="start-err" class="err-msg" style="display:none"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px">
+          <button class="btn btn-verde" onclick="startEx()">Iniciar ejercicios ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIOS -->
+  <div id="scr-ex" class="screen">
+    <div class="timer-bar">
+      <div class="tb-l">
+        <div id="tb-ex">Ejercicio 1 de 10</div>
+        <div id="tb-name" style="font-size:11px;opacity:.8;margin-top:2px"></div>
+      </div>
+      <div class="tb-clk" id="tb-clk">20:00</div>
+      <div class="tb-r">⏱ Tiempo<br>restante</div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-f" id="prog-f" style="width:10%"></div></div>
+      <div class="prog-lbl" id="prog-lbl">Ejercicio 1 de 10</div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+
+  <!-- FIN -->
+  <div id="scr-fin" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026</div>
+      <div class="hdr-b">EJERCICIOS COMPLETADOS</div>
+    </div>
+    <div style="max-width:500px;margin:20px auto;background:#fff;border-radius:10px;padding:26px;box-shadow:0 2px 12px rgba(46,125,82,.12);text-align:center;border-top:3px solid var(--verde)">
+      <div style="font-size:52px;margin-bottom:12px">✅</div>
+      <div style="font-size:19px;font-weight:700;color:var(--verde);margin-bottom:8px">¡Ejercicios enviados!</div>
+      <div id="fin-info" style="font-size:13px;color:#555;line-height:1.85;margin-bottom:20px"></div>
+      <button class="btn btn-verde" onclick="window.print()" style="margin-bottom:8px">🖨️ Imprimir / Guardar PDF</button>
+      <p style="font-size:11.5px;color:#6c757d">Selecciona <strong>"Guardar como PDF"</strong> en el diálogo de impresión</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const CFG={pwd:'KEY2204',sk:'plc_ej_MTD1007_v1',sec:20*60};
+
+const EX=[
+{num:1,cat:"Ciclo de Scan",tit:"Tiempo total y frecuencia de scan",sub:"Análisis del ciclo de escaneo del S7-1214C",
+ datos:[{l:"Lectura de entradas",v:"0.8 ms"},{l:"Ejecución del programa",v:"3.4 ms"},{l:"Actualización de salidas",v:"0.6 ms"},{l:"Tareas de comunicación",v:"1.2 ms"}],
+ pregunta:"Calcula el <strong>tiempo total del ciclo de scan</strong> y la <strong>frecuencia de scan en Hz</strong>.",nlineas:5,nformulas:3},
+{num:2,cat:"Ciclo de Scan",tit:"Detección de pulsos — Criterio de Nyquist",sub:"Verificación de detección confiable de señales",
+ datos:[{l:"Ciclo de scan",v:"12 ms"},{l:"Duración del pulso del sensor inductivo",v:"5 ms"}],
+ pregunta:"¿Podrá el PLC detectar correctamente cada pulso? Justifica aplicando el <strong>criterio de Nyquist al ciclo de scan</strong> y propón una solución.",nlineas:6,nformulas:2},
+{num:3,cat:"Ciclo de Scan",tit:"Comparación de versiones de programa",sub:"Eficiencia computacional: instrucciones binarias vs. bloques FB",
+ datos:[{l:"Versión A — instrucciones binarias",v:"2,400 instrucciones × 0.085 µs/inst."},{l:"Versión B — bloques de función FB",v:"850 instrucciones × 0.400 µs/inst."},{l:"Tiempo fijo I/O + comunicación",v:"1.5 ms (ambas versiones)"}],
+ pregunta:"Calcula el <strong>ciclo de scan de cada versión</strong> y determina cuál es más eficiente. Justifica.",nlineas:4,nformulas:4},
+{num:4,cat:"Ciclo de Scan",tit:"Tiempo de respuesta en el peor caso (Worst-case)",sub:"Verificación de requerimiento de seguridad",
+ datos:[{l:"Ciclo de scan actual",v:"8.5 ms"},{l:"Tiempo de respuesta máximo requerido",v:"20 ms"}],
+ pregunta:"Determina el <strong>tiempo de respuesta en el peor caso (WCRT)</strong> y verifica si el sistema cumple el requerimiento de seguridad.",nlineas:5,nformulas:2},
+{num:5,cat:"Direccionamiento",tit:"Asignación de direcciones de E/S — S7-1214C",sub:"Mapa de memoria de entradas y salidas digitales",
+ datos:[{l:"Entradas digitales integradas",v:"14 (I0.0–I0.7 e I1.0–I1.5)"},{l:"Salidas digitales integradas",v:"10 (Q0.0–Q0.7 y Q1.0–Q1.1)"}],
+ pregunta:`Asigna la dirección correcta en formato <strong>I/Q X.Y</strong> a cada señal:<br><br><table class='dtbl'><thead><tr><th>Señal</th><th>Tipo</th><th>Dirección asignada</th></tr></thead><tbody>
+<tr><td>Sensor de nivel alto — Tanque principal</td><td>Entrada</td><td><input type='text' placeholder='Ej. I0.0' style='border:none;border-bottom:2px solid #2e7d52;width:90px;font-size:13px;font-weight:700;color:#2e7d52;outline:none;background:transparent;padding:2px 4px;font-family:monospace'></td></tr>
+<tr><td>Sensor de nivel bajo — Tanque principal</td><td>Entrada</td><td><input type='text' placeholder='Ej. I0.1' style='border:none;border-bottom:2px solid #2e7d52;width:90px;font-size:13px;font-weight:700;color:#2e7d52;outline:none;background:transparent;padding:2px 4px;font-family:monospace'></td></tr>
+<tr><td>Paro de emergencia — Panel</td><td>Entrada</td><td><input type='text' placeholder='Ej. I0.2' style='border:none;border-bottom:2px solid #2e7d52;width:90px;font-size:13px;font-weight:700;color:#2e7d52;outline:none;background:transparent;padding:2px 4px;font-family:monospace'></td></tr>
+<tr><td>Botón de inicio — Panel</td><td>Entrada</td><td><input type='text' placeholder='Ej. I0.3' style='border:none;border-bottom:2px solid #2e7d52;width:90px;font-size:13px;font-weight:700;color:#2e7d52;outline:none;background:transparent;padding:2px 4px;font-family:monospace'></td></tr>
+<tr><td>Válvula de llenado — Solenoide 24VDC</td><td>Salida</td><td><input type='text' placeholder='Ej. Q0.0' style='border:none;border-bottom:2px solid #2e7d52;width:90px;font-size:13px;font-weight:700;color:#2e7d52;outline:none;background:transparent;padding:2px 4px;font-family:monospace'></td></tr>
+<tr><td>Piloto verde — Señalización</td><td>Salida</td><td><input type='text' placeholder='Ej. Q0.1' style='border:none;border-bottom:2px solid #2e7d52;width:90px;font-size:13px;font-weight:700;color:#2e7d52;outline:none;background:transparent;padding:2px 4px;font-family:monospace'></td></tr>
+<tr><td>Piloto rojo — Señalización</td><td>Salida</td><td><input type='text' placeholder='Ej. Q0.2' style='border:none;border-bottom:2px solid #2e7d52;width:90px;font-size:13px;font-weight:700;color:#2e7d52;outline:none;background:transparent;padding:2px 4px;font-family:monospace'></td></tr>
+</tbody></table>`,nlineas:0,nformulas:0},
+{num:6,cat:"Direccionamiento",tit:"Módulo de expansión SM 1223 — 8DI/8DO",sub:"Direccionamiento de módulos de expansión",
+ datos:[{l:"Entradas integradas",v:"I0.0 – I1.5"},{l:"Salidas integradas",v:"Q0.0 – Q1.1"},{l:"Inicio entradas expansión",v:"I2.0"},{l:"Módulo SM 1223",v:"8 entradas / 8 salidas digitales"}],
+ pregunta:"Determina las <strong>8 direcciones de entrada</strong> y las <strong>8 direcciones de salida</strong> del módulo SM 1223.",nlineas:6,nformulas:0},
+{num:7,cat:"Direccionamiento",tit:"Identificación de error de direccionamiento",sub:"Validación de rangos de direcciones en el S7-1214C",
+ datos:[{l:"Dirección usada por el técnico",v:"I0.9"}],
+ pregunta:"<strong>Identifica el error</strong>, explica por qué es incorrecto para el S7-1214C y escribe la <strong>dirección correcta disponible más cercana</strong>.",nlineas:6,nformulas:0},
+{num:8,cat:"Corriente en Entradas",tit:"Consumo de corriente — 14 entradas digitales activas",sub:"Cálculo de carga sobre la fuente de alimentación",
+ datos:[{l:"Número de entradas",v:"14 entradas digitales"},{l:"Voltaje de entrada",v:"24 VDC"},{l:"Corriente típica por entrada",v:"4 mA"},{l:"Capacidad de la fuente",v:"500 mA"}],
+ pregunta:"Calcula: <strong>a)</strong> Corriente total con las 14 entradas activas. <strong>b)</strong> Potencia total consumida. <strong>c)</strong> ¿La fuente de 500 mA soporta la carga? Justifica.",nlineas:4,nformulas:3},
+{num:9,cat:"Corriente en Salidas",tit:"Verificación de carga en salidas tipo transistor",sub:"Límites por salida individual y por grupo de salidas",
+ datos:[{l:"Corriente máxima por salida individual",v:"500 mA"},{l:"Corriente máxima total del grupo",v:"4,000 mA (4 A)"},{l:"Q0.0 — Electroválvula",v:"350 mA"},{l:"Q0.1 — Relevador 24VDC",v:"80 mA"},{l:"Q0.2 — Piloto LED",v:"40 mA"},{l:"Q0.3 — Motor pequeño DC",v:"480 mA"},{l:"Q0.4 — Buzzer",v:"60 mA"}],
+ pregunta:"<strong>a)</strong> ¿Alguna salida individual supera su límite? <strong>b)</strong> ¿La corriente total del grupo supera el límite? <strong>c)</strong> Identifica riesgos y propón una solución si aplica.",nlineas:5,nformulas:2},
+{num:10,cat:"Corriente en Salidas",tit:"Motores 24VDC de 1.2 A — Relays de interfaz",sub:"Diseño del circuito de potencia con relevadores intermedios",
+ datos:[{l:"Número de motores DC",v:"3 motores"},{l:"Corriente nominal por motor",v:"1,200 mA (1.2 A)"},{l:"Corriente máxima por salida PLC",v:"500 mA"},{l:"Corriente máxima grupo PLC",v:"4,000 mA (4 A)"}],
+ pregunta:"<strong>a)</strong> ¿Es posible conectar los motores directamente a las salidas del PLC? Calcula y justifica. <strong>b)</strong> Propón el circuito correcto con relevadores de interfaz.",nlineas:6,nformulas:3}
+];
+
+let S={name:'',ctrl:'',cur:0,tLeft:CFG.sec,tid:null,finAt:null,docente:false,
+  resp:EX.map(e=>({formulas:Array(e.nformulas).fill(''),lineas:Array(e.nlineas).fill('')}))
+};
+const store={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
+function $id(id){return document.getElementById(id)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$id('scr-'+id).classList.add('on')}
+
+(function(){
+  let docOk=false;
+  try{const p=new URLSearchParams(window.location.search);if(p.get('docente')===CFG.pwd)docOk=true}catch{}
+  if(docOk){activateDocente();return}
+  if(store.get(CFG.sk))show('blocked');else show('start');
+})();
+
+function activateDocente(){S.docente=true;$id('doc-bar').style.display='flex';show('start')}
+function simDoc(){activateDocente()}
+function docenteReset(){
+  if(!confirm('¿Reiniciar para nuevo alumno?'))return;
+  store.del(CFG.sk);clearInterval(S.tid);
+  S={name:'',ctrl:'',cur:0,tLeft:CFG.sec,tid:null,finAt:null,docente:true};
+  $id('inp-name').value='';$id('inp-ctrl').value='';show('start');
+}
+function startEx(){
+  const n=$id('inp-name').value.trim(),c=$id('inp-ctrl').value.trim();
+  const err=$id('start-err');
+  if(!n||!c){err.textContent='⚠ Ingresa tu nombre completo y número de control.';err.style.display='block';return}
+  err.style.display='none';
+  S.name=n;S.ctrl=c;S.cur=0;S.tLeft=CFG.sec;
+  show('ex');renderTabs();renderEx();runTimer();
+}
+function runTimer(){
+  clearInterval(S.tid);
+  S.tid=setInterval(()=>{S.tLeft--;updateClock();if(S.tLeft<=0){clearInterval(S.tid);finalize(true)}},1000);
+}
+function updateClock(){
+  const m=String(Math.floor(S.tLeft/60)).padStart(2,'0'),s=String(S.tLeft%60).padStart(2,'0');
+  const el=$id('tb-clk');el.textContent=`${m}:${s}`;
+  el.className='tb-clk'+(S.tLeft<=60?' danger':S.tLeft<=300?' warn':'');
+}
+function renderTabs(){
+  const t=$id('tabs');t.innerHTML='';
+  EX.forEach((e,i)=>{
+    const d=document.createElement('div');
+    d.className='tab'+(i===S.cur?' on':'');
+    d.textContent=`Ej.${e.num}`;
+    d.onclick=()=>{S.cur=i;renderTabs();renderEx()};
+    t.appendChild(d);
+  });
+}
+function renderEx(){
+  const e=EX[S.cur];
+  const pct=((S.cur+1)/EX.length*100).toFixed(0);
+  $id('prog-f').style.width=pct+'%';
+  $id('prog-lbl').textContent=`Ejercicio ${S.cur+1} de ${EX.length}`;
+  $id('tb-ex').textContent=`Ejercicio ${S.cur+1} de ${EX.length}`;
+  $id('tb-name').textContent=S.name;
+  let datosHtml='';
+  if(e.datos.length>0){
+    datosHtml=`<div class="bloque"><div class="bloque-tit">📋 Datos del problema</div>
+    <table class="dtbl"><thead><tr><th>Dato</th><th>Valor</th></tr></thead><tbody>
+    ${e.datos.map(d=>`<tr><td>${d.l}</td><td><b>${d.v}</b></td></tr>`).join('')}
+    </tbody></table></div>`;
+  }
+  let formulasHtml='';
+  if(e.nformulas>0){
+    const flineas=Array(e.nformulas).fill(0).map((_,i)=>
+      `<textarea class="txt-formula" rows="1" placeholder="Fórmula / cálculo ${i+1}..." oninput="autoResize(this)"></textarea>`
+    ).join('');
+    formulasHtml=`<div class="formula-box"><div class="formula-box-lbl">✏️ Desarrollo y fórmulas</div>${flineas}</div>`;
+  }
+  let lineasHtml='';
+  if(e.nlineas>0){
+    const lins=Array(e.nlineas).fill(0).map(()=>
+      `<textarea class="txt-resp" rows="1" placeholder="Escribe tu respuesta aquí..." oninput="autoResize(this)"></textarea>`
+    ).join('');
+    lineasHtml=`<div style="margin-bottom:14px"><div class="resp-lbl">📝 Respuesta y conclusión</div><div class="lineas">${lins}</div></div>`;
+  }
+  const isLast=S.cur===EX.length-1,isPrev=S.cur>0;
+  $id('content').innerHTML=`
+  <div class="ex-card">
+    <div class="ex-hdr"><div class="ex-num">${e.num}</div><div><div class="ex-tit">${e.tit}</div><div class="ex-sub">${e.sub}</div></div></div>
+    <div class="ex-body">
+      <span class="bloque-cat">📁 ${e.cat}</span>
+      ${datosHtml}
+      <div class="bloque" style="border-left-color:#e6a800;background:#fffdf0">
+        <div class="bloque-tit" style="color:#856404">❓ Lo que debes resolver</div>
+        <p>${e.pregunta}</p>
+      </div>
+      ${formulasHtml}${lineasHtml}
+      <div class="btn-row">
+        <button class="btn btn-gray" onclick="navEx(-1)" ${isPrev?'':'disabled'}>← Anterior</button>
+        ${isLast?`<button class="btn btn-verde" onclick="confirmFin()">✓ Finalizar y guardar</button>`:`<button class="btn btn-verde" onclick="navEx(1)">Siguiente →</button>`}
+      </div>
+    </div>
+  </div>`;
+}
+function saveAnswers(){
+  document.querySelectorAll('.txt-formula').forEach((el,i)=>{if(S.resp[S.cur])S.resp[S.cur].formulas[i]=el.value});
+  document.querySelectorAll('.txt-resp').forEach((el,i)=>{if(S.resp[S.cur])S.resp[S.cur].lineas[i]=el.value});
+}
+function restoreAnswers(){
+  const r=S.resp[S.cur];if(!r)return;
+  document.querySelectorAll('.txt-formula').forEach((el,i)=>{el.value=r.formulas[i]||'';autoResize(el)});
+  document.querySelectorAll('.txt-resp').forEach((el,i)=>{el.value=r.lineas[i]||'';autoResize(el)});
+}
+function navEx(d){
+  saveAnswers();
+  S.cur=Math.max(0,Math.min(EX.length-1,S.cur+d));
+  renderTabs();renderEx();restoreAnswers();window.scrollTo(0,0);
+}
+function confirmFin(){if(!confirm('¿Finalizar y guardar tus ejercicios?\n\nEsta acción no se puede deshacer.'))return;saveAnswers();finalize(false)}
+function finalize(timeout){
+  clearInterval(S.tid);S.finAt=new Date();
+  store.set(CFG.sk,JSON.stringify({name:S.name,ctrl:S.ctrl,at:S.finAt.toISOString()}));
+  buildPrintZone();
+  const dt=S.finAt.toLocaleString('es-MX',{dateStyle:'long',timeStyle:'medium'});
+  $id('fin-info').innerHTML=`<strong>Alumno:</strong> ${S.name}<br><strong>No. Control:</strong> ${S.ctrl}<br><strong>Fecha:</strong> ${dt}${timeout?'<br><span style="color:#c82333;font-weight:700">⏱ Tiempo agotado</span>':''}`;
+  show('fin');window.scrollTo(0,0);
+}
+function buildPrintZone(){
+  $id('p-name2').textContent=S.name;
+  $id('p-ctrl2').textContent=S.ctrl;
+  $id('p-fecha2').textContent=S.finAt?S.finAt.toLocaleString('es-MX'):'—';
+  const pe=$id('p-ejercicios');pe.innerHTML='';
+  EX.forEach((e,idx)=>{
+    const r=S.resp[idx]||{formulas:[],lineas:[]};
+    const div=document.createElement('div');div.className='p-ex';
+    let datosP='';
+    if(e.datos.length>0) datosP=`<div class="p-datos"><b>Datos: </b>${e.datos.map(d=>`${d.l}: <b>${d.v}</b>`).join(' | ')}</div>`;
+    let formP='';
+    if(e.nformulas>0){
+      const lineas=r.formulas.map(v=>
+        v?`<div class="p-formula-linea" style="border-bottom:1pt solid #aaa;min-height:16pt;padding:2pt 0;font-family:monospace;font-size:8pt;color:#1a2e1a">${v}</div>`
+         :`<div class="p-formula-linea"></div>`
+      ).join('');
+      formP=`<div class="p-formula"><div class="p-formula-lbl">Desarrollo y fórmulas:</div>${lineas}</div>`;
+    }
+    let linP='';
+    if(e.nlineas>0){
+      const lineas=r.lineas.map(v=>
+        v?`<div class="p-linea" style="border-bottom:1pt solid #aaa;min-height:16pt;padding:2pt 0;font-size:8.5pt;color:#1b3a2a">${v}</div>`
+         :`<div class="p-linea"></div>`
+      ).join('');
+      linP=`<div class="p-lineas">${lineas}</div>`;
+    }
+    div.innerHTML=`
+      <div class="p-ex-hdr"><span class="p-cat">${e.cat}</span> &nbsp; Ejercicio ${e.num}: ${e.tit}</div>
+      <div class="p-ex-body">${datosP}<div class="p-pregunta">${e.pregunta.replace(/<[^>]+>/g,' ')}</div>${formP}${linP}</div>`;
+    pe.appendChild(div);
+  });
+}
+function descargarHTML(){
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='Ejercicios_U1_PLC_MTD1007.html';
+  a.click();URL.revokeObjectURL(a.href);
+}
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
+</script>

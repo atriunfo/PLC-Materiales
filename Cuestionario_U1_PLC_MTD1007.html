@@ -1,0 +1,411 @@
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#eef7f0;min-height:100vh;font-size:14px}
+.hidden{display:none!important}.screen{display:none}.screen.on{display:block}
+
+/* Verde pastel principal */
+:root{
+  --verde:#2e7d52;
+  --verde-claro:#e8f5ee;
+  --verde-medio:#c8e6d4;
+  --verde-oscuro:#1b5e3a;
+  --verde-borde:#a5d6b8;
+}
+
+.hdr{background:var(--verde);color:#fff;text-align:center;padding:15px 18px 13px}
+.hdr-t{font-size:15px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}
+.hdr-m{font-size:12px;line-height:2;opacity:1;font-weight:700}
+.hdr-b{display:inline-block;margin-top:8px;background:rgba(255,255,255,.2);border-radius:4px;padding:5px 20px;font-size:13px;font-weight:900;letter-spacing:.6px}
+
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(46,125,82,.12);padding:22px;margin:14px auto;max-width:680px;border-top:3px solid var(--verde)}
+
+.timer-bar{position:sticky;top:0;z-index:100;background:var(--verde);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 18px}
+.tb-l{font-size:12px}.tb-r{font-size:11px;text-align:right;opacity:.85}
+.tb-clk{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;min-width:80px;text-align:center}
+.tb-clk.warn{color:#ffe082}.tb-clk.danger{color:#ff8a80;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.prg{height:7px;background:#c8e6d4;border-radius:4px;margin-bottom:18px;overflow:hidden}
+.prg-f{height:100%;background:var(--verde);border-radius:4px;transition:width .4s ease}
+
+.q-lbl{font-size:10.5px;font-weight:700;color:#6c757d;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.q-txt{font-size:15px;font-weight:600;color:#1a2e1a;line-height:1.55;margin-bottom:18px}
+
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{border:2px solid #c8e6d4;border-radius:8px;padding:11px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:11px;transition:border-color .15s,background .15s;user-select:none}
+.opt:hover{border-color:var(--verde);background:#f0faf4}
+.opt.sel{border-color:var(--verde);background:#e8f5ee}
+.opt-l{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:#c8e6d4;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:1px;transition:background .15s,color .15s}
+.opt.sel .opt-l{background:var(--verde);color:#fff}
+.opt-t{font-size:13.5px;line-height:1.45;padding-top:3px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:none;border-radius:6px;font-size:13.5px;font-weight:600;cursor:pointer;transition:filter .15s}
+.btn:hover{filter:brightness(.88)}
+.btn-verde{background:var(--verde);color:#fff}
+.btn-gray{background:#6c757d;color:#fff}
+.btn-red{background:#dc3545;color:#fff}
+.btn-ylw{background:#e6a800;color:#fff}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn-row-e{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.btn-row-c{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+
+.fgrp{margin-bottom:15px}
+.fgrp label{display:block;font-size:11px;font-weight:700;color:#495057;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.finput{width:100%;padding:10px 13px;border:1.5px solid #c8e6d4;border-radius:6px;font-size:14px;transition:border-color .15s,box-shadow .15s}
+.finput:focus{outline:none;border-color:var(--verde);box-shadow:0 0 0 3px rgba(46,125,82,.14)}
+
+.instr{background:#e8f5ee;border-left:4px solid var(--verde);padding:13px 15px;border-radius:0 6px 6px 0;margin-bottom:18px;font-size:13px;line-height:1.85;color:#1b3a2a}
+
+.sc-wrap{text-align:center;padding:14px 0 20px}
+.sc-circle{width:130px;height:130px;border-radius:50%;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:13px;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.sc-n{font-size:40px;font-weight:700;color:#fff;line-height:1}
+.sc-s{font-size:12px;color:rgba(255,255,255,.9)}
+.sc-status{font-size:21px;font-weight:700;margin-bottom:3px}
+.sc-info{font-size:13px;color:#6c757d}
+
+.rev-t{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.rev-t th{background:var(--verde);color:#fff;padding:8px 10px;text-align:left;font-size:11px}
+.rev-t td{padding:7px 10px;border-bottom:1px solid #e8f5ee;vertical-align:top;word-break:break-word}
+.rev-t tr:nth-child(even) td{background:#f4fbf7}
+.aok{color:#155724;font-weight:600}.aerr{color:#721c24}
+.bdg{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700}
+.bdg-ok{background:#d4edda;color:#155724}.bdg-err{background:#f8d7da;color:#721c24}
+
+.doc-bar{background:#1b5e3a;color:#fff;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:3px solid var(--verde)}
+.doc-dt{font-weight:700;font-size:13px;color:#a8f0c6}
+.doc-ds{font-size:11px;color:#c8f5d8;margin-top:2px}
+.doc-url{font-family:monospace;background:rgba(255,255,255,.12);padding:3px 8px;border-radius:4px;font-size:11px;color:#c8f5d8;margin-top:3px;display:inline-block}
+
+.blk-wrap{text-align:center;padding:26px 0 14px}
+.blk-ico{font-size:56px;margin-bottom:11px}
+.blk-tit{font-size:19px;font-weight:700;color:#dc3545;margin-bottom:8px}
+.blk-msg{font-size:13.5px;color:#6c757d;max-width:360px;margin:0 auto 20px;line-height:1.7}
+
+.divider{border:none;border-top:1px solid #c8e6d4;margin:15px 0}
+.sec-tit{font-size:13px;font-weight:700;color:var(--verde);margin-bottom:9px}
+.res-inf{font-size:13px;color:#444;line-height:1.75;margin-bottom:13px}
+.err-msg{color:#dc3545;font-size:12.5px;margin-bottom:10px}
+
+.optb-tag{background:var(--verde-oscuro);color:#a8f0c6;font-size:11px;font-weight:700;padding:3px 10px;border-radius:0 0 8px 8px;display:inline-block;margin-bottom:2px;letter-spacing:.5px;border:2px solid var(--verde);border-top:none}
+.offline-badge{display:inline-flex;align-items:center;gap:5px;background:#d4edda;color:#155724;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;margin-left:8px}
+
+/* ═══════ ESTILOS DE IMPRESIÓN ═══════ */
+@media print{
+  body>*:not(#print-zone){display:none!important}
+  #print-zone{display:block!important}
+  @page{size:letter;margin:12mm 14mm 14mm 14mm}
+  body{background:#fff;font-family:Arial,sans-serif;font-size:9pt;color:#000}
+  .p-hdr{background:#2e7d52!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff!important;text-align:center;padding:10pt 8pt;margin-bottom:10pt}
+  .p-hdr-t{font-size:12pt;font-weight:900;margin-bottom:4pt}
+  .p-hdr-m{font-size:8.5pt;line-height:1.9;font-weight:700}
+  .p-hdr-b{font-size:9.5pt;font-weight:900;margin-top:5pt;display:block}
+  .p-info-row{display:flex;gap:8pt;margin-bottom:10pt;align-items:stretch}
+  .p-info-box{flex:1;background:#e8f5ee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-radius:4pt;padding:8pt 10pt;font-size:8.5pt;line-height:1.9}
+  .p-info-box strong{font-size:9pt;display:block;margin-bottom:3pt;color:#2e7d52}
+  .p-score-box{width:70pt;text-align:center;border-radius:4pt;padding:6pt;display:flex;flex-direction:column;align-items:center;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .p-score-n{font-size:28pt;font-weight:700;color:#fff!important;line-height:1}
+  .p-score-s{font-size:7pt;color:rgba(255,255,255,.9)!important}
+  .p-score-d{font-size:7pt;color:rgba(255,255,255,.9)!important;margin-top:2pt}
+  .p-q{margin-bottom:8pt;page-break-inside:avoid}
+  .p-q-hdr{padding:3pt 5pt;border-radius:2pt;margin-bottom:2pt;font-size:8.5pt;font-weight:700;color:#2e7d52!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .p-q-hdr.ok{background:#d4edda!important}.p-q-hdr.err{background:#f8d7da!important}
+  .p-opts{padding-left:8pt}
+  .p-opt{font-size:8pt;line-height:1.6}
+  .p-opt.user-ok{color:#155724!important;font-weight:700}
+  .p-opt.user-err{color:#721c24!important;font-weight:700}
+  .p-opt.correct{color:#155724!important;font-style:italic}
+  .p-opt.gray{color:#777}
+  .p-footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:7pt;color:#aaa;border-top:1px solid #ddd;padding-top:4pt}
+}
+#print-zone{display:none}
+</style>
+
+<!-- ZONA IMPRESIÓN -->
+<div id="print-zone">
+  <div class="p-hdr">
+    <div class="p-hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+    <div class="p-hdr-m">
+      Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>
+      Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026<br>
+      Docente: ALEJANDRO TRIUNFO CRUZ
+    </div>
+    <span class="p-hdr-b">CUESTIONARIO — UNIDAD 1: FUNDAMENTOS DE PLC</span>
+  </div>
+  <div class="p-info-row">
+    <div class="p-info-box">
+      <strong>DATOS DEL ALUMNO</strong>
+      <span id="p-name"></span><br>
+      <span id="p-ctrl"></span><br>
+      <span id="p-fecha"></span><br>
+      <span id="p-resultado"></span>
+    </div>
+    <div class="p-score-box" id="p-score-box">
+      <div class="p-score-n" id="p-score-n">—</div>
+      <div class="p-score-s">/ 100</div>
+      <div class="p-score-d" id="p-score-d"></div>
+    </div>
+  </div>
+  <div id="p-questions"></div>
+  <div class="p-footer" id="p-footer"></div>
+</div>
+
+<!-- INTERFAZ PRINCIPAL -->
+<div id="root">
+  <div id="doc-bar" class="doc-bar hidden">
+    <div>
+      <div class="doc-dt">🔐 Modo Docente Activo — Alejandro Triunfo Cruz</div>
+      <div class="doc-ds">Acceso por parámetro URL · Opción B &nbsp;<span class="offline-badge">📵 100% Offline</span></div>
+      <div class="doc-url">cuestionario_u1_plc_MTD1007.html?docente=KEY2204</div>
+    </div>
+    <button class="btn btn-red btn-sm" onclick="docenteReset()">🔄 Reiniciar para nuevo alumno</button>
+  </div>
+
+  <!-- BLOCKED -->
+  <div id="scr-blocked" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026<br>Docente: ALEJANDRO TRIUNFO CRUZ</div>
+      <div class="hdr-b">CUESTIONARIO — UNIDAD 1</div>
+    </div>
+    <div class="card" style="max-width:500px">
+      <div class="blk-wrap">
+        <div class="blk-ico">🔒</div>
+        <div class="blk-tit">Cuestionario ya completado</div>
+        <div class="blk-msg">Ya realizaste este cuestionario en este dispositivo. No es posible volver a contestarlo.<br>Si crees que hay un error, solicita ayuda a tu docente.</div>
+        <p style="font-size:12px;color:#aaa;margin-top:8px">El docente puede reiniciar desde su URL de acceso.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- START -->
+  <div id="scr-start" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026<br>Docente: ALEJANDRO TRIUNFO CRUZ</div>
+      <div class="hdr-b">CUESTIONARIO — UNIDAD 1</div>
+    </div>
+    <div style="text-align:center;margin-top:4px"><span class="optb-tag">📵 100% OFFLINE — PDF POR IMPRESIÓN</span></div>
+    <div class="card">
+      <div class="instr">
+        📋 <strong>Instrucciones:</strong><br>
+        • Lee cuidadosamente cada pregunta antes de seleccionar tu respuesta.<br>
+        • Selecciona <strong>una sola opción</strong> por pregunta.<br>
+        • Tienes <strong>10 minutos</strong> para completar el cuestionario.<br>
+        • Al agotarse el tiempo, el cuestionario se envía automáticamente.<br>
+        • Una vez enviado, <strong>no podrás volver a realizarlo</strong> en este dispositivo.
+      </div>
+      <div class="fgrp">
+        <label>Nombre completo</label>
+        <input type="text" id="inp-name" class="finput" placeholder="Ej. García López Juan Carlos">
+      </div>
+      <div class="fgrp">
+        <label>Número de control</label>
+        <input type="text" id="inp-ctrl" class="finput" placeholder="Ej. 22460001" maxlength="12">
+      </div>
+      <div id="start-err" class="err-msg hidden"></div>
+      <div class="btn-row-e">
+        <button class="btn btn-verde" onclick="startQuiz()">Comenzar cuestionario ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="scr-quiz" class="screen">
+    <div class="timer-bar">
+      <div class="tb-l">
+        <div id="tb-qnum" style="font-weight:700;font-size:13px">Pregunta 1 de 20</div>
+        <div id="tb-student" style="font-size:11px;opacity:.85;margin-top:2px"></div>
+      </div>
+      <div class="tb-clk" id="tb-clk">10:00</div>
+      <div class="tb-r">⏱ Tiempo<br>restante</div>
+    </div>
+    <div class="card">
+      <div class="prg"><div class="prg-f" id="prg-f" style="width:0%"></div></div>
+      <div class="q-lbl" id="q-lbl"></div>
+      <div class="q-txt" id="q-txt"></div>
+      <div class="opts" id="q-opts"></div>
+      <div class="btn-row-e">
+        <button class="btn btn-verde" id="btn-next" onclick="nextQ()">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="scr-results" class="screen">
+    <div class="hdr">
+      <div class="hdr-t">TECNOLÓGICO NACIONAL DE MÉXICO — CAMPUS CULIACÁN</div>
+      <div class="hdr-m">Asignatura: CONTROLADORES LÓGICOS PROGRAMABLES &nbsp;|&nbsp; Grupo: MTD1007-MtB<br>Carrera: INGENIERÍA MECATRÓNICA &nbsp;|&nbsp; Semestre: ENERO–JUNIO 2026<br>Docente: ALEJANDRO TRIUNFO CRUZ</div>
+      <div class="hdr-b">CUESTIONARIO — UNIDAD 1 — RESULTADOS</div>
+    </div>
+    <div class="card">
+      <div class="sc-wrap">
+        <div class="sc-circle" id="sc-circle">
+          <div class="sc-n" id="sc-n">—</div>
+          <div class="sc-s">de 100 puntos</div>
+        </div>
+        <div class="sc-status" id="sc-status"></div>
+        <div class="sc-info" id="sc-info"></div>
+      </div>
+      <hr class="divider">
+      <div class="res-inf" id="res-inf"></div>
+      <div class="btn-row-c">
+        <button class="btn btn-verde" onclick="window.print()">🖨️ Guardar / Imprimir resultados</button>
+      </div>
+      <p style="text-align:center;font-size:11.5px;color:#6c757d;margin-top:8px">
+        Selecciona <strong>"Guardar como PDF"</strong> en el diálogo de impresión · Sin internet · Sin instalar nada
+      </p>
+      <hr class="divider">
+      <div class="sec-tit">Revisión detallada de respuestas</div>
+      <table class="rev-t">
+        <thead><tr><th style="width:28px">#</th><th>Pregunta</th><th>Tu respuesta</th><th>Respuesta correcta</th><th style="width:28px"></th></tr></thead>
+        <tbody id="rev-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const CFG={pwd:'KEY2204',sk:'plcq_u1_MTD1007',sec:10*60};
+const LTRS=['A','B','C','D'];
+const QS=[
+  {q:"¿Qué es un Controlador Lógico Programable (PLC)?",opts:["Un dispositivo mecánico para el control directo de motores eléctricos","Una computadora industrial diseñada para automatizar procesos electromecánicos","Un transductor que convierte señales físicas en señales digitales","Un variador de frecuencia para controlar la velocidad de motores industriales"],c:1},
+  {q:"¿Cuál fue la principal razón por la que se desarrollaron los PLCs en la industria?",opts:["Aumentar el consumo energético de los equipos industriales","Reemplazar a los robots industriales en líneas de ensamblaje","Sustituir los sistemas de control cableados con relés electromecánicos","Eliminar el uso de sensores analógicos en procesos industriales"],c:2},
+  {q:"¿Cuál es la función principal de la CPU dentro de un PLC?",opts:["Alimentar eléctricamente los módulos de entrada y salida","Alojar físicamente todos los módulos en el chasis o rack","Controlar la velocidad de los motores conectados al sistema","Procesar el programa del usuario y coordinar todas las operaciones del PLC"],c:3},
+  {q:"¿Qué componente del PLC convierte la energía de la red eléctrica a los niveles de voltaje requeridos por los módulos internos?",opts:["CPU (Unidad Central de Procesamiento)","Módulo de entrada analógica","Fuente de alimentación","Módulo de comunicaciones Ethernet"],c:2},
+  {q:"¿Cómo se denomina el tipo de PLC que integra en una sola unidad la CPU, los módulos de E/S y la fuente de alimentación?",opts:["PLC Modular","PLC en Rack","PLC Compacto","PLC Distribuido"],c:2},
+  {q:"¿Cuál es la característica principal que distingue a un PLC modular del tipo compacto?",opts:["El PLC modular solo acepta señales digitales de 24 VDC","El PLC modular permite expandir su capacidad incorporando módulos adicionales","El PLC modular no admite conexión a redes de comunicación industrial","El PLC modular tiene menor costo inicial que el compacto"],c:1},
+  {q:"¿Qué tipo de memoria en un PLC conserva permanentemente el programa del usuario aunque se interrumpa la alimentación eléctrica?",opts:["RAM dinámica de trabajo","Memoria caché de alta velocidad","ROM / Flash EEPROM no volátil","Memoria virtual del sistema operativo"],c:2},
+  {q:"¿En qué consiste el ciclo de escaneo (scan cycle) de un PLC?",opts:["La velocidad de actualización de la pantalla HMI conectada al PLC","El proceso repetitivo de leer entradas, ejecutar el programa y actualizar salidas","El tiempo de arranque del PLC tras una interrupción de energía","La frecuencia de comunicación entre el PLC y variadores de frecuencia"],c:1},
+  {q:"¿Cuál es la secuencia correcta del ciclo de escaneo de un PLC?",opts:["Ejecutar programa → Leer entradas → Actualizar salidas","Actualizar salidas → Leer entradas → Ejecutar programa","Leer entradas → Actualizar salidas → Ejecutar programa","Leer entradas → Ejecutar programa → Actualizar salidas"],c:3},
+  {q:"¿Qué tipo de señal procesa un módulo de entrada digital en un PLC?",opts:["Señales continuas y proporcionales de 4 a 20 mA","Señales de voltaje variables de 0 a 10 VDC","Señales de temperatura provenientes de termopares","Señales discretas tipo ON/OFF (presencia o ausencia de voltaje)"],c:3},
+  {q:"¿Cuál es el rango de señal estándar más utilizado para entradas analógicas en PLCs industriales?",opts:["0 a 5 VDC exclusivamente","4 a 20 mA o 0 a 10 VDC","110 a 220 VAC","0 a 48 VDC"],c:1},
+  {q:"¿Qué tipo de salida de PLC resulta más adecuado para controlar cargas de corriente alterna (CA)?",opts:["Salida de transistor tipo NPN","Salida de transistor tipo PNP","Salida tipo triac (estado sólido para CA)","Salida de corriente analógica 4–20 mA"],c:2},
+  {q:"¿Cuál es la principal ventaja de una salida tipo relé en un PLC?",opts:["Mayor velocidad de conmutación en aplicaciones de alta frecuencia","Capacidad para manejar cargas de CA y CC sin depender de la polaridad","Ausencia total de interferencias electromagnéticas","Mayor vida útil en ciclos de conmutación rápidos"],c:1},
+  {q:"¿Qué norma internacional define y estandariza los lenguajes de programación para PLCs?",opts:["IEC 61000 (Compatibilidad electromagnética)","ISO 9001 (Gestión de calidad)","ANSI/ISA 5.1 (Instrumentación)","IEC 61131-3 (Lenguajes de programación para PLC)"],c:3},
+  {q:"¿Cuántos lenguajes de programación estándar define la norma IEC 61131-3?",opts:["3 lenguajes","4 lenguajes","5 lenguajes","6 lenguajes"],c:2},
+  {q:"¿Qué significa el acrónimo LAD en la programación de PLCs?",opts:["Logical Automation Design","Linear Algorithm Diagram","Load And Drive Protocol","Ladder Diagram (Diagrama de Escalera)"],c:3},
+  {q:"¿Cuál de las siguientes NO es una ventaja del PLC frente a los sistemas de control basados en relés electromecánicos?",opts:["Mayor facilidad para modificar la lógica de control mediante software","Menor espacio físico requerido en el tablero de control eléctrico","Funcionamiento sin ningún tipo de protección ambiental a cualquier temperatura","Mayor confiabilidad y menor costo de mantenimiento a largo plazo"],c:2},
+  {q:"¿Qué es el chasis o rack en un sistema PLC modular?",opts:["El software de programación para desarrollar el programa de control","La pantalla táctil HMI integrada al sistema de control","La estructura que aloja y conecta eléctricamente todos los módulos del PLC","El módulo de comunicación Ethernet del sistema"],c:2},
+  {q:"¿Cuál de los siguientes es un fabricante líder de PLCs reconocido mundialmente en automatización industrial?",opts:["Intel Corporation","Siemens AG","Adobe Systems","Oracle Corporation"],c:1},
+  {q:"¿En qué tipo de memoria almacena el PLC temporalmente los estados de las entradas y salidas físicas durante el ciclo de escaneo?",opts:["EEPROM no volátil de programa","ROM de solo lectura del sistema operativo","RAM de imagen de proceso (Process Image Memory)","Memoria Flash de configuración del sistema"],c:2}
+];
+
+let S={name:'',ctrl:'',cur:0,ans:Array(QS.length).fill(null),tLeft:CFG.sec,tid:null,finAt:null,docente:false};
+const store={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
+function $id(id){return document.getElementById(id)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$id('scr-'+id).classList.add('on')}
+
+(function(){
+  let docOk=false;
+  try{const p=new URLSearchParams(window.location.search);if(p.get('docente')===CFG.pwd)docOk=true}catch{}
+  if(docOk){activateDocente();return}
+  const done=store.get(CFG.sk);
+  if(done)show('blocked');else show('start');
+})();
+
+function activateDocente(){S.docente=true;$id('doc-bar').classList.remove('hidden');show('start')}
+function simularDocente(){activateDocente()}
+
+function docenteReset(){
+  if(!confirm('¿Reiniciar el cuestionario para un nuevo alumno?'))return;
+  store.del(CFG.sk);clearInterval(S.tid);
+  S={name:'',ctrl:'',cur:0,ans:Array(QS.length).fill(null),tLeft:CFG.sec,tid:null,finAt:null,docente:true};
+  $id('inp-name').value='';$id('inp-ctrl').value='';show('start');
+}
+
+function startQuiz(){
+  const n=$id('inp-name').value.trim(),c=$id('inp-ctrl').value.trim();
+  const err=$id('start-err');
+  if(!n||!c){err.textContent='⚠ Por favor ingresa tu nombre completo y número de control.';err.classList.remove('hidden');return}
+  err.classList.add('hidden');
+  S.name=n;S.ctrl=c;S.cur=0;S.ans=Array(QS.length).fill(null);S.tLeft=CFG.sec;
+  show('quiz');renderQ();runTimer();
+}
+function runTimer(){
+  clearInterval(S.tid);
+  S.tid=setInterval(()=>{S.tLeft--;updateClock();if(S.tLeft<=0){clearInterval(S.tid);submit(true)}},1000);
+}
+function updateClock(){
+  const m=String(Math.floor(S.tLeft/60)).padStart(2,'0'),s=String(S.tLeft%60).padStart(2,'0');
+  const el=$id('tb-clk');el.textContent=`${m}:${s}`;
+  el.className='tb-clk'+(S.tLeft<=60?' danger':S.tLeft<=180?' warn':'');
+}
+function renderQ(){
+  const i=S.cur,q=QS[i];
+  $id('tb-qnum').textContent=`Pregunta ${i+1} de ${QS.length}`;
+  $id('tb-student').textContent=S.name;
+  $id('q-lbl').textContent=`Pregunta ${i+1} de ${QS.length}`;
+  $id('q-txt').textContent=q.q;
+  $id('prg-f').style.width=((i/QS.length)*100)+'%';
+  const el=$id('q-opts');el.innerHTML='';
+  q.opts.forEach((opt,oi)=>{
+    const div=document.createElement('div');
+    div.className='opt'+(S.ans[i]===oi?' sel':'');
+    div.innerHTML=`<span class="opt-l">${LTRS[oi]}</span><span class="opt-t">${opt}</span>`;
+    div.onclick=()=>{S.ans[i]=oi;renderQ()};
+    el.appendChild(div);
+  });
+  $id('btn-next').textContent=i===QS.length-1?'Enviar cuestionario ✓':'Siguiente →';
+}
+function nextQ(){
+  if(S.ans[S.cur]===null&&!confirm('No seleccionaste respuesta.\n¿Continuar sin responder?'))return;
+  if(S.cur<QS.length-1){S.cur++;renderQ();window.scrollTo(0,0)}
+  else{if(!confirm('¿Enviar el cuestionario?\n\nEsta acción no se puede deshacer.'))return;submit(false)}
+}
+function submit(timeout){
+  clearInterval(S.tid);S.finAt=new Date();
+  store.set(CFG.sk,JSON.stringify({name:S.name,ctrl:S.ctrl,at:S.finAt.toISOString()}));
+  showResults(timeout);
+}
+function calcScore(){return S.ans.reduce((a,v,i)=>a+(v===QS[i].c?1:0),0)}
+
+function showResults(timeout){
+  const corr=calcScore(),score=Math.round((corr/QS.length)*100),passed=score>=70;
+  $id('sc-circle').style.background=score>=70?'#2e7d52':score>=60?'#c87800':'#c82333';
+  $id('sc-n').textContent=score;
+  $id('sc-status').textContent=passed?'✅ Aprobado':'❌ No aprobado';
+  $id('sc-status').style.color=passed?'#2e7d52':'#c82333';
+  $id('sc-info').textContent=`${corr} de ${QS.length} respuestas correctas${timeout?' — ⏱ Tiempo agotado':''}`;
+  const dt=S.finAt?S.finAt.toLocaleString('es-MX',{dateStyle:'long',timeStyle:'medium'}):'—';
+  $id('res-inf').innerHTML=`<strong>Alumno:</strong> ${S.name} &nbsp;|&nbsp; <strong>No. Control:</strong> ${S.ctrl}<br><strong>Fecha y hora de entrega:</strong> ${dt}`;
+  const tb=$id('rev-body');tb.innerHTML='';
+  QS.forEach((q,i)=>{
+    const ua=S.ans[i],ok=ua===q.c;
+    const uaStr=ua!==null?`${LTRS[ua]}) ${q.opts[ua]}`:'— Sin respuesta';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${q.q}</td><td class="${ok?'aok':'aerr'}">${uaStr}</td><td class="aok">${LTRS[q.c]}) ${q.opts[q.c]}</td><td><span class="bdg ${ok?'bdg-ok':'bdg-err'}">${ok?'✓':'✗'}</span></td>`;
+    tb.appendChild(tr);
+  });
+  buildPrintZone(score,corr,passed,dt,timeout);
+  show('results');window.scrollTo(0,0);
+}
+
+function buildPrintZone(score,corr,passed,dt,timeout){
+  $id('p-name').textContent=`Nombre: ${S.name}`;
+  $id('p-ctrl').textContent=`No. de Control: ${S.ctrl}`;
+  $id('p-fecha').textContent=`Fecha de entrega: ${dt}`;
+  $id('p-resultado').textContent=`Resultado: ${passed?'APROBADO':'NO APROBADO'}${timeout?' (Tiempo agotado)':''}`;
+  const bg=score>=70?'#2e7d52':score>=60?'#c87800':'#c82333';
+  $id('p-score-box').style.background=bg;
+  $id('p-score-n').textContent=score;
+  $id('p-score-d').textContent=`${corr}/${QS.length} correctas`;
+  $id('p-footer').textContent=`TecNM Campus Culiacán · Cuestionario U1 PLC · MTD1007-MtB · ${S.name} · ${S.ctrl}`;
+  const pq=$id('p-questions');pq.innerHTML='';
+  QS.forEach((q,i)=>{
+    const ua=S.ans[i],ok=ua===q.c;
+    const div=document.createElement('div');div.className='p-q';
+    let optsHtml='<div class="p-opts">';
+    q.opts.forEach((opt,oi)=>{
+      const isU=ua===oi,isC=q.c===oi;
+      let cls='p-opt gray',pfx=`${LTRS[oi]}) `;
+      if(isU&&isC){cls='p-opt user-ok';pfx=`✔ ${LTRS[oi]}) `}
+      else if(isU&&!isC){cls='p-opt user-err';pfx=`✘ ${LTRS[oi]}) `}
+      else if(isC){cls='p-opt correct';pfx=`→ ${LTRS[oi]}) `}
+      optsHtml+=`<div class="${cls}">${pfx}${opt}</div>`;
+    });
+    optsHtml+='</div>';
+    div.innerHTML=`<div class="p-q-hdr ${ok?'ok':'err'}">${i+1}. ${q.q}</div>${optsHtml}`;
+    pq.appendChild(div);
+  });
+}
+</script>
