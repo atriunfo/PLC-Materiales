@@ -185,7 +185,7 @@ tr.sel td{background:var(--doc-tint)}
     <div class="part-head"><h2>Calificar</h2><span class="pts" id="t-count">0 archivos</span></div>
     <div class="dropzone" id="drop">
       <p><b>Arrastra aquí los archivos .json</b> o elígelos:</p>
-      <input type="file" id="t-files" accept=".json,application/json" multiple>
+      <input type="file" id="t-files" multiple>
     </div>
     <p class="err" id="t-err"></p>
     <div class="tw" style="margin-top:12px"><table id="t-list"><thead><tr><th>Control</th><th>Nombre</th><th class="n">A</th><th class="n">B</th><th class="n">C</th><th class="n">D</th><th class="n">E</th><th class="n">Total</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
@@ -273,12 +273,14 @@ var OPEN=[
 ];
 
 /* ---------- construcción del examen ---------- */
-function build(control){
+function build(control,ver){
+  ver=ver||EXAM.ver;
   var seed=hash(control.toUpperCase()+"|"+EXAM.salt),r=rng(seed);
-  var ids=shuffle(BANK.map(function(q){return q.id;}),r).slice(0,1).concat(shuffle(PROG.map(function(q){return q.id;}),r).slice(0,EXAM.nMC-1));
+  var ids=ver===2?shuffle(BANK.map(function(q){return q.id;}),r).slice(0,EXAM.nMC)
+    :shuffle(BANK.map(function(q){return q.id;}),r).slice(0,1).concat(shuffle(PROG.map(function(q){return q.id;}),r).slice(0,EXAM.nMC-1));
   var mc=ids.map(function(id){return {id:id,ord:shuffle([0,1,2,3],r),r:null};});
   var sg=shuffle(SIG.map(function(q){return q.id;}),r).slice(0,NSIG).map(function(id){return {id:id,ord:shuffle(SBYID[id].o.map(function(_,k){return k;}),r),r:null};});
-  return {v:EXAM.ver,exam:EXAM.id,seed:seed,mc:mc,sig:sg,meas:MEAS.map(function(m){var v={};m.f.forEach(function(f){v[f[0]]="";});return {id:m.id,v:v,calc:"",extra:"",img:""};}),
+  return {v:ver,exam:EXAM.id,seed:seed,mc:mc,sig:sg,meas:MEAS.map(function(m){var v={};m.f.forEach(function(f){v[f[0]]="";});return {id:m.id,v:v,calc:"",extra:"",img:""};}),
     ph:Array.apply(null,Array(NPHOTO)).map(function(){return {comp:"",sen:"",conv:"",desc:"",img:""};}),ab:OPEN.map(function(o){return {id:o.id,r:""};})};
 }
 
@@ -453,12 +455,15 @@ function initTeacher(){
 }
 function resetAttempts(){var n=0;try{for(var i=localStorage.length-1;i>=0;i--){var k=localStorage.key(i);if(/^u4pead:(prog|done):/.test(k)){localStorage.removeItem(k);n++;}}}catch(e){}return n;}
 function loadFiles(files){
-  Array.prototype.forEach.call(files,function(f){var rd=new FileReader();rd.onload=function(){try{var d=JSON.parse(rd.result);
+  $("#t-err").textContent="";var okN=0,total=files.length,doneN=0;
+  var fin=function(){doneN++;if(doneN===total)$("#t-msg").textContent="Se cargaron "+okN+" de "+total+" archivos.";};
+  Array.prototype.forEach.call(files,function(f){var rd=new FileReader();rd.onerror=function(){$("#t-err").insertAdjacentText("beforeend",f.name+": no se pudo leer. ");fin();};rd.onload=function(){try{var txt=String(rd.result).replace(/^\uFEFF/,"");var d;try{d=JSON.parse(txt);}catch(_){throw new Error("no es un archivo de respuestas del examen (no se pudo leer como JSON)");}
     if(d.exam!==EXAM.id||!d.control)throw new Error("no es un archivo de este examen");
-    if(d.v!==EXAM.ver)throw new Error("es de una versión anterior del examen");
+    if(d.v!==2&&d.v!==3)throw new Error("es de una versión de prueba que ya no se califica (versión "+d.v+")");
+    if(!Array.isArray(d.mc)||!Array.isArray(d.sig)||!Array.isArray(d.meas)||!Array.isArray(d.ph)||!Array.isArray(d.ab))throw new Error("el archivo está incompleto");
     d._ok=d.sum===sumOf(d);
-    var exp=build(d.control);var sig=function(o){return JSON.stringify(o.mc.concat(o.sig).map(function(m){return m.id+m.ord;}));};d._seed=exp.seed===d.seed&&sig(exp)===sig(d);
-    SUB[d.control]=d;renderList();}catch(e){$("#t-err").textContent=f.name+": "+e.message+".";}};rd.readAsText(f);});
+    var exp=build(d.control,d.v);var sig=function(o){return JSON.stringify(o.mc.concat(o.sig).map(function(m){return m.id+m.ord;}));};d._seed=exp.seed===d.seed&&sig(exp)===sig(d);
+    SUB[d.control]=d;okN++;renderList();}catch(e){$("#t-err").insertAdjacentText("beforeend",f.name+": "+e.message+". ");}fin();};rd.readAsText(f);});
 }
 function tget(c){return st(tk(c))||{meas:[],ph:[{},{},{}],ab:[]};}
 function renderList(){
