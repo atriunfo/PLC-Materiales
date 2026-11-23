@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examen Unidad 4 · Principios Eléctricos y Aplicaciones Digitales</title>
+<style>
+:root{
+  --plate:#E3E6E1;--plate-2:#D3D8D1;--paper:#F4F6F3;--ink:#23282C;--ink-2:#4B545A;--line:#B4BBB3;--line-2:#9AA29A;
+  --cpu:#00646E;--cpu-tint:#D2E5E4;--sig:#2E7D3A;--sig-tint:#D5E7D3;--mm:#C77700;--mm-ink:#8A5100;--mm-tint:#F1E1C6;
+  --alert:#B3261E;--alert-tint:#F3D9D5;--doc:#6B2C5F;--doc-tint:#F0E4EC;
+  --f-label:"Bahnschrift","DIN Alternate","DIN Next LT Pro","Roboto Condensed","Arial Narrow",sans-serif;
+  --f-text:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,"DejaVu Sans Mono",monospace;--r:4px}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--plate);color:var(--ink);font:17px/1.55 var(--f-text)}
+:focus-visible{outline:3px solid var(--cpu);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+h1,h2,h3{font-family:var(--f-label);font-weight:600;line-height:1.12;margin:0}
+h2{font-size:28px}h3{font-size:19px}
+p{margin:.6rem 0}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+.wrap{max-width:900px;margin:0 auto;padding:0 clamp(16px,4vw,36px) 120px}
+header.mast{padding:22px 0 0}
+.inst{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 30px;font-size:14.5px;color:var(--ink-2);border-bottom:1px solid var(--line);padding-bottom:14px}
+.inst b{font-family:var(--f-label);font-weight:600;color:var(--ink);font-size:16px}
+.inst dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;margin:0}
+.inst dd{margin:0;color:var(--ink)}
+.titleblock{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:end;padding:26px 0 8px}
+.titleblock .u{font-family:var(--f-label);font-size:17px;color:var(--ink-2)}
+.titleblock h1{font-size:clamp(34px,5.4vw,52px);font-weight:700;letter-spacing:-.015em;margin-top:4px}
+.motif{width:100%;height:auto;color:var(--sig)}
+@media (max-width:640px){.titleblock{grid-template-columns:1fr}.motif{max-width:300px}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin:16px 0}
+.warn{border-left:4px solid var(--alert);background:var(--alert-tint);padding:10px 14px;margin:14px 0;border-radius:0 var(--r) var(--r) 0}
+.warn strong{color:var(--alert)}
+.note{border-left:4px solid var(--line-2);background:var(--paper);padding:10px 14px;margin:14px 0;border-radius:0 var(--r) var(--r) 0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--ink-2);margin:10px 0}
+input[type=text],input[type=number],input[inputmode],select,textarea{font:inherit;font-size:16px;color:var(--ink);padding:7px 9px;border:1px solid var(--line-2);border-radius:3px;background:#fff;max-width:100%}
+textarea{width:100%;min-height:120px;resize:vertical;font-family:var(--f-text)}
+button{font:inherit;font-family:var(--f-label);font-size:16px;padding:8px 16px;border:1px solid var(--line-2);background:#fff;color:var(--ink);border-radius:3px;cursor:pointer}
+button:hover{background:#EEF1ED}
+button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.primary:hover{background:#3A4247}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hint{font-size:14px;color:var(--ink-2)}
+.err{color:var(--alert);font-size:14.5px;min-height:1.2em}
+section.part{padding-top:34px}
+.part-head{display:flex;gap:14px;align-items:baseline;justify-content:space-between;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:6px}
+.part-head .pts{font-family:var(--f-label);color:var(--ink-2);font-size:16px}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin:12px 0;position:relative}
+.q .qn{font-family:var(--f-label);font-weight:700;color:var(--ink-2);margin-right:6px}
+.q.answered{border-left:4px solid var(--sig)}
+.q .stem{margin:0 0 10px}
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start;padding:8px 10px;border:1px solid #D3D8D1;border-radius:3px;background:#fff;cursor:pointer}
+.opt:hover{border-color:var(--line-2)}
+.opt input{margin:4px 0 0;width:18px;height:18px;accent-color:var(--cpu)}
+.opt:has(input:checked){border-color:var(--cpu);background:#EEF6F5}
+.fig{display:block;width:100%;max-width:240px;height:auto;color:var(--ink)}
+.fig.wide{max-width:520px;margin:6px 0 10px}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ans input{width:170px;font-family:var(--f-mono)}
+.ans .u{font-family:var(--f-label);color:var(--ink-2)}
+.meas .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:4px 16px}
+.photo{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:start;margin-top:8px}
+.photo .thumb{width:150px;height:112px;border:1px dashed var(--line-2);border-radius:3px;background:#fff center/cover no-repeat;display:grid;place-items:center;font-size:13px;color:var(--ink-2);text-align:center;padding:6px}
+.photo .thumb.has{border-style:solid;color:transparent}
+.photo input[type=file]{font-size:14px;max-width:100%}
+@media (max-width:560px){.photo{grid-template-columns:1fr}.photo .thumb{width:100%;height:180px}}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;z-index:10}
+.bar .in{max-width:900px;margin:0 auto;padding:10px clamp(16px,4vw,36px);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.bar .prog{font-family:var(--f-label);font-size:16px}
+.bar .t{font-family:var(--f-mono);font-size:14px;color:#C9D0D4}
+.bar button{background:#fff;color:var(--ink);border-color:#fff}
+.bar button.confirm{background:var(--mm);border-color:var(--mm);color:#111}
+.missing{font-size:14px;color:#F3D9D5;flex-basis:100%;margin:0}
+.done{text-align:left}
+[hidden]{display:none!important}
+/* ----- docente ----- */
+.docband{background:var(--doc);color:#fff;padding:10px 16px;border-radius:var(--r);margin-top:16px}
+.dropzone{border:2px dashed var(--doc);background:var(--doc-tint);border-radius:var(--r);padding:20px;text-align:center}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--paper);border:1px solid var(--line)}
+th,td{text-align:left;vertical-align:top;padding:6px 9px;border-bottom:1px solid #CFD4CD}
+th{font-family:var(--f-label);font-weight:600;background:var(--plate-2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto}
+tr.sel td{background:var(--doc-tint)}
+.ok{color:var(--sig);font-weight:700}.bad{color:var(--alert);font-weight:700}.pend{color:var(--mm-ink);font-weight:700}
+.dq{border:1px solid var(--line);background:#fff;border-radius:3px;padding:10px 12px;margin:8px 0}
+.dq .k{font-size:14px;color:var(--ink-2)}
+.dq img{max-width:100%;max-height:420px;display:block;margin:6px 0;border:1px solid var(--line)}
+.score{width:70px}
+.chip{display:inline-block;font-size:12.5px;padding:1px 7px;border-radius:10px;background:var(--plate-2);margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+  <div class="inst">
+    <div><b>Tecnológico Nacional de México</b><br>Instituto Tecnológico de Culiacán</div>
+    <dl>
+      <dt>Asignatura</dt><dd>Principios Eléctricos y Aplicaciones Digitales</dd>
+      <dt>Carrera</dt><dd>Ingeniería en Sistemas Computacionales</dd>
+      <dt>Periodo</dt><dd>Agosto–diciembre 2026</dd>
+      <dt>Docente</dt><dd>M.C. Alejandro Triunfo Cruz</dd>
+    </dl>
+  </div>
+  <div class="titleblock">
+    <div><div class="u">Examen de la Unidad 4</div><h1>Señales y convertidores A/D y D/A</h1></div>
+    <svg class="motif" viewBox="0 0 260 110" aria-hidden="true">
+      <path d="M6,55 C26,10 46,10 66,55 S106,100 126,55 S166,10 186,55 S226,100 254,55" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <path d="M6,60 H22 V35 H38 V22 H54 V28 H70 V52 H86 V78 H102 V90 H118 V72 H134 V48 H150 V25 H166 V20 H182 V42 H198 V68 H214 V88 H230 V82 H246 V60 H254" fill="none" stroke="#00646E" stroke-width="2"/>
+      <path d="M6,104 H254" stroke="#9AA29A"/>
+    </svg>
+  </div>
+</header>
+<div id="docband" class="docband" hidden><b>Modo docente.</b> Carga los archivos de respuesta para calificarlos. Nada de esta vista aparece en el examen de los alumnos.</div>
+
+<!-- ===================== INICIO ===================== -->
+<main id="start">
+  <div class="card">
+    <h2>Antes de empezar</h2>
+    <p>El examen tiene cinco partes y vale 100 puntos. Tienes <b>un solo intento</b>: al entregar se descarga un archivo con tus respuestas, que debes enviar a tu docente como te indique. No verás tu calificación en esta página.</p>
+    <p>Necesitas tus fotografías de la práctica: tres componentes y las lecturas de los instrumentos. Puedes tomar las fotos desde este mismo examen si lo abres en tu celular.</p>
+    <label class="f">Nombre completo<input type="text" id="s-nombre" autocomplete="name" maxlength="80"></label>
+    <label class="f">Número de control<input type="text" id="s-control" autocomplete="off" maxlength="12" inputmode="text" style="max-width:220px;font-family:var(--f-mono)"></label>
+    <label class="row" style="gap:8px;font-size:15px;margin:12px 0"><input type="checkbox" id="s-indiv" style="width:18px;height:18px"> Respondo de forma individual y con mis propias mediciones.</label>
+    <p class="err" id="s-err" aria-live="polite"></p>
+    <div class="row"><button type="button" class="primary" id="s-go">Comenzar examen</button></div>
+  </div>
+</main>
+
+<!-- ===================== EXAMEN ===================== -->
+<main id="exam" hidden>
+  <p class="hint" id="who"></p>
+
+  <section class="part" aria-labelledby="hA">
+    <div class="part-head"><h2 id="hA">A. Opción múltiple</h2><span class="pts">12 reactivos · 2 puntos cada uno</span></div>
+    <div id="partA"></div>
+  </section>
+
+  <section class="part" aria-labelledby="hB">
+    <div class="part-head"><h2 id="hB">B. Señales en la práctica</h2><span class="pts">6 reactivos · 4 puntos cada uno</span></div>
+    <p class="hint">Piensa en el equipo que viste en la demostración: ¿cada elemento maneja una señal digital o analógica?</p>
+    <div id="partB"></div>
+  </section>
+
+  <section class="part" aria-labelledby="hC">
+    <div class="part-head"><h2 id="hC">C. Mediciones en el laboratorio</h2><span class="pts">4 mediciones · 5 puntos cada una</span></div>
+    <div class="warn"><p><strong>Mide solo cuando el docente lo indique</strong> y únicamente en los puntos señalados. Con el multímetro, solo bornes de control de 0–10 V y 24 V. Con el amperímetro de gancho, abraza un solo conductor aislado de una fase. No abras el variador ni toques bornes de potencia.</p></div>
+    <p class="hint">En cada medición sube una foto donde se lea el instrumento o la pantalla. El cálculo se revisa con <b>tu</b> valor medido, así que mide con cuidado.</p>
+    <div id="partC"></div>
+  </section>
+
+  <section class="part" aria-labelledby="hD">
+    <div class="part-head"><h2 id="hD">D. Componentes en fotografía</h2><span class="pts">3 componentes distintos · 6 puntos cada uno</span></div>
+    <p class="hint">Fotografía tres componentes distintos de la práctica. Para cada uno indica qué es, qué tipo de señal maneja y si hace alguna conversión.</p>
+    <div id="partD"></div>
+  </section>
+
+  <section class="part" aria-labelledby="hE">
+    <div class="part-head"><h2 id="hE">E. Preguntas abiertas</h2><span class="pts">2 preguntas · 7 puntos cada una</span></div>
+    <div id="partE"></div>
+  </section>
+</main>
+
+<!-- ===================== ENTREGADO ===================== -->
+<main id="done" hidden>
+  <div class="card done">
+    <h2>Examen entregado</h2>
+    <p id="done-msg"></p>
+    <p>Envía ese archivo a tu docente como te indique. No lo edites: el docente puede detectar si fue modificado.</p>
+    <div class="row"><button type="button" id="d-again">Descargar de nuevo el archivo</button><a id="d-link" hidden>Abrir archivo</a></div>
+    <p class="err" id="d-err"></p>
+  </div>
+</main>
+
+<!-- ===================== DOCENTE ===================== -->
+<main id="teacher" hidden>
+  <section class="part">
+    <div class="part-head"><h2>Calificar</h2><span class="pts" id="t-count">0 archivos</span></div>
+    <div class="dropzone" id="drop">
+      <p><b>Arrastra aquí los archivos .json</b> o elígelos:</p>
+      <input type="file" id="t-files" accept=".json,application/json" multiple>
+    </div>
+    <p class="err" id="t-err"></p>
+    <div class="tw" style="margin-top:12px"><table id="t-list"><thead><tr><th>Control</th><th>Nombre</th><th class="n">A</th><th class="n">B</th><th class="n">C</th><th class="n">D</th><th class="n">E</th><th class="n">Total</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
+    <div class="row" style="margin-top:10px"><button type="button" id="t-copy">Copiar tabla para Excel</button><button type="button" id="t-csv">Descargar CSV</button><button type="button" id="t-reset">Borrar intentos de alumnos en este navegador</button></div>
+    <p class="hint" id="t-msg" aria-live="polite"></p>
+  </section>
+  <section class="part" id="t-detail"></section>
+</main>
+</div>
+
+<div class="bar" id="bar" hidden>
+  <div class="in">
+    <span class="prog" id="b-prog">0 de 27 respondidos</span>
+    <span class="t" id="b-time">00:00</span>
+    <button type="button" id="b-submit">Revisar y entregar</button>
+    <p class="missing" id="b-miss" hidden></p>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var EXAM={id:"U4-PEAD-AD2026",ver:2,key:"KEY2204",salt:"U4PEAD|2026B",nMC:12};
+var $=function(s,r){return (r||document).querySelector(s);};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function st(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r?JSON.parse(r):null;}if(v===null){localStorage.removeItem(k);return true;}localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+function b64(s){return new TextDecoder().decode(Uint8Array.from(atob(s),function(c){return c.charCodeAt(0);}));}
+var BANK=JSON.parse(b64("W3siaWQiOiAibTAxIiwgInEiOiAiwr9RdcOpIGNhcmFjdGVyaXphIGEgdW5hIHNlw7FhbCBhbmFsw7NnaWNhPyIsICJvIjogWyJQdWVkZSB0b21hciBjdWFscXVpZXIgdmFsb3IgZGVudHJvIGRlIHVuIGludGVydmFsbyBjb250aW51by4iLCAiU29sbyBwdWVkZSB0b21hciBkb3MgdmFsb3JlcywgYWx0byB5IGJham8uIiwgIlNvbG8gY2FtYmlhIGVuIGxvcyBmbGFuY29zIGRlIHVuIHJlbG9qLiIsICJTb2xvIHB1ZWRlIHJlcHJlc2VudGFyIG7Dum1lcm9zIGVudGVyb3MuIl19LCB7ImlkIjogIm0wMiIsICJxIjogIsK/UXXDqSBjYXJhY3Rlcml6YSBhIHVuYSBzZcOxYWwgZGlnaXRhbD8iLCAibyI6IFsiVG9tYSB1biBuw7ptZXJvIGZpbml0byBkZSB2YWxvcmVzOyBlbiBsw7NnaWNhIGJpbmFyaWEsIGRvcyBuaXZlbGVzIHNlcGFyYWRvcyBwb3IgdW1icmFsZXMuIiwgIlZhcsOtYSBkZSBmb3JtYSBjb250aW51YSBlbiBlbCB0aWVtcG8geSBlbiBhbXBsaXR1ZC4iLCAiU2llbXByZSBlcyB1bmEgb25kYSBzZW5vaWRhbCBkZSBmcmVjdWVuY2lhIGZpamEuIiwgIlNvbG8gZXhpc3RlIGRlbnRybyBkZSB1bmEgY29tcHV0YWRvcmE7IHVuIGNhYmxlIG5vIHB1ZWRlIHRyYW5zcG9ydGFybGEuIl19LCB7ImlkIjogIm0wMyIsICJxIjogIkVuIGxhIHByw6FjdGljYSwgZWwgZW5jb2RlciBlbnRyZWdhIGEgbGEgZW50cmFkYSBJMC4wIGRlbCBQTEM6IiwgIm8iOiBbIlVuIHRyZW4gZGUgcHVsc29zIGRlIGRvcyBuaXZlbGVzIGN1eWEgZnJlY3VlbmNpYSBlcyBwcm9wb3JjaW9uYWwgYSBsYSB2ZWxvY2lkYWQuIiwgIlVuYSB0ZW5zacOzbiBhbmFsw7NnaWNhIGRlIDAgYSAxMCBWIHByb3BvcmNpb25hbCBhIGxhIHZlbG9jaWRhZC4iLCAiVW5hIGNvcnJpZW50ZSBkZSA0IGEgMjAgbUEgcHJvcG9yY2lvbmFsIGEgbGEgcG9zaWNpw7NuLiIsICJVbiBuw7ptZXJvIGRlIDE2IGJpdHMgdHJhbnNtaXRpZG8gZW4gcGFyYWxlbG8uIl19LCB7ImlkIjogIm0wNCIsICJxIjogIkVsIHBvdGVuY2nDs21ldHJvIGNvbmVjdGFkbyBhbCBjYW5hbCAlSVc2NCBlbnRyZWdhOiIsICJvIjogWyJVbmEgdGVuc2nDs24gYW5hbMOzZ2ljYSBkZSAwIGEgMTAgViBxdWUgZWwgY2FuYWwgZGUgZW50cmFkYSBjb252aWVydGUgYSB1biBuw7ptZXJvLiIsICJQdWxzb3MgZGlnaXRhbGVzIHF1ZSBjdWVudGEgZWwgY29udGFkb3IgcsOhcGlkby4iLCAiVW4gdmFsb3IgYmluYXJpbyBkZSAwIGEgMjc2NDggZGlyZWN0YW1lbnRlIGVuIHN1cyB0ZXJtaW5hbGVzLiIsICJVbmEgc2XDsWFsIGRlIHBvdGVuY2lhIHF1ZSBhbGltZW50YSBhbCBtb3Rvci4iXX0sIHsiaWQiOiAibTA1IiwgInEiOiAiwr9RdcOpIGVsZW1lbnRvIGRlIGxhIHByw6FjdGljYSByZWFsaXphIHVuYSBjb252ZXJzacOzbiBhbmFsw7NnaWNhIGEgZGlnaXRhbCAoQS9EKT8iLCAibyI6IFsiRWwgY2FuYWwgZGUgZW50cmFkYSBhbmFsw7NnaWNhIGRlbCBQTEMgKCVJVzY0KS4iLCAiRWwgbcOzZHVsbyBkZSBzYWxpZGEgYW5hbMOzZ2ljYSAoJVFXMTEyKS4iLCAiTG9zIGNvbnRhY3RvcyBkZSByZWxldmFkb3IgUTAuMCBhIFEwLjIuIiwgIkVsIGNhYmxlIEV0aGVybmV0IGVudHJlIGVsIFBMQyB5IGVsIEhNSS4iXX0sIHsiaWQiOiAibTA2IiwgInEiOiAiwr9RdcOpIGVsZW1lbnRvIGRlIGxhIHByw6FjdGljYSByZWFsaXphIHVuYSBjb252ZXJzacOzbiBkaWdpdGFsIGEgYW5hbMOzZ2ljYSAoRC9BKT8iLCAibyI6IFsiRWwgbcOzZHVsbyBkZSBzYWxpZGEgYW5hbMOzZ2ljYSBxdWUgY29udmllcnRlICVRVzExMiBlbiAwIGEgMTAgViBoYWNpYSBlbCB2YXJpYWRvci4iLCAiRWwgY2FuYWwgZGUgZW50cmFkYSBhbmFsw7NnaWNhICVJVzY0LiIsICJFbCBjb250YWRvciByw6FwaWRvIEhTQzEuIiwgIkVsIHB1bHNhZG9yIGRlIG1hcmNoYS4iXX0sIHsiaWQiOiAibTA3IiwgInEiOiAiRW4gZWwgUzctMTIwMCwgZWwgcmFuZ28gbm9taW5hbCBkZSAwIGEgMTAgViBzZSByZXByZXNlbnRhIGNvbiBsb3MgdmFsb3JlczoiLCAibyI6IFsiMCBhIDI3NjQ4LiIsICIwIGEgMTAyMy4iLCAiMCBhIDQwOTUuIiwgIjAgYSA2NTUzNS4iXX0sIHsiaWQiOiAibTA4IiwgInEiOiAiVW4gY29udmVydGlkb3IgZGUgbiBiaXRzIHB1ZWRlIHJlcHJlc2VudGFyOiIsICJvIjogWyIy4oG/IG5pdmVsZXMgZGlzdGludG9zLiIsICJuIG5pdmVsZXMgZGlzdGludG9zLiIsICIybiBuaXZlbGVzIGRpc3RpbnRvcy4iLCAibsKyIG5pdmVsZXMgZGlzdGludG9zLiJdfSwgeyJpZCI6ICJtMDkiLCAicSI6ICJFbiB1biBjb252ZXJ0aWRvciBBL0QgaWRlYWwsIGVsIGVycm9yIG3DoXhpbW8gZGUgY3VhbnRpemFjacOzbiBlczoiLCAibyI6IFsiwrHCvSBMU0IuIiwgIsKxMiBMU0IuIiwgIkNlcm8sIHNpIGVsIGNvbnZlcnRpZG9yIGVzIGlkZWFsLiIsICJJZ3VhbCBhbCB2YWxvciBkZSBmb25kbyBkZSBlc2NhbGEuIl19LCB7ImlkIjogIm0xMCIsICJxIjogIlNlZ8O6biBlbCB0ZW9yZW1hIGRlIG11ZXN0cmVvIGRlIE55cXVpc3QsIHBhcmEgcmVjb25zdHJ1aXIgdW5hIHNlw7FhbCBjdXlhIGZyZWN1ZW5jaWEgbcOheGltYSBlcyBmbcOheCBzZSBuZWNlc2l0YToiLCAibyI6IFsiTXVlc3RyZWFyIGEgdW5hIGZyZWN1ZW5jaWEgbWF5b3IgcXVlIDLCt2Ztw6F4LiIsICJNdWVzdHJlYXIgYSBmbcOheCBleGFjdGFtZW50ZS4iLCAiTXVlc3RyZWFyIGEgbGEgbWl0YWQgZGUgZm3DoXguIiwgIlVzYXIgdW4gY29udmVydGlkb3IgZGUgbcOhcyBiaXRzLCBzaW4gaW1wb3J0YXIgbGEgZnJlY3VlbmNpYSBkZSBtdWVzdHJlby4iXX0sIHsiaWQiOiAibTExIiwgInEiOiAiwr9RdcOpIGVzIGVsIGFsaWFzaW5nPyIsICJvIjogWyJVbmEgc2XDsWFsIG11ZXN0cmVhZGEgZGVtYXNpYWRvIGxlbnRvIGFwYXJlY2UgY29tbyBvdHJhIGRlIGZyZWN1ZW5jaWEgbWVub3IuIiwgIkVsIHJ1aWRvIHF1ZSBhZ3JlZ2EgdW4gY2FibGUgbGFyZ28gYSB1bmEgc2XDsWFsIGRpZ2l0YWwuIiwgIkxhIHDDqXJkaWRhIGRlIGJpdHMgYWwgZ3VhcmRhciB1biBuw7ptZXJvIGVuIG1lbW9yaWEuIiwgIkVsIHJldGFyZG8gZW50cmUgbGEgZXNjcml0dXJhIGVuIGVsIEhNSSB5IGVsIGNhbWJpbyBlbiBlbCBQTEMuIl19LCB7ImlkIjogIm0xMiIsICJxIjogIlVuYSBzZcOxYWwgcXVlIHlhIGZ1ZSBtdWVzdHJlYWRhLCBwZXJvIGN1eWFzIG11ZXN0cmFzIGHDum4gbm8gc2UgY3VhbnRpemFuLCBlczoiLCAibyI6IFsiRGlzY3JldGEgZW4gZWwgdGllbXBvIHkgY29udGludWEgZW4gYW1wbGl0dWQuIiwgIkNvbnRpbnVhIGVuIGVsIHRpZW1wbyB5IGRpc2NyZXRhIGVuIGFtcGxpdHVkLiIsICJEaWdpdGFsIGJpbmFyaWEuIiwgIkNvbnRpbnVhIGVuIGVsIHRpZW1wbyB5IGVuIGFtcGxpdHVkLiJdfSwgeyJpZCI6ICJtMTMiLCAicSI6ICLCv0N1w6FsIGVzIHVuYSB2ZW50YWphIGRlIHRyYW5zbWl0aXIgaW5mb3JtYWNpw7NuIGVuIGZvcm1hIGRpZ2l0YWw/IiwgIm8iOiBbIk1pZW50cmFzIGVsIHJ1aWRvIG5vIGNydWNlIGxvcyB1bWJyYWxlcywgZWwgcmVjZXB0b3IgcmVjdXBlcmEgZXhhY3RhbWVudGUgZWwgbWlzbW8gdmFsb3IuIiwgIk5vIG5lY2VzaXRhIG5pbmfDum4gbWVkaW8gZsOtc2ljbyBwYXJhIHZpYWphci4iLCAiVGllbmUgcmVzb2x1Y2nDs24gaW5maW5pdGEuIiwgIk5vIHJlcXVpZXJlIGNvbnZlcnNpw7NuIGN1YW5kbyBsYSBmdWVudGUgZXMgYW5hbMOzZ2ljYS4iXX0sIHsiaWQiOiAibTE0IiwgInEiOiAiVW4gY29udmVydGlkb3IgQS9EIHRpcG8gZmxhc2ggZGUgbiBiaXRzIHJlcXVpZXJlOiIsICJvIjogWyIy4oG/IOKIkiAxIGNvbXBhcmFkb3Jlcy4iLCAibiBjb21wYXJhZG9yZXMuIiwgIlVuIHNvbG8gY29tcGFyYWRvciB5IHVuIGNvbnRhZG9yLiIsICIybiBjb21wYXJhZG9yZXMuIl19LCB7ImlkIjogIm0xNSIsICJxIjogIlVuIGNvbnZlcnRpZG9yIEEvRCBkZSBhcHJveGltYWNpb25lcyBzdWNlc2l2YXMgZGUgOCBiaXRzIG9idGllbmUgZWwgcmVzdWx0YWRvIGVuOiIsICJvIjogWyI4IHBhc29zIGRlIGNvbXBhcmFjacOzbiwgdW5vIHBvciBiaXQuIiwgIjI1NiBwYXNvcyBkZSBjb21wYXJhY2nDs24uIiwgIlVuIHNvbG8gcGFzby4iLCAiMiBwYXNvczogdW5vIHBvciBjYWRhIG5pYmJsZS4iXX0sIHsiaWQiOiAibTE2IiwgInEiOiAiwr9RdcOpIHRpcG8gZGUgY29udmVydGlkb3IgQS9EIGVzIGVsIG3DoXMgcsOhcGlkbywgYSBjb3N0YSBkZSBtdWNob3MgY29tcGFyYWRvcmVzPyIsICJvIjogWyJGbGFzaCAocGFyYWxlbG8pLiIsICJEb2JsZSByYW1wYSAoaW50ZWdyYWRvcikuIiwgIkFwcm94aW1hY2lvbmVzIHN1Y2VzaXZhcy4iLCAiUmFtcGEgZGUgY29udGVvLiJdfSwgeyJpZCI6ICJtMTciLCAicSI6ICJFbCBjb252ZXJ0aWRvciBBL0QgZGUgZG9ibGUgcmFtcGEsIGNvbcO6biBlbiBtdWx0w61tZXRyb3MsIHNlIGNhcmFjdGVyaXphIHBvcjoiLCAibyI6IFsiU2VyIGxlbnRvLCBwZXJvIHJlY2hhemFyIGJpZW4gZWwgcnVpZG8gYWwgaW50ZWdyYXIgbGEgc2XDsWFsLiIsICJTZXIgZWwgbcOhcyByw6FwaWRvIHF1ZSBleGlzdGUuIiwgIlVzYXIgMuKBvyDiiJIgMSBjb21wYXJhZG9yZXMuIiwgIk5vIG5lY2VzaXRhciByZWZlcmVuY2lhIGRlIHRlbnNpw7NuLiJdfSwgeyJpZCI6ICJtMTgiLCAicSI6ICJMYSB2ZW50YWphIHByaW5jaXBhbCBkZSB1biBjb252ZXJ0aWRvciBEL0EgZGUgZXNjYWxlcmEgUi0yUiBlcyBxdWU6IiwgIm8iOiBbIlNvbG8gdXNhIGRvcyB2YWxvcmVzIGRlIHJlc2lzdGVuY2lhLCBzaW4gaW1wb3J0YXIgZWwgbsO6bWVybyBkZSBiaXRzLiIsICJObyBuZWNlc2l0YSB0ZW5zacOzbiBkZSByZWZlcmVuY2lhLiIsICJUaWVuZSB1bmEgcmVzaXN0ZW5jaWEgZGlzdGludGEgcG9yIGNhZGEgYml0LCBwb25kZXJhZGEgZW4gYmluYXJpby4iLCAiQ29udmllcnRlIGRlIGFuYWzDs2dpY28gYSBkaWdpdGFsIHNpbiBjb21wYXJhZG9yZXMuIl19LCB7ImlkIjogIm0xOSIsICJxIjogIsK/Q3XDoWwgZXMgbGEgZGVzdmVudGFqYSBkZSB1biBjb252ZXJ0aWRvciBEL0EgZGUgcmVzaXN0ZW5jaWFzIHBvbmRlcmFkYXMgZW4gYmluYXJpbyBjb24gbXVjaG9zIGJpdHM/IiwgIm8iOiBbIlJlcXVpZXJlIHJlc2lzdGVuY2lhcyBkZSBwcmVjaXNpw7NuIGNvbiB2YWxvcmVzIG11eSBkaWZlcmVudGVzIGVudHJlIHPDrS4iLCAiU29sbyBmdW5jaW9uYSBjb24gc2XDsWFsZXMgZGUgY29ycmllbnRlIGFsdGVybmEuIiwgIk5vIHB1ZWRlIGdlbmVyYXIgbcOhcyBkZSBkb3Mgbml2ZWxlcyBkZSBzYWxpZGEuIiwgIk5lY2VzaXRhIHVuIGNvbnRhZG9yIHLDoXBpZG8gcGFyYSBmdW5jaW9uYXIuIl19LCB7ImlkIjogIm0yMCIsICJxIjogIlNpIHVuIGNvbnZlcnRpZG9yIEEvRCBwYXNhIGRlIDggYSAxMiBiaXRzIGNvbiBlbCBtaXNtbyByYW5nbyBkZSBlbnRyYWRhLCBlbCBwYXNvIGRlIGN1YW50aXphY2nDs246IiwgIm8iOiBbIlNlIGhhY2UgMTYgdmVjZXMgbcOhcyBwZXF1ZcOxby4iLCAiU2UgaGFjZSA0IHZlY2VzIG3DoXMgcGVxdWXDsW8uIiwgIk5vIGNhbWJpYS4iLCAiU2UgaGFjZSAxNiB2ZWNlcyBtw6FzIGdyYW5kZS4iXX0sIHsiaWQiOiAibTIxIiwgInEiOiAiRWwgY29udGFkb3IgcsOhcGlkbyBtaWRlIGxhIGZyZWN1ZW5jaWEgZGVsIGVuY29kZXIgY29uIHVuIHBlcmlvZG8gZGUgbWVkaWNpw7NuIGRlIDEuMCBzLiBFc3RvIHNpZ25pZmljYSBxdWUgZWwgdmFsb3IgZW4gJUlEMTAwMDoiLCAibyI6IFsiU2UgYWN0dWFsaXphIHVuYSB2ZXogcG9yIHBlcmlvZG8sIGNvbiBsb3MgcHVsc29zIGNvbnRhZG9zIGR1cmFudGUgZXNlIGludGVydmFsby4iLCAiQ2FtYmlhIGNvbiBjYWRhIHB1bHNvIGluZGl2aWR1YWwgZGVsIGVuY29kZXIuIiwgIkVzIGxhIHN1bWEgZGUgdG9kb3MgbG9zIHB1bHNvcyBkZXNkZSBxdWUgc2UgZW5jZW5kacOzIGVsIFBMQy4iLCAiRXMgdW5hIHRlbnNpw7NuIGFuYWzDs2dpY2EgcHJvcG9yY2lvbmFsIGEgbGEgdmVsb2NpZGFkLiJdfSwgeyJpZCI6ICJtMjIiLCAicSI6ICLCv1BvciBxdcOpIGVsIHByb2dyYW1hIGxpbWl0YSBsYSBjb25zaWduYSAoTElNSVQpIGFudGVzIGRlIGVzY2FsYXJsYSBhIGxhIHNhbGlkYSBhbmFsw7NnaWNhPyIsICJvIjogWyJQYXJhIHF1ZSBlbCBuw7ptZXJvIG51bmNhIHNhbGdhIGRlbCByYW5nbyBxdWUgcmVwcmVzZW50YSAwIGEgMTAgVi4iLCAiUGFyYSBhdW1lbnRhciBsYSByZXNvbHVjacOzbiBkZWwgY29udmVydGlkb3IgRC9BLiIsICJQYXJhIGNvbnZlcnRpciBsYSBzZcOxYWwgYW5hbMOzZ2ljYSBlbiBkaWdpdGFsLiIsICJQYXJhIHF1ZSBlbCBlbmNvZGVyIGN1ZW50ZSBtw6FzIHLDoXBpZG8uIl19LCB7ImlkIjogIm0yMyIsICJxIjogIsK/UXXDqSB0aXBvIGRlIHNlw7FhbCB2aWFqYSBwb3IgZWwgY2FibGUgRXRoZXJuZXQgZW50cmUgZWwgSE1JIHkgZWwgUExDPyIsICJvIjogWyJEaWdpdGFsOiB0cmFtYXMgZGUgZGF0b3MgYmluYXJpb3MuIiwgIkFuYWzDs2dpY2EgZGUgMCBhIDEwIFYuIiwgIlVuIHRyZW4gZGUgcHVsc29zIGN1eWEgZnJlY3VlbmNpYSBpbmRpY2EgbGFzIHJwbS4iLCAiQ29ycmllbnRlIGRlIDQgYSAyMCBtQS4iXX0sIHsiaWQiOiAibTI0IiwgInEiOiAiRWwgYW1wZXLDrW1ldHJvIGRlIGdhbmNobyBtdWVzdHJhIGxhIGNvcnJpZW50ZSBkZWwgbW90b3IgY29tbyB1biBuw7ptZXJvIGVuIHN1IHBhbnRhbGxhLiBEZW50cm8gZGVsIGluc3RydW1lbnRvOiIsICJvIjogWyJVbiBzZW5zb3IgcHJvZHVjZSB1bmEgc2XDsWFsIGFuYWzDs2dpY2EgcXVlIHVuIGNvbnZlcnRpZG9yIEEvRCBkaWdpdGFsaXphIHBhcmEgbW9zdHJhcmxhLiIsICJMYSBjb3JyaWVudGUgc2UgY3VlbnRhIGVsZWN0csOzbiBwb3IgZWxlY3Ryw7NuLiIsICJFbCBtb3RvciBlbnbDrWEgdW4gbsO6bWVybyBiaW5hcmlvIHBvciBlbCBjYWJsZS4iLCAiVW4gY29udmVydGlkb3IgRC9BIGdlbmVyYSBsYSBjb3JyaWVudGUgcXVlIHNlIG11ZXN0cmEuIl19LCB7ImlkIjogImYwMSIsICJxIjogIsK/Q3XDoWwgZmlndXJhIHJlcHJlc2VudGEgdW5hIHNlw7FhbCBkaWdpdGFsIGJpbmFyaWE/IiwgImZpZyI6ICJvcHRzIiwgIm8iOiBbIjxzdmcgdmlld0JveD1cIjAgMCAyMjAgODBcIiBjbGFzcz1cImZpZ1wiPjxwYXRoIGQ9XCJNMTAsNjAgSDQwIFYyMCBINzUgVjYwIEg5NSBWMjAgSDE1MCBWNjAgSDE3NSBWMjAgSDIxMFwiIGZpbGw9XCJub25lXCIgc3Ryb2tlPVwiY3VycmVudENvbG9yXCIgc3Ryb2tlLXdpZHRoPVwiM1wiLz48cGF0aCBkPVwiTTEwLDcwIEgyMTBcIiBzdHJva2U9XCIjOUFBMjlBXCIgc3Ryb2tlLXdpZHRoPVwiMVwiLz48L3N2Zz4iLCAiPHN2ZyB2aWV3Qm94PVwiMCAwIDIyMCA4MFwiIGNsYXNzPVwiZmlnXCI+PHBhdGggZD1cIk0xMCw0MCBDMzAsMCA1MCwwIDcwLDQwIFMxMTAsODAgMTMwLDQwIFMxNzAsMCAxOTAsNDAgUzIwNSw2MiAyMTAsNTVcIiBmaWxsPVwibm9uZVwiIHN0cm9rZT1cImN1cnJlbnRDb2xvclwiIHN0cm9rZS13aWR0aD1cIjNcIi8+PHBhdGggZD1cIk0xMCw3MCBIMjEwXCIgc3Ryb2tlPVwiIzlBQTI5QVwiIHN0cm9rZS13aWR0aD1cIjFcIi8+PC9zdmc+IiwgIjxzdmcgdmlld0JveD1cIjAgMCAyMjAgODBcIiBjbGFzcz1cImZpZ1wiPjxnIHN0cm9rZT1cImN1cnJlbnRDb2xvclwiIHN0cm9rZS13aWR0aD1cIjIuNVwiPjxwYXRoIGQ9XCJNMTUsNzAgVjQ1XCIvPjxjaXJjbGUgY3g9XCIxNVwiIGN5PVwiNDVcIiByPVwiMy41XCIgZmlsbD1cImN1cnJlbnRDb2xvclwiLz48cGF0aCBkPVwiTTM1LDcwIFYyNFwiLz48Y2lyY2xlIGN4PVwiMzVcIiBjeT1cIjI0XCIgcj1cIjMuNVwiIGZpbGw9XCJjdXJyZW50Q29sb3JcIi8+PHBhdGggZD1cIk01NSw3MCBWMTJcIi8+PGNpcmNsZSBjeD1cIjU1XCIgY3k9XCIxMlwiIHI9XCIzLjVcIiBmaWxsPVwiY3VycmVudENvbG9yXCIvPjxwYXRoIGQ9XCJNNzUsNzAgVjE2XCIvPjxjaXJjbGUgY3g9XCI3NVwiIGN5PVwiMTZcIiByPVwiMy41XCIgZmlsbD1cImN1cnJlbnRDb2xvclwiLz48cGF0aCBkPVwiTTk1LDcwIFYzM1wiLz48Y2lyY2xlIGN4PVwiOTVcIiBjeT1cIjMzXCIgcj1cIjMuNVwiIGZpbGw9XCJjdXJyZW50Q29sb3JcIi8+PHBhdGggZD1cIk0xMTUsNzAgVjUzXCIvPjxjaXJjbGUgY3g9XCIxMTVcIiBjeT1cIjUzXCIgcj1cIjMuNVwiIGZpbGw9XCJjdXJyZW50Q29sb3JcIi8+PHBhdGggZD1cIk0xMzUsNzAgVjY2XCIvPjxjaXJjbGUgY3g9XCIxMzVcIiBjeT1cIjY2XCIgcj1cIjMuNVwiIGZpbGw9XCJjdXJyZW50Q29sb3JcIi8+PHBhdGggZD1cIk0xNTUsNzAgVjYyXCIvPjxjaXJjbGUgY3g9XCIxNTVcIiBjeT1cIjYyXCIgcj1cIjMuNVwiIGZpbGw9XCJjdXJyZW50Q29sb3JcIi8+PHBhdGggZD1cIk0xNzUsNzAgVjQ1XCIvPjxjaXJjbGUgY3g9XCIxNzVcIiBjeT1cIjQ1XCIgcj1cIjMuNVwiIGZpbGw9XCJjdXJyZW50Q29sb3JcIi8+PHBhdGggZD1cIk0xOTUsNzAgVjI0XCIvPjxjaXJjbGUgY3g9XCIxOTVcIiBjeT1cIjI0XCIgcj1cIjMuNVwiIGZpbGw9XCJjdXJyZW50Q29sb3JcIi8+PC9nPjxwYXRoIGQ9XCJNMTAsNzAgSDIxMFwiIHN0cm9rZT1cIiM5QUEyOUFcIiBzdHJva2Utd2lkdGg9XCIxXCIvPjwvc3ZnPiIsICI8c3ZnIHZpZXdCb3g9XCIwIDAgMjIwIDgwXCIgY2xhc3M9XCJmaWdcIj48cGF0aCBkPVwiTTEwLDYwIEw1NSwxNSBMMTAwLDYwIEwxNDUsMTUgTDE5MCw2MCBMMjEwLDQwXCIgZmlsbD1cIm5vbmVcIiBzdHJva2U9XCJjdXJyZW50Q29sb3JcIiBzdHJva2Utd2lkdGg9XCIzXCIvPjxwYXRoIGQ9XCJNMTAsNzAgSDIxMFwiIHN0cm9rZT1cIiM5QUEyOUFcIiBzdHJva2Utd2lkdGg9XCIxXCIvPjwvc3ZnPiJdfSwgeyJpZCI6ICJmMDIiLCAicSI6ICJFbCBjaXJjdWl0byBkZSBsYSBmaWd1cmEgZXMgdW46IiwgImZpZyI6ICI8c3ZnIHZpZXdCb3g9XCIwIDAgNTc1IDIxNVwiIGNsYXNzPVwiZmlnIHdpZGVcIiByb2xlPVwiaW1nXCIgYXJpYS1sYWJlbD1cIlJlZCBkZSByZXNpc3RlbmNpYXMgY29uIHZhbG9yZXMgUiB5IDJSLCBjdWF0cm8gaW50ZXJydXB0b3JlcyBiMCBhIGIzIHkgdW4gYW1wbGlmaWNhZG9yIG9wZXJhY2lvbmFsXCI+XG48cGF0aCBkPVwiTTQwLDYwIEgxMDAgbDQsLTggbDgsMTYgbDgsLTE2IGw4LDE2IGw4LC0xNiBsNCw4IEgyMDAgbDQsLTggbDgsMTYgbDgsLTE2IGw4LDE2IGw4LC0xNiBsNCw4IEgzMDAgbDQsLTggbDgsMTYgbDgsLTE2IGw4LDE2IGw4LC0xNiBsNCw4IEg0NDAgTTcwLDYwIHYyMiBsOCw0IC0xNiw2IDE2LDYgLTE2LDYgMTYsNiAtOCw0IHYyMiBsMTYsMjIgTTE3MCw2MCB2MjIgbDgsNCAtMTYsNiAxNiw2IC0xNiw2IDE2LDYgLTgsNCB2MjIgbDE2LDIyIE0yNzAsNjAgdjIyIGw4LDQgLTE2LDYgMTYsNiAtMTYsNiAxNiw2IC04LDQgdjIyIGwxNiwyMiBNMzcwLDYwIHYyMiBsOCw0IC0xNiw2IDE2LDYgLTE2LDYgMTYsNiAtOCw0IHYyMiBsMTYsMjIgTTQwLDYwIHYyMiBsOCw0IC0xNiw2IDE2LDYgLTE2LDYgMTYsNiAtOCw0IHYyMiBNMjgsMTM2IEg1MiBNMzIsMTQyIEg0OCBNMzYsMTQ4IEg0NCBNNjAsMTYwIEg0MTAgTTYwLDE3NSBINDEwIE00NDAsNjAgVjQwIEg0NTUgTTQ1NSwyMCBWOTAgTDUxMCw1NSBaIE01MTAsNTUgSDUyMCBWMTEwIEg0NDUgVjcwIEg0NTVcIiBmaWxsPVwibm9uZVwiIHN0cm9rZT1cImN1cnJlbnRDb2xvclwiIHN0cm9rZS13aWR0aD1cIjJcIiBzdHJva2UtbGluZWpvaW49XCJyb3VuZFwiLz5cbjxnIGZpbGw9XCJjdXJyZW50Q29sb3JcIiBmb250LXNpemU9XCIxNFwiIGZvbnQtZmFtaWx5PVwiU2Vnb2UgVUksQXJpYWwsc2Fucy1zZXJpZlwiPlxuPHRleHQgeD1cIjExNFwiIHk9XCI0NFwiPlI8L3RleHQ+PHRleHQgeD1cIjIxNFwiIHk9XCI0NFwiPlI8L3RleHQ+PHRleHQgeD1cIjMxNFwiIHk9XCI0NFwiPlI8L3RleHQ+XG48dGV4dCB4PVwiODJcIiB5PVwiMTA0XCI+MlI8L3RleHQ+PHRleHQgeD1cIjE4MlwiIHk9XCIxMDRcIj4yUjwvdGV4dD48dGV4dCB4PVwiMjgyXCIgeT1cIjEwNFwiPjJSPC90ZXh0Pjx0ZXh0IHg9XCIzODJcIiB5PVwiMTA0XCI+MlI8L3RleHQ+PHRleHQgeD1cIjRcIiB5PVwiMTA0XCI+MlI8L3RleHQ+XG48dGV4dCB4PVwiNjRcIiB5PVwiMjAwXCI+YjA8L3RleHQ+PHRleHQgeD1cIjE2NFwiIHk9XCIyMDBcIj5iMTwvdGV4dD48dGV4dCB4PVwiMjY0XCIgeT1cIjIwMFwiPmIyPC90ZXh0Pjx0ZXh0IHg9XCIzNjRcIiB5PVwiMjAwXCI+YjM8L3RleHQ+XG48dGV4dCB4PVwiNDE4XCIgeT1cIjE2NVwiPlZyZWY8L3RleHQ+PHRleHQgeD1cIjQxOFwiIHk9XCIxODBcIj4wIFY8L3RleHQ+PHRleHQgeD1cIjUyNlwiIHk9XCI0OFwiPlZzYWw8L3RleHQ+XG48dGV4dCB4PVwiNDU5XCIgeT1cIjQ1XCIgZm9udC1zaXplPVwiMTNcIj4rPC90ZXh0Pjx0ZXh0IHg9XCI0NTlcIiB5PVwiNzZcIiBmb250LXNpemU9XCIxM1wiPuKIkjwvdGV4dD5cbjwvZz48L3N2Zz4iLCAibyI6IFsiQ29udmVydGlkb3IgRC9BIGRlIGVzY2FsZXJhIFItMlIuIiwgIkNvbnZlcnRpZG9yIEEvRCB0aXBvIGZsYXNoLiIsICJDb252ZXJ0aWRvciBBL0QgZGUgYXByb3hpbWFjaW9uZXMgc3VjZXNpdmFzLiIsICJDb252ZXJ0aWRvciBEL0EgZGUgcmVzaXN0ZW5jaWFzIHBvbmRlcmFkYXMgZW4gYmluYXJpby4iXX1d"));
+var BYID={};BANK.forEach(function(q){BYID[q.id]=q;});
+
+/* ---------- aleatorio con semilla ---------- */
+function hash(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h>>>0;}
+function rng(seed){var a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
+function shuffle(arr,r){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function ri(r,a,b){return a+Math.floor(r()*(b-a+1));}
+function num(s){if(s==null)return NaN;s=String(s).trim().replace(/\s/g,"").replace(",",".");if(!/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(s))return NaN;return parseFloat(s);}
+function fx(x,d){return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);}
+function bin8(n){var s=n.toString(2);while(s.length<8)s="0"+s;return s.slice(0,4)+" "+s.slice(4);}
+
+/* ---------- parte B: identificar señales ---------- */
+var SIG=JSON.parse(b64("W3siaWQiOiAiczAxIiwgInEiOiAiRWwgYm90w7NuIGRlIGFycmFucXVlIChtYXJjaGEpIHNlIGNvbmVjdGEgYWwgUExDIGVuIHVuYSBlbnRyYWRhOiIsICJvIjogWyJEaWdpdGFsIChJMC40KTogc29sbyBkaXN0aW5ndWUgcHVsc2FkbyBvIG5vIHB1bHNhZG8uIiwgIkFuYWzDs2dpY2EgKCVJVzY0KTogbWlkZSBjb24gY3XDoW50YSBmdWVyemEgc2UgcHVsc2EuIiwgIkRlIGxhIHNhbGlkYSBhbmFsw7NnaWNhICVRVzExMi4iXX0sIHsiaWQiOiAiczAyIiwgInEiOiAiRWwgZW5jb2RlciBkZWwgbW90b3IgZW50cmVnYSB1bmEgc2XDsWFsOiIsICJvIjogWyJEaWdpdGFsOiB1biB0cmVuIGRlIHB1bHNvcyBkZSBkb3Mgbml2ZWxlcy4iLCAiQW5hbMOzZ2ljYTogdW5hIHRlbnNpw7NuIGRlIDAgYSAxMCBWIHByb3BvcmNpb25hbCBhIGxhIHZlbG9jaWRhZC4iLCAiQW5hbMOzZ2ljYTogdW5hIGNvcnJpZW50ZSBkZSA0IGEgMjAgbUEuIl19LCB7ImlkIjogInMwMyIsICJxIjogIkVsIHBvdGVuY2nDs21ldHJvIGNvbiBlbCBxdWUgc2UgYWp1c3RhIGxhIHZlbG9jaWRhZCBzZSBjb25lY3RhIGEgdW5hIGVudHJhZGE6IiwgIm8iOiBbIkFuYWzDs2dpY2EgKCVJVzY0KTogbGEgdGVuc2nDs24gcHVlZGUgdG9tYXIgY3VhbHF1aWVyIHZhbG9yIGVudHJlIDAgeSAxMCBWLiIsICJEaWdpdGFsIChJMC40KTogc29sbyB0aWVuZSBkb3MgcG9zaWNpb25lcy4iLCAiRGVsIGNvbnRhZG9yIHLDoXBpZG8gSFNDMS4iXX0sIHsiaWQiOiAiczA0IiwgInEiOiAiTGEgY29uc2lnbmEgZGUgdmVsb2NpZGFkIHF1ZSBlbCBQTEMgbWFuZGEgYWwgdmFyaWFkb3IgcG9yIGxvcyBib3JuZXMgMyB5IDQgZXMgdW5hIHNlw7FhbDoiLCAibyI6IFsiQW5hbMOzZ2ljYSBkZSAwIGEgMTAgViwgZ2VuZXJhZGEgcG9yIHVuIGNvbnZlcnRpZG9yIEQvQS4iLCAiRGlnaXRhbCBkZSBkb3Mgbml2ZWxlcywgY29tbyB1biBib3TDs24uIiwgIlVuIHRyZW4gZGUgcHVsc29zIGNvbW8gZWwgZGVsIGVuY29kZXIuIl19LCB7ImlkIjogInMwNSIsICJxIjogIkVsIGJvdMOzbiBkZSBwYXJvIChjb250YWN0byBOQykgc2UgY29uZWN0YSBhbCBQTEMgZW4gdW5hIGVudHJhZGE6IiwgIm8iOiBbIkRpZ2l0YWwgKEkwLjUpOiBlbiByZXBvc28gZXN0w6EgZW4gMSB5IGFsIHB1bHNhciBwYXNhIGEgMC4iLCAiQW5hbMOzZ2ljYTogaW5kaWNhIHF1w6kgdGFuIHLDoXBpZG8gZGViZSBmcmVuYXIgZWwgbW90b3IuIiwgIkFuYWzDs2dpY2EgKCVJVzY0KSwgY29tcGFydGlkYSBjb24gZWwgcG90ZW5jacOzbWV0cm8uIl19LCB7ImlkIjogInMwNiIsICJxIjogIkxhcyBzZcOxYWxlcyDigJx2YXJpYWRvciBsaXN0b+KAnSB5IOKAnHNpbiBmYWxsYeKAnSBxdWUgZWwgTU00NDAgZGV2dWVsdmUgYWwgUExDIChJMS4wIGUgSTEuMSkgc29uOiIsICJvIjogWyJEaWdpdGFsZXM6IGNvbnRhY3RvcyBkZSByZWzDqSBhYmllcnRvcyBvIGNlcnJhZG9zLiIsICJBbmFsw7NnaWNhczogaW5kaWNhbiBlbCBwb3JjZW50YWplIGRlIGZhbGxhIGRlbCB2YXJpYWRvci4iLCAiVHJlbmVzIGRlIHB1bHNvcyBxdWUgbWlkZSBlbCBjb250YWRvciByw6FwaWRvLiJdfSwgeyJpZCI6ICJzMDciLCAicSI6ICJMYSBvcmRlbiBkZSBtYXJjaGEgcXVlIGVsIFBMQyBlbnbDrWEgYWwgdmFyaWFkb3IgKFEwLjAgYWwgYm9ybmUgNSkgZXMgdW5hIHNhbGlkYToiLCAibyI6IFsiRGlnaXRhbDogdW4gY29udGFjdG8gZGUgcmVsZXZhZG9yIGFiaWVydG8gbyBjZXJyYWRvLiIsICJBbmFsw7NnaWNhOiBlbnRyZSBtw6FzIHRlbnNpw7NuLCBtw6FzIHLDoXBpZG8gZ2lyYSBlbCBtb3Rvci4iLCAiQW5hbMOzZ2ljYSBkZSAwIGEgMjc2NDggY3VlbnRhcy4iXX0sIHsiaWQiOiAiczA4IiwgInEiOiAiRWwgc2VsZWN0b3IgZGUgc2VudGlkbyBkZSBnaXJvIChhZGVsYW50ZSBvIHJldmVyc2EpIGVzIHVuYSBzZcOxYWw6IiwgIm8iOiBbIkRpZ2l0YWw6IHRpZW5lIHNvbG8gZG9zIGVzdGFkb3MuIiwgIkFuYWzDs2dpY2E6IGVsIMOhbmd1bG8gZGVsIHNlbGVjdG9yIGZpamEgbGEgdmVsb2NpZGFkLiIsICJVbiB0cmVuIGRlIHB1bHNvcy4iXX0sIHsiaWQiOiAiczA5IiwgInEiOiAiTGEgY29ycmllbnRlIHF1ZSBtaWRlIGVsIGFtcGVyw61tZXRybyBkZSBnYW5jaG8gZW4gdW5hIGZhc2UgZGVsIG1vdG9yIGVzIHVuYSBtYWduaXR1ZDoiLCAibyI6IFsiQW5hbMOzZ2ljYTogdmFyw61hIGRlIGZvcm1hIGNvbnRpbnVhOyBlbCBnYW5jaG8gbGEgY29udmllcnRlIGEgbsO6bWVybyBwYXJhIG1vc3RyYXJsYS4iLCAiRGlnaXRhbDogZWwgZ2FuY2hvIHNvbG8gZGV0ZWN0YSBzaSBoYXkgY29ycmllbnRlICgxKSBvIG5vIGxhIGhheSAoMCkuIiwgIlVuIHRyZW4gZGUgcHVsc29zIGRlIDI0IFYsIGlndWFsIGFsIHF1ZSBlbnRyZWdhIGVsIGVuY29kZXIuIl19LCB7ImlkIjogInMxMCIsICJxIjogIkVsIGVuY29kZXIgc2UgY29uZWN0YSBhIGxhIGVudHJhZGEgSTAuMCB5IG5vIGEgdW5hIGVudHJhZGEgY3VhbHF1aWVyYSBwb3JxdWU6IiwgIm8iOiBbIkVzIHVuYSBlbnRyYWRhIGRpZ2l0YWwgcsOhcGlkYSBxdWUgdXNhIGVsIGNvbnRhZG9yIEhTQzEgcGFyYSBtZWRpciBtaWxlcyBkZSBwdWxzb3MgcG9yIHNlZ3VuZG8uIiwgIkVzIGxhIMO6bmljYSBlbnRyYWRhIGFuYWzDs2dpY2EgZGVsIFBMQyB5IG1pZGUgbGEgYWx0dXJhIGRlIGNhZGEgcHVsc28uIiwgIlBvciBhaMOtIGVsIFBMQyBsZSBlbnbDrWEgYWwgZW5jb2RlciBsYSBjb25zaWduYSBkZSB2ZWxvY2lkYWQuIl19XQ=="));
+var SBYID={};SIG.forEach(function(q){SBYID[q.id]=q;});
+var NSIG=6;
+
+/* ---------- mediciones ---------- */
+var MEAS=[
+ {id:"m1",t:"Salida analógica hacia el variador (D/A)",
+  how:"El docente pone la consigna en <b>875 rpm</b> desde el HMI: %QW112 = 13824 y la tensión ideal es <b>5.00 V</b>. Mide con el multímetro en VCD entre los bornes 3 (+) y 4 (−) del MICROMASTER 440.",
+  f:[["vm","Tensión medida","V"]],
+  calc:"Error respecto al ideal: (V<sub>medida</sub> − 5.00) / 5.00 × 100. Usa dos decimales.",cu:"%",
+  ans:function(v){return (v.vm-5)/5*100;},tol:0.15,photo:"Foto del multímetro con la lectura"},
+ {id:"m2",t:"Entrada analógica del potenciómetro (A/D)",
+  how:"Con el potenciómetro en la posición que indique el docente, mide con el multímetro la tensión que llega al canal analógico (%IW64) y anota el valor de <code>AI_Pot</code> que se muestra en la tabla de observación.",
+  f:[["vp","Tensión medida","V"],["cnt","AI_Pot leído en el PLC","cuentas"]],
+  calc:"Valor que esperarías leer con tu tensión medida: V × 27648 / 10. Redondea al entero.",cu:"cuentas",
+  ans:function(v){return Math.round(v.vp/10*27648);},tol:3,photo:"Foto del multímetro o de la tabla de observación"},
+ {id:"m3",t:"Corriente de una fase del motor (amperímetro de gancho)",
+  how:"Abraza un solo conductor de fase del motor. Anota la corriente en las dos consignas que indique el docente, con la frecuencia de cada una (Hz en el variador, o la que muestre tu gancho si la mide).",
+  f:[["f1","Frecuencia 1","Hz"],["i1","Corriente 1","A"],["f2","Frecuencia 2","Hz"],["i2","Corriente 2","A"]],
+  calc:"Relación de corrientes I<sub>2</sub> / I<sub>1</sub>. Usa dos decimales.",cu:"",
+  ans:function(v){return v.i2/v.i1;},tol:0.02,photo:"Foto del gancho con una de las lecturas",
+  extra:"¿La corriente cambió en la misma proporción que la frecuencia? Explica en una o dos líneas."},
+ {id:"m4",t:"Frecuencia del encoder y RPM",
+  how:"Con el motor girando a velocidad constante, anota <code>HSC_Frecuencia_Hz</code> (%ID1000) de la tabla de observación y las RPM reales que muestra el HMI. Si tu multímetro mide frecuencia, mide también entre I0.0 y M (opcional).",
+  f:[["hz","%ID1000","Hz"],["rpm","RPM reales en el HMI","rpm"],["hzm","Frecuencia con multímetro (opcional)","Hz"]],
+  calc:"RPM calculadas con tu frecuencia: Hz × 60 / 400. Usa un decimal.",cu:"rpm",
+  ans:function(v){return v.hz*60/400;},tol:0.2,photo:"Foto de la pantalla del HMI o de la tabla",opt:["hzm"]}
+];
+
+/* ---------- componentes ---------- */
+var COMP=[["plc","PLC S7-1214C"],["enc","Encoder incremental"],["mm","Variador MICROMASTER 440"],["ao","Módulo de salida analógica (%QW112)"],["pot","Potenciómetro de la entrada analógica (%IW64)"],["hmi","Pantalla HMI (simulada en la PC)"],["motor","Motor trifásico"],["pb","Botonera (marcha, paro, reset)"],["fuente","Fuente o bornes de 24 V"]];
+var SEN=[["ana","Analógica"],["dig","Digital: niveles lógicos o datos binarios"],["pul","Digital: tren de pulsos"],["mix","Mixta: recibe o entrega analógicas y digitales"],["pot","De potencia, no lleva información"]];
+var CONV=[["ad","A/D"],["da","D/A"],["ambas","A/D y D/A"],["ninguna","Ninguna"]];
+var CKEY={plc:["mix","ambas"],enc:["pul","ninguna"],mm:["mix","ad"],ao:["ana","da"],pot:["ana","ninguna"],hmi:["dig","ninguna"],motor:["pot","ninguna"],pb:["dig","ninguna"],fuente:["pot","ninguna"]};
+var NPHOTO=3;
+
+/* ---------- abiertas ---------- */
+var OPEN=[
+ {id:"o1",q:"Describe el recorrido de la consigna desde que escribes 875 rpm en el HMI hasta que el motor gira. Indica en qué tramos la información es digital y en cuáles es analógica, y en qué equipo ocurre cada conversión.",
+  key:"HMI → Ethernet (digital, Real en DB_HMI) → PLC escala a 13824 (digital, Int) → módulo AO: D/A a ~5 V (analógica) → bornes 3/4 del MM440: su ADC1 la digitaliza (A/D) → el variador genera la frecuencia de salida al motor (potencia). Retorno: encoder (pulsos digitales) → HSC (frecuencia en Hz, DInt) → RPM (Real) → HMI."},
+ {id:"o2",q:"Tu multímetro y tu amperímetro de gancho muestran números en una pantalla. ¿Qué conversión ocurre dentro de ellos? ¿Qué limita cuántos dígitos confiables puedes leer? Relaciónalo con la resolución de un convertidor A/D.",
+  key:"El sensor o divisor entrega una señal analógica que un A/D (en multímetros, típicamente integrador/doble rampa) convierte a número. Los dígitos confiables dependen de la resolución (número de cuentas del convertidor, p. ej. 2000 o 6000), de la exactitud del instrumento y del ruido; más bits o cuentas = paso menor. Paralelo con el PLC: 0–10 V en 27648 cuentas ≈ 0.36 mV por cuenta."}
+];
+
+/* ---------- construcción del examen ---------- */
+function build(control){
+  var seed=hash(control.toUpperCase()+"|"+EXAM.salt),r=rng(seed);
+  var ids=shuffle(BANK.map(function(q){return q.id;}),r).slice(0,EXAM.nMC);
+  var mc=ids.map(function(id){return {id:id,ord:shuffle([0,1,2,3],r),r:null};});
+  var sg=shuffle(SIG.map(function(q){return q.id;}),r).slice(0,NSIG).map(function(id){return {id:id,ord:shuffle(SBYID[id].o.map(function(_,k){return k;}),r),r:null};});
+  return {v:EXAM.ver,exam:EXAM.id,seed:seed,mc:mc,sig:sg,meas:MEAS.map(function(m){var v={};m.f.forEach(function(f){v[f[0]]="";});return {id:m.id,v:v,calc:"",extra:"",img:""};}),
+    ph:Array.apply(null,Array(NPHOTO)).map(function(){return {comp:"",sen:"",conv:"",desc:"",img:""};}),ab:OPEN.map(function(o){return {id:o.id,r:""};})};
+}
+
+/* ---------- estado del alumno ---------- */
+var R=null,PK=null,timer=null;
+function pk(c){return "u4pead:prog:"+c.toUpperCase();}
+function dk(c){return "u4pead:done:"+c.toUpperCase();}
+function save(){if(!R)return;R.saved=new Date().toISOString();if(!st(PK,R))$("#b-miss").hidden=false,$("#b-miss").textContent="No se pudo guardar el avance en este navegador. No recargues la página.";}
+var saveT=null;function saveSoon(){clearTimeout(saveT);saveT=setTimeout(save,400);}
+
+/* ---------- pantalla inicial ---------- */
+var params=new URLSearchParams(location.search);
+var DOCENTE=params.get("docente")===EXAM.key;
+window.addEventListener("pagehide",function(){if(R&&PK){clearTimeout(saveT);save();}});
+document.addEventListener("visibilitychange",function(){if(document.hidden&&R&&PK){clearTimeout(saveT);save();}});
+if(!DOCENTE){
+  $("#s-go").addEventListener("click",function(){
+    var n=$("#s-nombre").value.trim().replace(/\s+/g," "),c=$("#s-control").value.trim().replace(/\s+/g,"").toUpperCase();
+    if(n.length<5){$("#s-err").textContent="Escribe tu nombre completo.";$("#s-nombre").focus();return;}
+    if(!/^[A-Z0-9]{6,12}$/.test(c)){$("#s-err").textContent="El número de control debe tener de 6 a 12 letras o dígitos, sin espacios.";$("#s-control").focus();return;}
+    if(!$("#s-indiv").checked){$("#s-err").textContent="Marca la casilla de respuesta individual.";return;}
+    var done=st(dk(c));
+    if(done){showDone(done,true);return;}
+    PK=pk(c);
+    var prev=st(PK);
+    R=prev&&prev.exam===EXAM.id&&prev.v===EXAM.ver?prev:build(c);
+    R.nombre=n;R.control=c;R.inicio=R.inicio||new Date().toISOString();
+    save();startExam();
+  });
+}
+
+function startExam(){
+  $("#start").hidden=true;$("#exam").hidden=false;$("#bar").hidden=false;
+  $("#who").textContent=R.nombre+" · "+R.control+(R.saved&&R.saved!==R.inicio?" · avance recuperado":"");
+  renderA();renderB();renderC();renderD();renderE();progress();
+  var t0=new Date(R.inicio).getTime();
+  timer=setInterval(function(){var s=Math.floor((Date.now()-t0)/1000);$("#b-time").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");},1000);
+  window.scrollTo(0,0);
+}
+
+function qbox(n,inner,id){return "<div class=\"q\" id=\"q-"+id+"\"><p class=\"stem\"><span class=\"qn\">"+n+".</span>"+inner+"</p>";}
+function renderA(){
+  $("#partA").innerHTML=R.mc.map(function(m,i){var q=BYID[m.id],isFig=q.fig==="opts";
+    var h=qbox(i+1,esc(q.q),m.id)+(q.fig&&!isFig?q.fig:"")+"<div class=\"opts\" role=\"radiogroup\">";
+    h+=m.ord.map(function(o,j){return "<label class=\"opt\"><input type=\"radio\" name=\"mc"+i+"\" value=\""+o+"\""+(m.r===o?" checked":"")+"><span>"+(isFig?q.o[o]:esc(q.o[o]))+"</span></label>";}).join("");
+    return h+"</div></div>";}).join("");
+  R.mc.forEach(function(m,i){$$("input[name=mc"+i+"]").forEach(function(inp){inp.addEventListener("change",function(){m.r=+inp.value;mark("q-"+m.id,true);saveSoon();progress();});});mark("q-"+m.id,m.r!==null);});
+}
+function renderB(){
+  $("#partB").innerHTML=R.sig.map(function(m,i){var q=SBYID[m.id];
+    return qbox(i+1,esc(q.q),m.id)+"<div class=\"opts\" role=\"radiogroup\">"+m.ord.map(function(o){return "<label class=\"opt\"><input type=\"radio\" name=\"sg"+i+"\" value=\""+o+"\""+(m.r===o?" checked":"")+"><span>"+esc(q.o[o])+"</span></label>";}).join("")+"</div></div>";}).join("");
+  R.sig.forEach(function(m,i){$$("input[name=sg"+i+"]").forEach(function(inp){inp.addEventListener("change",function(){m.r=+inp.value;mark("q-"+m.id,true);saveSoon();progress();});});mark("q-"+m.id,m.r!==null);});
+}
+function photoBlock(key,img,label){
+  return "<div class=\"photo\"><div class=\"thumb"+(img?" has":"")+"\" id=\"th-"+key+"\""+(img?" style=\"background-image:url("+img+")\"":"")+">"+esc(label)+"</div><div><label class=\"f\">"+esc(label)+" (JPEG)<input type=\"file\" accept=\"image/jpeg,image/*\" data-img=\""+key+"\"></label><p class=\"err\" id=\"ie-"+key+"\"></p></div></div>";
+}
+function renderC(){
+  $("#partC").innerHTML=R.meas.map(function(x,i){var m=MEAS[i];
+    var h=qbox(i+1,"<b>"+esc(m.t)+".</b> "+m.how,x.id)+"<div class=\"meas\"><div class=\"grid\">";
+    h+=m.f.map(function(f){return "<label class=\"f\">"+esc(f[1])+(f[2]?" ("+f[2]+")":"")+"<input type=\"text\" inputmode=\"decimal\" data-m=\""+i+"\" data-k=\""+f[0]+"\" value=\""+esc(x.v[f[0]])+"\"></label>";}).join("");
+    h+="</div><label class=\"f\"><span>"+m.calc+"</span><span class=\"ans\"><input type=\"text\" inputmode=\"decimal\" data-m=\""+i+"\" data-k=\"__calc\" value=\""+esc(x.calc)+"\"><span class=\"u\">"+m.cu+"</span></span></label>";
+    if(m.extra)h+="<label class=\"f\">"+esc(m.extra)+"<textarea data-m=\""+i+"\" data-k=\"__extra\" style=\"min-height:70px\">"+esc(x.extra)+"</textarea></label>";
+    h+=photoBlock("m"+i,x.img,m.photo)+"</div></div>";return h;}).join("");
+  $$("#partC [data-m]").forEach(function(inp){inp.addEventListener("input",function(){var x=R.meas[+inp.dataset.m],k=inp.dataset.k;
+    if(k==="__calc")x.calc=inp.value.trim();else if(k==="__extra")x.extra=inp.value;else x.v[k]=inp.value.trim();
+    mark("q-"+x.id,measDone(+inp.dataset.m));saveSoon();progress();});});
+  R.meas.forEach(function(x,i){mark("q-"+x.id,measDone(i));});
+}
+function measDone(i){var x=R.meas[i],m=MEAS[i];var ok=m.f.every(function(f){return (m.opt&&m.opt.indexOf(f[0])>=0)||x.v[f[0]]!=="";});return ok&&x.calc!==""&&!!x.img&&(!m.extra||x.extra.trim()!=="");}
+function sel(name,opts,val,i){return "<select data-p=\""+i+"\" data-k=\""+name+"\"><option value=\"\">Elige…</option>"+opts.map(function(o){return "<option value=\""+o[0]+"\""+(val===o[0]?" selected":"")+">"+esc(o[1])+"</option>";}).join("")+"</select>";}
+function renderD(){
+  $("#partD").innerHTML=R.ph.map(function(x,i){
+    return "<div class=\"q\" id=\"q-ph"+i+"\"><p class=\"stem\"><span class=\"qn\">"+(i+1)+".</span>Componente "+(i+1)+"</p>"+
+     photoBlock("p"+i,x.img,"Foto del componente")+
+     "<div class=\"meas\"><div class=\"grid\"><label class=\"f\">¿Qué componente es?"+sel("comp",COMP,x.comp,i)+"</label><label class=\"f\">Tipo de señal que maneja"+sel("sen",SEN,x.sen,i)+"</label><label class=\"f\">Conversión que realiza"+sel("conv",CONV,x.conv,i)+"</label></div>"+
+     "<label class=\"f\">¿Qué señal le entra y qué señal sale de él? Sé concreto (bornes, rangos, tipo de dato).<textarea data-p=\""+i+"\" data-k=\"desc\" style=\"min-height:80px\">"+esc(x.desc)+"</textarea></label>"+
+     "<p class=\"err\" id=\"pe-"+i+"\"></p></div></div>";}).join("");
+  $$("#partD [data-p]").forEach(function(inp){var h=function(){var x=R.ph[+inp.dataset.p];x[inp.dataset.k]=inp.value;dupCheck();mark("q-ph"+inp.dataset.p,phDone(+inp.dataset.p));saveSoon();progress();};inp.addEventListener("input",h);inp.addEventListener("change",h);});
+  R.ph.forEach(function(x,i){mark("q-ph"+i,phDone(i));});dupCheck();
+}
+function phDone(i){var x=R.ph[i];return !!(x.img&&x.comp&&x.sen&&x.conv&&x.desc.trim());}
+function dupCheck(){var seen={};R.ph.forEach(function(x,i){var e=$("#pe-"+i);if(!e)return;if(x.comp&&seen[x.comp]!==undefined)e.textContent="Ya elegiste este componente; fotografía uno distinto.";else e.textContent="";if(x.comp)seen[x.comp]=i;});}
+function renderE(){
+  $("#partE").innerHTML=R.ab.map(function(x,i){return qbox(i+1,esc(OPEN[i].q),x.id)+"<textarea data-a=\""+i+"\" aria-label=\"Respuesta abierta "+(i+1)+"\">"+esc(x.r)+"</textarea><p class=\"hint\" id=\"ac-"+i+"\"></p></div>";}).join("");
+  $$("#partE textarea").forEach(function(t){var i=+t.dataset.a,cnt=function(){var w=R.ab[i].r.trim().split(/\s+/).filter(Boolean).length;$("#ac-"+i).textContent=w+" palabras";};
+    mark("q-"+R.ab[i].id,R.ab[i].r.trim()!=="");cnt();t.addEventListener("input",function(){R.ab[i].r=t.value;mark("q-"+R.ab[i].id,t.value.trim()!=="");cnt();saveSoon();progress();});});
+}
+function mark(id,on){var e=document.getElementById(id);if(e)e.classList.toggle("answered",!!on);}
+
+/* imágenes: se convierten a JPEG de 1024 px como máximo */
+document.addEventListener("change",function(e){
+  var inp=e.target;if(!inp.dataset||!inp.dataset.img)return;var key=inp.dataset.img,file=inp.files&&inp.files[0];if(!file)return;
+  var err=$("#ie-"+key);err.textContent="Procesando…";
+  var url=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){var mx=1024,w=im.naturalWidth,h=im.naturalHeight,s=Math.min(1,mx/Math.max(w,h));
+    var c=document.createElement("canvas");c.width=Math.round(w*s);c.height=Math.round(h*s);var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+    var d=c.toDataURL("image/jpeg",0.72);URL.revokeObjectURL(url);
+    if(key.charAt(0)==="m"){var i=+key.slice(1);R.meas[i].img=d;mark("q-"+R.meas[i].id,measDone(i));}else{var j=+key.slice(1);R.ph[j].img=d;mark("q-ph"+j,phDone(j));}
+    var th=$("#th-"+key);th.style.backgroundImage="url("+d+")";th.classList.add("has");err.textContent="";save();progress();};
+  im.onerror=function(){URL.revokeObjectURL(url);err.textContent="No se pudo abrir la imagen. Usa una foto JPEG.";};
+  im.src=url;
+});
+
+/* progreso y entrega */
+function items(){
+  var L=[];R.mc.forEach(function(m,i){L.push(["A"+(i+1),m.r!==null]);});R.sig.forEach(function(x,i){L.push(["B"+(i+1),x.r!==null]);});
+  R.meas.forEach(function(x,i){L.push(["C"+(i+1),measDone(i)]);});R.ph.forEach(function(x,i){L.push(["D"+(i+1),phDone(i)]);});R.ab.forEach(function(x,i){L.push(["E"+(i+1),x.r.trim()!==""]);});return L;}
+function progress(){var L=items(),n=L.filter(function(x){return x[1];}).length;$("#b-prog").textContent=n+" de "+L.length+" respondidos";resetSubmit();}
+var armed=false;
+function resetSubmit(){if(armed){armed=false;var b=$("#b-submit");b.textContent="Revisar y entregar";b.classList.remove("confirm");$("#b-miss").hidden=true;}}
+$("#b-submit").addEventListener("click",function(){
+  var b=$("#b-submit");
+  if(!armed){var miss=items().filter(function(x){return !x[1];}).map(function(x){return x[0];});
+    armed=true;b.textContent="Confirmar entrega";b.classList.add("confirm");
+    $("#b-miss").hidden=false;$("#b-miss").textContent=miss.length?"Te faltan: "+miss.join(", ")+". Si entregas ahora, esos reactivos valen 0. Después de entregar no podrás cambiar nada.":"Todo respondido. Después de entregar no podrás cambiar nada.";return;}
+  submit();
+});
+function sumOf(o){var c=JSON.parse(JSON.stringify(o));delete c.sum;return hash(JSON.stringify(c)+"|"+EXAM.salt).toString(36);}
+function submit(){
+  R.fin=new Date().toISOString();R.ua=navigator.userAgent;delete R.saved;R.sum=sumOf(R);
+  var done={control:R.control,nombre:R.nombre,fin:R.fin,file:fileName(R),data:R};
+  if(!st(dk(R.control),done)){done.data=R;}   // aunque no se guarde, se descarga
+  st(PK,null);clearInterval(timer);
+  showDone(done,false);
+}
+function fileName(r){return "U4_PEAD_"+r.control+"_"+r.nombre.split(" ")[0].normalize("NFD").replace(/[^A-Za-z]/g,"")+".json";}
+var lastDone=null;
+function showDone(done,already){
+  lastDone=done;$("#start").hidden=true;$("#exam").hidden=true;$("#bar").hidden=true;$("#done").hidden=false;
+  $("#done-msg").innerHTML=(already?"Este número de control ya entregó el examen en este navegador. ":"")+"Tu archivo de respuestas es <b class=\"mono\">"+esc(done.file)+"</b>.";
+  if(!already)download(done);
+  window.scrollTo(0,0);
+}
+function download(done){
+  try{var blob=new Blob([JSON.stringify(done.data)],{type:"application/json"}),u=URL.createObjectURL(blob),a=$("#d-link");
+    a.href=u;a.download=done.file;a.textContent="Si no se descargó, toca aquí: "+done.file;a.hidden=false;
+    var t=document.createElement("a");t.href=u;t.download=done.file;document.body.appendChild(t);t.click();t.remove();}
+  catch(e){$("#d-err").textContent="El navegador no permitió la descarga. Pide ayuda a tu docente antes de cerrar esta página.";}
+}
+$("#d-again").addEventListener("click",function(){if(lastDone&&lastDone.data)download(lastDone);});
+
+/* ===================== DOCENTE ===================== */
+function gradeAll(d,tg){
+  tg=tg||{};
+  var A=d.mc.reduce(function(s,m){return s+(m.r===0?2:0);},0);
+  var B=(d.sig||[]).reduce(function(s,m){return s+(m.r===0?4:0);},0);
+  var C=0,cAuto=[];d.meas.forEach(function(x,i){var m=MEAS[i],v={},ok=true;m.f.forEach(function(f){v[f[0]]=num(x.v[f[0]]);});
+    var need=m.f.filter(function(f){return !(m.opt&&m.opt.indexOf(f[0])>=0);});ok=need.every(function(f){return !isNaN(v[f[0]]);});
+    var exp=ok?m.ans(v):NaN,c=num(x.calc),a=ok&&isFinite(exp)&&!isNaN(c)&&Math.abs(c-exp)<=m.tol+1e-9;cAuto.push({exp:exp,ok:a});
+    C+=(a?3:0)+((tg.meas&&tg.meas[i])||0);});
+  var D=0,dAuto=[];d.ph.forEach(function(x,i){var k=CKEY[x.comp],s=!!(k&&x.sen===k[0]),c=!!(k&&x.conv===k[1]);var o=(tg.ph&&tg.ph[i])||{};
+    var sp=o.sen!==undefined?o.sen:(s?1:0),cp=o.conv!==undefined?o.conv:(c?1:0);dAuto.push({s:s,c:c,sp:sp,cp:cp});D+=sp+cp+(o.foto||0)+(o.desc||0);});
+  var E=(tg.ab||[]).reduce(function(s,v){return s+(v||0);},0);
+  var df=function(v){return v!==undefined&&v!==null;};
+  var pend=!([0,1,2,3].every(function(i){return tg.meas&&df(tg.meas[i]);})&&[0,1,2].every(function(i){return tg.ph&&tg.ph[i]&&df(tg.ph[i].foto)&&df(tg.ph[i].desc);})&&[0,1].every(function(i){return tg.ab&&df(tg.ab[i]);}));
+  return {A:A,B:B,C:C,D:D,E:E,T:A+B+C+D+E,cAuto:cAuto,dAuto:dAuto,pend:pend};
+}
+var SUB={},CUR=null;
+function tk(c){return "u4pead:doc:"+c;}
+function initTeacher(){
+  document.title="Calificar · Examen Unidad 4 PEAD";
+  $("#start").hidden=true;$("#teacher").hidden=false;$("#docband").hidden=false;
+  if(params.get("reset")==="1"){var n=resetAttempts();$("#t-msg").textContent="Se borraron "+n+" intentos y avances de alumnos en este navegador.";}
+  $("#t-files").addEventListener("change",function(e){loadFiles(e.target.files);e.target.value="";});
+  var dz=$("#drop");["dragover","dragenter"].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();});});
+  dz.addEventListener("drop",function(e){e.preventDefault();loadFiles(e.dataTransfer.files);});
+  $("#t-copy").addEventListener("click",function(){var t=table("\t");try{navigator.clipboard.writeText(t).then(function(){$("#t-msg").textContent="Tabla copiada. Pégala en Excel.";},function(){$("#t-msg").textContent="No se pudo copiar; usa Descargar CSV.";});}catch(e){$("#t-msg").textContent="No se pudo copiar; usa Descargar CSV.";}});
+  $("#t-csv").addEventListener("click",function(){try{var b=new Blob(["﻿"+table(",")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="Examen_U4_PEAD_calificaciones.csv";document.body.appendChild(a);a.click();a.remove();}catch(e){$("#t-msg").textContent="Este visor no permite descargas; usa Copiar tabla.";}});
+  var rb=$("#t-reset");rb.addEventListener("click",function(){if(!rb.dataset.armed){rb.dataset.armed="1";rb.textContent="Pulsa otra vez para borrar los intentos";setTimeout(function(){delete rb.dataset.armed;rb.textContent="Borrar intentos de alumnos en este navegador";},4000);return;}
+    delete rb.dataset.armed;rb.textContent="Borrar intentos de alumnos en este navegador";var n=resetAttempts();$("#t-msg").textContent="Se borraron "+n+" intentos y avances de alumnos en este navegador.";});
+  renderList();
+}
+function resetAttempts(){var n=0;try{for(var i=localStorage.length-1;i>=0;i--){var k=localStorage.key(i);if(/^u4pead:(prog|done):/.test(k)){localStorage.removeItem(k);n++;}}}catch(e){}return n;}
+function loadFiles(files){
+  Array.prototype.forEach.call(files,function(f){var rd=new FileReader();rd.onload=function(){try{var d=JSON.parse(rd.result);
+    if(d.exam!==EXAM.id||!d.control)throw new Error("no es un archivo de este examen");
+    if(d.v!==EXAM.ver)throw new Error("es de una versión anterior del examen");
+    d._ok=d.sum===sumOf(d);
+    var exp=build(d.control);var sig=function(o){return JSON.stringify(o.mc.concat(o.sig).map(function(m){return m.id+m.ord;}));};d._seed=exp.seed===d.seed&&sig(exp)===sig(d);
+    SUB[d.control]=d;renderList();}catch(e){$("#t-err").textContent=f.name+": "+e.message+".";}};rd.readAsText(f);});
+}
+function tget(c){return st(tk(c))||{meas:[],ph:[{},{},{}],ab:[]};}
+function renderList(){
+  var keys=Object.keys(SUB).sort();$("#t-count").textContent=keys.length+(keys.length===1?" archivo":" archivos");
+  $("#t-list tbody").innerHTML=keys.map(function(c){var d=SUB[c],g=gradeAll(d,tget(c));
+    return "<tr data-c=\""+esc(c)+"\""+(CUR===c?" class=\"sel\"":"")+" style=\"cursor:pointer\"><td class=\"mono\">"+esc(c)+"</td><td>"+esc(d.nombre)+"</td><td class=\"n\">"+g.A+"</td><td class=\"n\">"+g.B+"</td><td class=\"n\">"+g.C+"</td><td class=\"n\">"+g.D+"</td><td class=\"n\">"+g.E+"</td><td class=\"n\"><b>"+g.T+"</b></td><td>"+
+      (!d._ok?"<span class=\"bad\">archivo modificado</span> ":"")+(!d._seed?"<span class=\"bad\">reactivos no coinciden</span> ":"")+(g.pend?"<span class=\"pend\">falta revisión</span>":"<span class=\"ok\">completo</span>")+"</td></tr>";}).join("");
+  $$("#t-list tbody tr").forEach(function(tr){tr.addEventListener("click",function(){CUR=tr.dataset.c;renderList();renderDetail();});});
+}
+function sc(name,max,val){var o="";for(var v=0;v<=max;v++)o+="<option value=\""+v+"\""+(val===v?" selected":"")+">"+v+"</option>";return "<select class=\"score\" data-s=\""+name+"\"><option value=\"\""+(val===undefined||val===null?" selected":"")+">—</option>"+o+"</select>";}
+function lbl(list,v){for(var i=0;i<list.length;i++)if(list[i][0]===v)return list[i][1];return "(sin respuesta)";}
+function renderDetail(){
+  var d=SUB[CUR];if(!d){$("#t-detail").innerHTML="";return;}var tg=tget(CUR),g=gradeAll(d,tg);
+  var h="<div class=\"part-head\"><h2>"+esc(d.nombre)+" <span class=\"mono\" style=\"font-size:18px\">"+esc(d.control)+"</span></h2><span class=\"pts\">Total "+g.T+" / 100</span></div>";
+  h+="<p class=\"hint\">Inicio "+new Date(d.inicio).toLocaleString("es-MX")+" · entrega "+new Date(d.fin).toLocaleString("es-MX")+(d._ok?"":" · <span class=\"bad\">la suma de verificación no coincide: el archivo fue editado</span>")+"</p>";
+  h+="<h3>A. Opción múltiple: "+g.A+" / 24</h3>";
+  h+=d.mc.map(function(m,i){var q=BYID[m.id],fig=q.fig==="opts";var resp=m.r===null?"(sin respuesta)":(fig?q.o[m.r]:esc(q.o[m.r]));
+    return "<div class=\"dq\"><b>"+(i+1)+".</b> "+esc(q.q)+"<div class=\"k\">Respondió: "+(m.r===0?"<span class=\"ok\">correcta</span>":"<span class=\"bad\">incorrecta</span>")+" — "+resp+(m.r!==0?"<br>Correcta: "+(fig?q.o[0]:esc(q.o[0])):"")+"</div></div>";}).join("");
+  h+="<h3>B. Señales en la práctica: "+g.B+" / 24</h3>";
+  h+=d.sig.map(function(m,i){var q=SBYID[m.id];
+    return "<div class=\"dq\"><b>"+(i+1)+".</b> "+esc(q.q)+"<div class=\"k\">Respondió: "+(m.r===0?"<span class=\"ok\">correcta</span>":"<span class=\"bad\">incorrecta</span>")+" — "+(m.r===null?"(sin respuesta)":esc(q.o[m.r]))+(m.r!==0?"<br>Correcta: "+esc(q.o[0]):"")+"</div></div>";}).join("");
+  h+="<h3>C. Mediciones: "+g.C+" / 20</h3><p class=\"hint\">El cálculo (3 pts) se revisa con el valor que el alumno midió. Tú calificas si la foto y los valores son plausibles (0–2).</p>";
+  h+=d.meas.map(function(x,i){var m=MEAS[i],a=g.cAuto[i];
+    return "<div class=\"dq\"><b>"+(i+1)+". "+esc(m.t)+"</b><div class=\"k\">"+m.f.map(function(f){return esc(f[1])+": <b class=\"mono\">"+esc(x.v[f[0]]||"—")+"</b> "+f[2];}).join(" · ")+"</div>"+
+      "<div class=\"k\">Cálculo: <b class=\"mono\">"+esc(x.calc||"—")+"</b> · con sus datos debía dar <b class=\"mono\">"+(isFinite(a.exp)?fx(a.exp,2):"no calculable")+"</b> · "+(a.ok?"<span class=\"ok\">3</span>":"<span class=\"bad\">0</span>")+"</div>"+
+      (m.extra?"<div class=\"k\">Explicación: "+esc(x.extra||"—")+"</div>":"")+
+      (x.img?"<img src=\""+x.img+"\" alt=\"Foto de la medición "+(i+1)+"\">":"<p class=\"bad\">Sin foto</p>")+
+      "<label class=\"k\">Foto y valores plausibles (0–2) "+sc("meas."+i,2,tg.meas[i])+"</label></div>";}).join("");
+  h+="<h3>D. Componentes: "+g.D+" / 18</h3><p class=\"hint\">Señal y conversión se sugieren con la clave; puedes corregirlas. Foto (0–2): corresponde al componente elegido. Descripción (0–2): señales de entrada y salida correctas.</p>";
+  h+=d.ph.map(function(x,i){var k=CKEY[x.comp],a=g.dAuto[i],o=tg.ph[i]||{};
+    return "<div class=\"dq\"><b>"+(i+1)+". "+esc(lbl(COMP,x.comp))+"</b>"+(x.img?"<img src=\""+x.img+"\" alt=\"Foto del componente "+(i+1)+"\">":"<p class=\"bad\">Sin foto</p>")+
+      "<div class=\"k\">Señal: "+esc(lbl(SEN,x.sen))+(k?" · clave: "+esc(lbl(SEN,k[0])):"")+" · "+sc("ph."+i+".sen",1,a.sp)+"</div>"+
+      "<div class=\"k\">Conversión: "+esc(lbl(CONV,x.conv))+(k?" · clave: "+esc(lbl(CONV,k[1])):"")+" · "+sc("ph."+i+".conv",1,a.cp)+"</div>"+
+      "<div class=\"k\">Descripción: "+esc(x.desc||"—")+"</div>"+
+      "<div class=\"k\">Foto "+sc("ph."+i+".foto",2,o.foto)+" · Descripción "+sc("ph."+i+".desc",2,o.desc)+"</div></div>";}).join("");
+  h+="<h3>E. Abiertas: "+g.E+" / 14</h3>";
+  h+=d.ab.map(function(x,i){return "<div class=\"dq\"><b>"+(i+1)+".</b> "+esc(OPEN[i].q)+"<p style=\"white-space:pre-wrap\">"+esc(x.r||"—")+"</p><div class=\"k\"><b>Clave orientativa:</b> "+esc(OPEN[i].key)+"</div><label class=\"k\">Puntos (0–7) "+sc("ab."+i,7,tg.ab[i])+"</label></div>";}).join("");
+  $("#t-detail").innerHTML=h;
+  $$("#t-detail select.score").forEach(function(s){s.addEventListener("change",function(){var t=tget(CUR),p=s.dataset.s.split("."),v=s.value===""?undefined:+s.value;
+    if(p[0]==="meas")t.meas[+p[1]]=v;else if(p[0]==="ab")t.ab[+p[1]]=v;else{t.ph[+p[1]]=t.ph[+p[1]]||{};t.ph[+p[1]][p[2]]=v;}
+    st(tk(CUR),t);renderList();var y=window.scrollY,id=s.dataset.s;renderDetail();window.scrollTo(0,y);var n=document.querySelector("#t-detail select[data-s=\""+id+"\"]");if(n)n.focus();});});
+}
+function table(sep){
+  var q=function(v){v=String(v);return sep===","&&/[",\n]/.test(v)?"\""+v.replace(/"/g,"\"\"")+"\"":v;};
+  var rows=[["Control","Nombre","A (24)","B (24)","C (20)","D (18)","E (14)","Total","Estado"].join(sep)];
+  Object.keys(SUB).sort().forEach(function(c){var d=SUB[c],g=gradeAll(d,tget(c));rows.push([c,d.nombre,g.A,g.B,g.C,g.D,g.E,g.T,(d._ok?"":"modificado ")+(g.pend?"falta revisión":"completo")].map(q).join(sep));});
+  return rows.join("\n");
+}
+if(DOCENTE)initTeacher();
+})();
+
+</script>
+</body>
+</html>
