@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Práctica 2 · MICROMASTER 440 con S7-1214C y TP700</title>
+<meta name="description" content="Práctica 2: cableado de 24 V, programa LAD, HSC del encoder y HMI TP700 para un MICROMASTER 440 con S7-1214C. TecNM Campus Culiacán.">
+<style>
+:root{
+  --plate:#E3E6E1;      /* placa galvanizada */
+  --plate-2:#D3D8D1;
+  --paper:#F4F6F3;
+  --ink:#23282C;        /* grafito */
+  --ink-2:#4B545A;
+  --line:#B4BBB3;
+  --line-2:#9AA29A;
+  --cpu:#00646E;        /* petróleo: fuente de la CPU */
+  --cpu-tint:#D2E5E4;
+  --mm:#C77700;         /* ámbar: fuente del MM440 */
+  --mm-ink:#8A5100;
+  --mm-tint:#F1E1C6;
+  --sig:#2E7D3A;        /* verde señal */
+  --sig-tint:#D5E7D3;
+  --alert:#B3261E;
+  --alert-tint:#F3D9D5;
+  --hmi:#17284A;        /* azul marino del TP700 */
+  --f-label:"Bahnschrift","DIN Alternate","DIN Next LT Pro","Roboto Condensed","Arial Narrow",sans-serif;
+  --f-text:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,"DejaVu Sans Mono",monospace;
+  --nav-w:178px;
+  --r:4px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--plate);color:var(--ink);font:17px/1.55 var(--f-text)}
+a{color:var(--cpu);text-underline-offset:2px}
+a:hover{color:var(--ink)}
+:focus-visible{outline:3px solid var(--cpu);outline-offset:2px;border-radius:2px}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+code{background:rgba(255,255,255,.55);padding:.05em .3em;border-radius:3px;white-space:nowrap}
+h1,h2,h3,h4{font-family:var(--f-label);font-weight:600;line-height:1.12;margin:0;letter-spacing:-.005em}
+h2{font-size:clamp(28px,3.4vw,36px)}
+h3{font-size:21px;margin-top:2.2rem}
+h4{font-size:17px;margin-top:1.4rem}
+p{margin:.7rem 0;max-width:68ch}
+ul,ol{max-width:68ch;padding-left:1.3rem}
+li{margin:.3rem 0}
+.skip{position:absolute;left:-999px;top:0;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:20}
+.skip:focus{left:8px;top:8px}
+
+/* ---------- regleta de bornes (navegación) ---------- */
+.shell{display:grid;grid-template-columns:var(--nav-w) minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;padding:20px 0 20px 18px;display:flex;flex-direction:column;gap:2px;
+  background:linear-gradient(90deg,transparent 0 18px,#C3C9C2 18px 22px,transparent 22px)}
+.rail-title{font-family:var(--f-label);font-size:13px;color:var(--ink-2);margin:0 0 10px 12px;line-height:1.3}
+.rail a{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:9px;text-decoration:none;color:var(--ink);
+  background:#CDD2CB;border:1px solid #AEB5AD;border-right:0;padding:8px 10px 8px 6px;border-radius:3px 0 0 3px;
+  font-family:var(--f-label);font-size:15px;line-height:1.15;position:relative}
+.rail a:hover{background:#D9DDD6}
+.rail a .scr{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#F5F6F4,#AEB4AD 70%);
+  border:1px solid #8E968D;display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--ink)}
+.rail a[aria-current="true"]{background:var(--paper);border-color:var(--line-2)}
+.rail a[aria-current="true"]::after{content:"";position:absolute;right:0;top:6px;bottom:6px;width:4px;background:var(--cpu)}
+.rail a.hero-link .scr{background:radial-gradient(circle at 40% 35%,#E9F3EA,#8FB794 70%);border-color:#5E8A64}
+.rail-foot{margin-top:auto;font-size:12.5px;color:var(--ink-2);padding:0 10px 0 12px;line-height:1.35}
+
+main{padding:0 clamp(18px,4vw,56px) 80px;max-width:1120px;min-width:0}
+
+/* ---------- encabezado institucional ---------- */
+.mast{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px 40px;padding:22px 0 18px;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--ink-2)}
+.mast-inst{font-family:var(--f-label);font-size:16px;color:var(--ink);line-height:1.3}
+.mast dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 14px;margin:0}
+.mast dt{color:var(--ink-2)}
+.mast dd{margin:0;color:var(--ink)}
+
+/* ---------- héroe: cadena de referencia ---------- */
+.hero{padding:44px 0 30px}
+.practice{font-family:var(--f-label);font-size:17px;color:var(--ink-2);margin:0 0 12px}
+.hero h1{font-size:clamp(46px,7.4vw,84px);font-weight:700;font-stretch:condensed;letter-spacing:-.02em;line-height:.95}
+.hero h1 .arrow{color:var(--sig)}
+.lede{font-size:19px;max-width:58ch;margin-top:16px}
+.controls{display:flex;flex-wrap:wrap;gap:18px 34px;align-items:flex-end;margin:28px 0 22px;padding:16px 18px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r)}
+.ctl{display:flex;flex-direction:column;gap:6px;min-width:220px}
+.ctl > span,.ctl legend{font-family:var(--f-label);font-size:15px;color:var(--ink-2);padding:0}
+fieldset.ctl{border:0;margin:0;padding:0}
+.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;background:#fff}
+.seg label{position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0}
+.seg label span{display:block;padding:7px 14px;font-family:var(--f-label);font-size:15px}
+.seg input:checked + span{background:var(--ink);color:#fff}
+.seg input:focus-visible + span{outline:3px solid var(--cpu);outline-offset:-3px}
+.rangebox{display:flex;align-items:center;gap:10px}
+.rangebox input[type=range]{width:200px;accent-color:var(--sig)}
+.rangebox input[type=number]{width:96px}
+input[type=number],input[type=text],select{font:inherit;font-family:var(--f-mono);font-size:15px;padding:5px 7px;border:1px solid var(--line-2);border-radius:3px;background:#fff;color:var(--ink)}
+.hint{font-size:13.5px;color:var(--ink-2);margin:0}
+
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.05fr);gap:16px 22px;align-items:stretch}
+.branch{display:contents}
+.node{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:9px 11px 10px;display:flex;flex-direction:column;gap:1px;min-width:0;transition:opacity .25s}
+.node::after{content:"";position:absolute;top:50%;right:-23px;width:22px;height:3px;background:var(--sig);transform:translateY(-50%)}
+.node .net{font-family:var(--f-label);font-size:13.5px;color:var(--ink-2)}
+.node .ins{font-family:var(--f-label);font-size:15.5px;font-weight:600}
+.node output{font-family:var(--f-mono);font-size:22px;font-weight:600;line-height:1.25;margin-top:4px;font-variant-numeric:tabular-nums}
+.node .var{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);overflow-wrap:anywhere}
+.node.src{background:#fff;border-style:dashed}
+.node.clamped output{color:var(--mm-ink)}
+.node .flag{font-size:12px;color:var(--mm-ink);min-height:1em}
+.idle .node{opacity:.42}
+.idle .node::after{background:var(--line-2)}
+.node.sel{grid-column:5;grid-row:1 / span 2;justify-content:center;border:2px solid var(--ink)}
+.node.sel::after{display:none}
+.node.sel .g{font-family:var(--f-mono);font-size:13.5px;margin-top:6px}
+#br-pot .node:last-child::after,#br-hmi .node:last-child::after{width:22px}
+.outrow{grid-column:1 / -1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px 22px;position:relative;margin-top:14px}
+.outrow::before{content:"";position:absolute;right:10%;top:-30px;height:19px;border-right:3px solid var(--sig)}
+.outrow::after{content:"";position:absolute;left:10%;right:10%;top:-14px;height:14px;border-top:3px solid var(--sig);border-left:3px solid var(--sig);border-top-left-radius:4px;margin-right:-3px}
+.outrow .node:last-child::after{display:none}
+.node.dest{background:#fff;border-color:var(--ink)}
+.node.dest output{font-size:26px}
+.node.mm{border-color:var(--mm)}
+.chain-foot{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:18px;font-size:14.5px;color:var(--ink-2)}
+.chain-foot strong{color:var(--ink);font-family:var(--f-mono);font-weight:600}
+
+/* ---------- secciones ---------- */
+section.part{padding:56px 0 8px;scroll-margin-top:12px}
+.duct{height:22px;margin:0;border:0;background:
+  repeating-linear-gradient(90deg,#C4CAC3 0 14px,#B3BAB2 14px 17px);border-radius:2px;opacity:.85;
+  -webkit-mask:linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0)}
+.part-head{display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:start;margin-bottom:10px}
+.part-head .scr{width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#F7F8F6,#A9B0A8 72%);border:1px solid #858D84;
+  display:grid;place-items:center;font-family:var(--f-label);font-weight:700;font-size:22px}
+.part-head p{margin:.35rem 0 0;color:var(--ink-2);font-size:18px}
+
+table{border-collapse:collapse;width:100%;margin:12px 0 6px;font-size:15px;background:var(--paper);border:1px solid var(--line)}
+th,td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid #CFD4CD}
+th{font-family:var(--f-label);font-weight:600;font-size:14.5px;background:var(--plate-2);color:var(--ink)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto;margin:0 0 6px}
+.tw table{min-width:560px}
+caption{caption-side:top;text-align:left;font-family:var(--f-label);font-size:15px;color:var(--ink-2);padding:0 0 6px}
+
+.warn,.note{border-left:4px solid var(--alert);background:var(--alert-tint);padding:10px 14px;margin:16px 0;border-radius:0 var(--r) var(--r) 0;max-width:76ch}
+.warn p,.note p{margin:.3rem 0}
+.note{border-left-color:var(--line-2);background:var(--paper)}
+.warn strong{color:var(--alert)}
+.src-cpu{color:var(--cpu);font-weight:600}
+.src-mm{color:var(--mm-ink);font-weight:600}
+.sw{display:inline-block;width:.8em;height:.8em;border-radius:50%;vertical-align:-.05em;margin-right:.3em;border:1px solid rgba(0,0,0,.25)}
+
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- cableado ---------- */
+.wiring{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-top:16px}
+.wiring figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:8px;overflow-x:auto}
+.wiring svg{display:block;width:100%;min-width:640px;height:auto}
+.wire-info{order:-1;position:sticky;top:8px;z-index:5;background:var(--paper);border:1px solid var(--line-2);border-radius:var(--r);padding:10px 16px;font-size:15px;box-shadow:0 2px 0 rgba(35,40,44,.08);min-height:76px}
+.wire-info p{margin:.2rem 0}
+.wire-info h4{margin:0 0 4px;font-size:18px}
+.wire-info dl{margin:4px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);gap:3px 12px}
+@media (max-width:760px){.wire-info dl{grid-template-columns:auto 1fr}}
+.wire-info dt{color:var(--ink-2)}
+.wire-info dd{margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;margin:10px 0 0}
+.legend i{display:inline-block;width:22px;height:4px;vertical-align:middle;margin-right:6px;border-radius:2px}
+svg .term text,svg text{font-family:var(--f-label)}
+svg .w{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+svg .w.cpu{stroke:var(--cpu)}
+svg .w.cpu0{stroke:var(--cpu);stroke-dasharray:7 4}
+svg .w.mm{stroke:var(--mm)}
+svg .w.sig{stroke:var(--sig)}
+svg .w.ao{stroke:#6B7470}
+svg .w.old{stroke:var(--mm);stroke-dasharray:3 5}
+svg .hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer;pointer-events:stroke}
+svg g.wire:hover .w,svg g.wire:focus .w,svg g.wire.on .w{stroke-width:5.5}
+svg g.wire:focus{outline:none}
+svg g.wire:focus-visible .hit{stroke:rgba(0,100,110,.18)}
+svg .old-only{display:none}
+.show-old svg .old-only{display:inline}
+.show-old svg .new-only{display:none}
+
+/* ---------- balance ---------- */
+.meter{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.meter h3{margin:0 0 4px}
+.meter .cap{font-size:14.5px;color:var(--ink-2);margin:0 0 10px}
+.bar{position:relative;height:30px;background:#fff;border:1px solid var(--line-2);border-radius:3px;display:flex;overflow:hidden}
+.bar span{height:100%;transition:width .2s}
+.bar .pend{background:repeating-linear-gradient(135deg,#fff 0 6px,#E6E9E5 6px 12px)}
+.bar-scale{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);font-family:var(--f-mono);margin-top:3px}
+.readout{display:flex;flex-wrap:wrap;gap:4px 22px;margin:10px 0 4px;font-size:15px}
+.readout b{font-family:var(--f-mono);font-size:19px}
+.chk{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:center;font-size:15px;margin:10px 0}
+.chk label{display:contents;cursor:pointer}
+.chk .ma{font-family:var(--f-mono);font-size:14px;color:var(--ink-2);text-align:right}
+.fields{display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;font-size:15px;margin:10px 0}
+.fields input{width:110px}
+.fields input:placeholder-shown{background:repeating-linear-gradient(135deg,#fff 0 6px,#EEF0ED 6px 12px)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+button,.btn{font:inherit;font-family:var(--f-label);font-size:15px;padding:6px 13px;border:1px solid var(--line-2);background:#fff;color:var(--ink);border-radius:3px;cursor:pointer}
+button:hover{background:#EEF1ED}
+button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:15px;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--cpu)}
+.status-ok{color:var(--sig);font-weight:600}
+.status-bad{color:var(--alert);font-weight:600}
+.status-pend{color:var(--mm-ink);font-weight:600}
+
+/* ---------- LAD ---------- */
+details.net{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);margin:8px 0}
+details.net > summary{cursor:pointer;padding:9px 14px;font-family:var(--f-label);font-size:16.5px;list-style:none;display:flex;gap:12px;align-items:baseline}
+details.net > summary::-webkit-details-marker{display:none}
+details.net > summary::before{content:"+";font-family:var(--f-mono);color:var(--ink-2);width:1ch}
+details.net[open] > summary::before{content:"−"}
+details.net > summary .n{font-family:var(--f-mono);font-size:14px;color:var(--ink-2);min-width:6.5ch}
+.net-body{padding:0 14px 12px}
+.net-body p{font-size:15px;margin:.2rem 0 .6rem}
+.lad{overflow-x:auto;background:#fff;border:1px solid #D6DAD4;border-radius:3px}
+.lad svg{display:block;height:auto}
+.lad text{font-family:var(--f-mono);font-size:12px;fill:var(--ink)}
+.lad .t-ins{font-family:var(--f-label);font-size:13px;font-weight:600}
+.lad .t-pin{font-size:11px;fill:var(--ink-2)}
+.lad .wr{stroke:#3E464B;stroke-width:1.6;fill:none}
+.lad .wr.p{stroke:var(--sig);stroke-width:3}
+.lad .rail{stroke:#3E464B;stroke-width:3}
+.lad .rail.p{stroke:var(--sig)}
+.lad .bx{fill:#F6F7F5;stroke:#3E464B;stroke-width:1.4}
+.lad .el{stroke:#3E464B;stroke-width:1.8;fill:none}
+.lad .el.p{stroke:var(--sig);stroke-width:2.6}
+.lad .val{font-size:11px;fill:var(--cpu)}
+.grp{font-family:var(--f-label);font-size:18px;margin:26px 0 6px}
+
+/* ---------- banco virtual ---------- */
+.bench{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,1fr);gap:18px;margin-top:16px;align-items:start}
+@media (max-width:980px){.bench{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:620px){.tp-wrap{overflow-x:auto;margin:0 -4px;padding:0 4px 6px}.tp{min-width:560px}}
+.tp{container-type:inline-size;background:#2B2F33;border-radius:10px;padding:clamp(10px,2.4cqw,22px);border:1px solid #111}
+.tp-screen{position:relative;aspect-ratio:800/480;background:var(--hmi);color:#fff;border-radius:2px;overflow:hidden;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+.tp-brand{display:flex;justify-content:space-between;color:#9AA3AA;font-family:var(--f-label);font-size:12px;margin-top:6px}
+.tp-o{position:absolute}
+.tp-title{left:2.5%;top:2.08%;width:95%;height:8.33%;display:flex;flex-direction:column;justify-content:center}
+.tp-title b{font-size:3.6cqw;font-weight:600;line-height:1}
+.tp-title small{font-size:1.9cqw;color:#B8C3D9;margin-top:.5cqw}
+.tp-lbl{font-size:2.1cqw;color:#D9E0EE;font-weight:600}
+.tp-field{background:#fff;color:#000;display:flex;align-items:center;justify-content:flex-end;padding-right:2.2cqw;font-size:4.4cqw;font-weight:600;font-variant-numeric:tabular-nums;border:.25cqw solid #8C99B3}
+.tp-field.io{cursor:pointer;border-color:#E8B04A}
+.tp-field.io:hover{background:#FFF8E9}
+.tp-unit{font-size:2cqw;color:#D9E0EE}
+.tp-sw{display:flex;border:.25cqw solid #8C99B3;border-radius:.6cqw;overflow:hidden;cursor:pointer;background:#0E1A33}
+.tp-sw span{flex:1;display:grid;place-items:center;font-size:2.2cqw;font-weight:600;color:#93A0BB}
+.tp-sw span.on{background:#E8B04A;color:#111}
+.tp-ind{display:flex;gap:2.5cqw;align-items:center;justify-content:space-between}
+.tp-ind > div{display:flex;align-items:center;gap:1.4cqw;font-size:2cqw;font-weight:600;line-height:1.15}
+.tp-led{width:4.2cqw;height:4.2cqw;border-radius:50%;background:#7B828C;border:.3cqw solid #C9D0DB;flex:none}
+.tp-led.on{background:#3DCB5C}
+.tp-sym{background:#fff;color:#000;padding:.4cqw 1.2cqw;font-size:2.2cqw;font-weight:700;min-width:15cqw;text-align:center}
+.tp-cfg{left:2.5%;top:89%;font-size:2.1cqw;font-weight:600;color:#E8B04A}
+.tp-cfg.ok{color:#9FE0AE}
+.tp-err{color:#B22}
+.tp-keypad{position:absolute;inset:0;background:rgba(5,10,20,.72);display:none;place-items:center}
+.tp-keypad.open{display:grid}
+.tp-keypad .kp{background:#E6E9EE;color:#000;padding:2cqw;border-radius:.6cqw;width:46cqw;font-size:2.3cqw}
+.tp-keypad input{width:100%;font-size:3.4cqw;padding:.6cqw;margin:1cqw 0;text-align:right}
+.tp-keypad .kp-msg{min-height:2.6cqw;color:#B3261E;font-size:2cqw}
+.tp-keypad .kp-btns{display:flex;gap:1cqw;justify-content:flex-end}
+.tp-keypad button{font-size:2.2cqw;padding:.6cqw 1.6cqw}
+
+.panelbox{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.panelbox h3{margin:0 0 8px;font-size:18px}
+.panelbox + .panelbox{margin-top:12px}
+.pb-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.pb{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:13px;font-family:var(--f-label);text-align:center;width:72px}
+.pb button.cap{width:52px;height:52px;border-radius:50%;padding:0;border:3px solid #555;font-size:12px;color:#fff;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+.pb button.cap.green{background:#2E8B45}
+.pb button.cap.red{background:#C0281E;border-radius:50%;width:56px;height:56px;border-color:#E2B007;border-width:4px}
+.pb button.cap.blue{background:#245AA8}
+.pb button.cap[aria-pressed="true"]{box-shadow:inset 0 3px 0 rgba(0,0,0,.35);filter:brightness(.82)}
+.pb .lock{font-size:11.5px;display:flex;gap:4px;align-items:center;color:var(--ink-2)}
+.selector{display:flex;flex-direction:column;align-items:center;gap:5px;font-family:var(--f-label);font-size:13px;width:86px}
+.selector button{width:52px;height:52px;border-radius:50%;background:#2F3438;border:3px solid #666;position:relative;padding:0}
+.selector button::after{content:"";position:absolute;left:50%;top:7px;width:6px;height:36px;margin-left:-3px;background:#E8E8E8;border-radius:3px;transform:rotate(-35deg);transform-origin:50% 50%;transition:transform .15s}
+.selector button[aria-pressed="true"]::after{transform:rotate(35deg)}
+.leds{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--f-mono);font-size:13px;margin-top:6px}
+.leds span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:#C7CCC6;border:1px solid #8E968D;margin-right:5px;vertical-align:0}
+.leds span.on::before{background:#38B44A;border-color:#1F6B2B}
+.scanbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:14px 0 6px;font-size:14.5px}
+.scanbar .count{font-family:var(--f-mono)}
+.watch td:nth-child(2){font-family:var(--f-mono);white-space:nowrap}
+.watch td:nth-child(3){font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.watch tr.chg td:nth-child(3){background:#E5F0E3}
+.tests{list-style:none;padding:0;max-width:none;counter-reset:t}
+.tests li{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:start;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);margin:8px 0;counter-increment:t}
+.tests li::before{content:counter(t);font-family:var(--f-label);font-weight:700;font-size:18px;color:var(--ink-2);width:1.4ch;text-align:right}
+.tests .exp{font-size:14.5px;color:var(--ink-2);margin:.2rem 0 0}
+.tests .do{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.tests label{font-size:14px;display:flex;gap:6px;align-items:center;white-space:nowrap}
+
+/* ---------- pasos ---------- */
+ol.steps{counter-reset:s;list-style:none;padding:0;max-width:72ch}
+ol.steps > li{counter-increment:s;position:relative;padding-left:40px;margin:12px 0}
+ol.steps > li::before{content:counter(s);position:absolute;left:0;top:-1px;width:28px;height:28px;border-radius:50%;background:var(--plate-2);border:1px solid var(--line-2);
+  font-family:var(--f-label);font-weight:700;display:grid;place-items:center;font-size:14.5px}
+.search{display:flex;gap:10px;align-items:center;margin:10px 0}
+.search input{width:min(360px,100%);font-family:var(--f-text)}
+.done-row td:first-child{width:40px}
+.done-row input{width:20px;height:20px;accent-color:var(--sig)}
+.record input{width:100%;font-family:var(--f-mono)}
+.progress{font-family:var(--f-label);font-size:16px;margin:8px 0}
+.sources li{font-size:14.5px}
+footer{border-top:1px solid var(--line);margin-top:60px;padding-top:16px;font-size:14px;color:var(--ink-2)}
+
+/* ---------- responsivo ---------- */
+@media (max-width:1100px){
+  .chain{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1fr);gap:14px 18px}
+  .node::after{right:-19px;width:18px}
+  .node output{font-size:19px}
+}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .rail{position:sticky;top:0;z-index:10;height:auto;flex-direction:row;overflow-x:auto;padding:8px 10px;gap:4px;background:var(--plate);border-bottom:1px solid var(--line);scrollbar-width:thin}
+  .rail-title,.rail-foot{display:none}
+  .rail a{grid-template-columns:24px auto;border-right:1px solid #AEB5AD;border-radius:3px;padding:5px 9px 5px 5px;font-size:14px;white-space:nowrap}
+  .rail a .scr{width:22px;height:22px;font-size:12px}
+  .rail a[aria-current="true"]::after{left:6px;right:6px;top:auto;bottom:0;width:auto;height:3px}
+  section.part{scroll-margin-top:60px}
+  .wire-info{top:56px}
+}
+@media (max-width:760px){
+  .chain{grid-template-columns:minmax(0,1fr);gap:12px}
+  .branch{display:flex;flex-direction:column;gap:12px}
+  .node::after{top:auto;bottom:-13px;right:auto;left:22px;width:3px;height:12px;transform:none}
+  .node.sel{grid-column:auto;grid-row:auto}
+  .node.sel::after{display:block}
+  .outrow{grid-template-columns:minmax(0,1fr);gap:12px;margin-top:0}
+  .outrow::before,.outrow::after{display:none}
+  #br-pot,#br-hmi{padding-bottom:4px}
+  .ctl{min-width:0;width:100%}
+  .rangebox input[type=range]{flex:1;width:auto}
+  .tests li{grid-template-columns:auto 1fr}
+  .tests .do{grid-column:2;align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  body{font-size:16.5px}
+}
+@media print{
+  .rail,.controls,.bench,.btnrow,.scanbar,button{display:none!important}
+  .shell{display:block}
+  body{background:#fff;font-size:11pt}
+  details.net{break-inside:avoid}
+  details.net:not([open]) > :not(summary){display:block}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<div class="shell">
+<nav class="rail" aria-label="Etapas de la práctica">
+  <p class="rail-title">Práctica 2<br>MICROMASTER 440</p>
+  <a href="#cadena" class="hero-link"><span class="scr" aria-hidden="true">→</span><span>Cadena de referencia</span></a>
+  <a href="#cableado"><span class="scr">1</span><span>Cableado</span></a>
+  <a href="#balance"><span class="scr">2</span><span>Balance de 24 V</span></a>
+  <a href="#programa"><span class="scr">3</span><span>Programa LAD</span></a>
+  <a href="#banco"><span class="scr">4</span><span>Banco virtual</span></a>
+  <a href="#hmi"><span class="scr">5</span><span>HMI en TIA</span></a>
+  <a href="#pruebas"><span class="scr">6</span><span>Descarga y pruebas</span></a>
+  <a href="#lista"><span class="scr">7</span><span>Lista final</span></a>
+  <p class="rail-foot">TIA Portal V17<br>WinCC Comfort</p>
+</nav>
+
+<main id="contenido">
+<header class="mast">
+  <div class="mast-inst">Tecnológico Nacional de México<br>Instituto Tecnológico de Culiacán</div>
+  <dl>
+    <dt>Asignaturas</dt><dd>Controladores Lógicos Programables, Ingeniería Mecatrónica<br>Instrumentación y Control, Ingeniería Mecánica</dd>
+    <dt>Periodo</dt><dd>Agosto–diciembre 2026</dd>
+    <dt>Docente</dt><dd>M.C. Alejandro Triunfo Cruz</dd>
+  </dl>
+</header>
+
+<!-- =================== HÉROE =================== -->
+<section id="cadena" class="hero" aria-labelledby="h-cadena">
+  <p class="practice">Práctica 2: S7-1214C AC/DC/RLY, MICROMASTER 440, encoder NPN y TP700 Comfort</p>
+  <h1 id="h-cadena">De 875 rpm a 5 V</h1>
+  <p class="lede">Antes de llegar al variador, una consigna pasa por diez redes del FB. Elige de dónde sale la referencia, cambia su valor y sigue el número en cada caja.</p>
+
+  <div class="controls">
+    <fieldset class="ctl">
+      <legend>Origen de la referencia (G del SEL)</legend>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="g" value="0" id="g0"><span>Potenciómetro</span></label>
+        <label><input type="radio" name="g" value="1" id="g1" checked><span>HMI</span></label>
+      </div>
+    </fieldset>
+    <label class="ctl"><span>Potenciómetro en %IW64</span>
+      <span class="rangebox"><input type="range" id="potV" min="0" max="10" step="0.05" value="3.2" aria-label="Tensión del potenciómetro en volts"><output id="potVo" class="mono">3.20 V</output></span>
+    </label>
+    <label class="ctl"><span>DB_HMI.RPM_Consigna</span>
+      <span class="rangebox"><input type="range" id="rpmR" min="0" max="2000" step="12.5" value="875" aria-label="Consigna en rpm"><input type="number" id="rpmN" min="-200" max="2500" step="0.1" value="875.0" aria-label="Consigna en rpm, valor exacto"></span>
+    </label>
+  </div>
+  <p class="hint">El deslizador de la consigna llega a 2000 rpm a propósito: en el panel, los límites de la variable HMI rechazan esos valores, pero la red 10 del PLC los recorta de todas formas.</p>
+
+  <div class="chain" id="chain" aria-live="polite">
+    <div class="branch" id="br-pot">
+      <div class="node src"><span class="net">Entrada analógica</span><span class="ins">AI_Pot %IW64</span><output id="c-raw">0</output><span class="var">Int, 0…27648 = 0…10 V</span></div>
+      <div class="node" id="n7"><span class="net">Red 07</span><span class="ins">LIMIT Int</span><output id="c-lim">0</output><span class="var">Entrada_Limitada</span><span class="flag"></span></div>
+      <div class="node"><span class="net">Red 08</span><span class="ins">NORM_X Int → Real</span><output id="c-nor">0</output><span class="var">Entrada_Normalizada</span></div>
+      <div class="node"><span class="net">Red 09</span><span class="ins">SCALE_X 0…60</span><output id="c-hzp">0</output><span class="var">Hz_Pot</span></div>
+    </div>
+    <div class="branch" id="br-hmi">
+      <div class="node src"><span class="net">Escrita desde el panel</span><span class="ins">DB_HMI.RPM_Consigna</span><output id="c-rpm">0</output><span class="var">Real, rpm</span></div>
+      <div class="node" id="n10"><span class="net">Red 10</span><span class="ins">LIMIT 0…1750</span><output id="c-rpml">0</output><span class="var">RPM_HMI_Limitada</span><span class="flag"></span></div>
+      <div class="node"><span class="net">Red 11</span><span class="ins">NORM_X 0…1750</span><output id="c-hmin">0</output><span class="var">HMI_Normalizada</span></div>
+      <div class="node"><span class="net">Red 12</span><span class="ins">SCALE_X 0…60</span><output id="c-hzh">0</output><span class="var">Hz_HMI</span></div>
+    </div>
+    <div class="node sel"><span class="net">Red 13</span><span class="ins">SEL Real</span><output id="c-sel">0</output><span class="var">Consigna_Hz_Limitada</span><span class="g" id="c-g">G = TRUE → IN1</span></div>
+    <div class="outrow">
+      <div class="node"><span class="net">Red 14</span><span class="ins">LIMIT 0…60</span><output id="c-hz">0</output><span class="var">Consigna_Hz</span></div>
+      <div class="node"><span class="net">Red 15</span><span class="ins">NORM_X 0…60</span><output id="c-son">0</output><span class="var">Salida_Normalizada</span></div>
+      <div class="node"><span class="net">Red 16</span><span class="ins">SCALE_X Real → Int</span><output id="c-ao">0</output><span class="var">AO_Raw → %QW112</span></div>
+      <div class="node dest"><span class="net">Módulo AO a bornes 3 / 4</span><span class="ins">Tensión ideal</span><output id="c-v">0</output><span class="var">0…27648 = 0…10 V</span></div>
+      <div class="node dest mm"><span class="net">MICROMASTER 440</span><span class="ins">Frecuencia nominal</span><output id="c-mmhz">0</output><span class="var">si P2000 y la escala son 60 Hz / 0–10 V</span></div>
+    </div>
+  </div>
+  <div class="chain-foot">
+    <span>OB1, redes 2 y 3: <code>DB_HMI.RPM_Referencia_Activa</code> = Consigna_Hz × 1750 / 60 = <strong id="c-ref">0</strong> rpm</span>
+    <span>Lazo abierto: el encoder mide, no corrige la velocidad.</span>
+  </div>
+</section>
+
+<hr class="duct" aria-hidden="true">
+
+<!-- =================== 1 CABLEADO =================== -->
+<section id="cableado" class="part" aria-labelledby="h1-cab">
+  <div class="part-head"><span class="scr" aria-hidden="true">1</span><div><h2 id="h1-cab">Cableado: dos fuentes que nunca se unen</h2>
+  <p>El encoder y las entradas toman 24 V de la CPU. El mando del variador conserva la fuente del MM440 a través de los contactos del PLC.</p></div></div>
+
+  <div class="warn"><p><strong>Desenergiza el PLC y el variador antes de mover cualquier conductor.</strong> Respeta el tiempo de descarga indicado en el MM440 y verifica ausencia de tensión. La secuencia completa está al final de esta sección.</p></div>
+
+  <div class="tw"><table>
+    <caption>Fuentes auxiliares de 24 V. Son capacidades máximas, no el consumo permanente ni la corriente del motor.</caption>
+    <thead><tr><th>Fuente</th><th>Bornes</th><th class="num">Corriente disponible</th><th class="num">A 24 V</th></tr></thead>
+    <tbody>
+      <tr><td><span class="sw" style="background:var(--cpu)"></span><span class="src-cpu">CPU S7-1214C AC/DC/RLY</span>, salida para sensores [S1]</td><td><code>L+</code> / <code>M</code></td><td class="num">400 mA máx.</td><td class="num">9.6 W</td></tr>
+      <tr><td><span class="sw" style="background:var(--mm)"></span><span class="src-mm">MICROMASTER 440</span> [S3]</td><td><code>9</code> / <code>28</code></td><td class="num">100 mA máx.</td><td class="num">2.4 W</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="btnrow" role="group" aria-label="Vista del diagrama">
+    <button type="button" id="v-new" aria-pressed="true">Montaje propuesto</button>
+    <button type="button" id="v-old" aria-pressed="false">Montaje anterior</button>
+  </div>
+
+  <div class="wiring" id="wiring">
+    <figure>
+      <svg viewBox="0 0 900 660" role="img" aria-labelledby="svg-t svg-d" id="wsvg">
+        <title id="svg-t">Diagrama de conexiones del PLC, el encoder y el MICROMASTER 440</title>
+        <desc id="svg-d">El encoder y las entradas se alimentan desde L+ y M de la CPU. El borne 9 del MM440 alimenta el común 1L de las salidas Q0.0 a Q0.2, que van a los bornes 5, 6 y 7. Los relés 19/20 y 21/22 del variador regresan a I1.0 e I1.1 con común a M de la CPU.</desc>
+        <!-- bloques -->
+        <g fill="#F4F6F3" stroke="#3E464B" stroke-width="1.4">
+          <rect x="30" y="30" width="190" height="525" rx="4"/>
+          <rect x="30" y="578" width="190" height="62" rx="4"/>
+          <rect x="560" y="22" width="160" height="195" rx="4"/>
+          <rect x="640" y="345" width="240" height="295" rx="4"/>
+        </g>
+        <g font-size="16" font-weight="600" fill="#23282C">
+          <text x="44" y="52">CPU S7-1214C</text>
+          <text x="44" y="598">Módulo AO</text>
+          <text x="574" y="44">Encoder NPN</text>
+          <text x="640" y="337">MICROMASTER 440</text>
+        </g>
+        <g font-size="13.5" fill="#4B545A">
+          <text x="44" y="68">AC/DC/RLY</text>
+          <text x="44" y="614">%QW112, 0–10 V</text>
+          <text x="574" y="61">400 pulsos/vuelta</text>
+        </g>
+        <!-- bornes CPU -->
+        <g font-size="14.5" fill="#23282C" text-anchor="end">
+          <text x="206" y="84">L+  24 V sensores</text>
+          <text x="206" y="114">M  0 V</text>
+          <text x="206" y="154">1M  común entradas</text>
+          <text x="206" y="194">I0.0  HSC1</text>
+          <text x="206" y="244">I0.4</text>
+          <text x="206" y="274">I0.5</text>
+          <text x="206" y="304">I0.6</text>
+          <text x="206" y="334">I0.7</text>
+          <text x="206" y="374">I1.0</text>
+          <text x="206" y="414">I1.1</text>
+          <text x="206" y="464">1L  común salidas</text>
+          <text x="206" y="489">Q0.0</text>
+          <text x="206" y="514">Q0.1</text>
+          <text x="206" y="539">Q0.2</text>
+          <text x="206" y="602">0+</text>
+          <text x="206" y="626">0M</text>
+        </g>
+        <g fill="#fff" stroke="#3E464B" stroke-width="1.2">
+          <rect x="213" y="73" width="14" height="14"/><rect x="213" y="103" width="14" height="14"/><rect x="213" y="143" width="14" height="14"/>
+          <rect x="213" y="183" width="14" height="14"/><rect x="213" y="233" width="14" height="14"/><rect x="213" y="263" width="14" height="14"/>
+          <rect x="213" y="293" width="14" height="14"/><rect x="213" y="323" width="14" height="14"/><rect x="213" y="363" width="14" height="14"/>
+          <rect x="213" y="403" width="14" height="14"/><rect x="213" y="453" width="14" height="14"/><rect x="213" y="478" width="14" height="14"/>
+          <rect x="213" y="503" width="14" height="14"/><rect x="213" y="528" width="14" height="14"/><rect x="213" y="591" width="14" height="14"/>
+          <rect x="213" y="615" width="14" height="14"/>
+          <!-- encoder -->
+          <rect x="553" y="73" width="14" height="14"/><rect x="553" y="103" width="14" height="14"/><rect x="553" y="183" width="14" height="14"/>
+          <!-- MM440 -->
+          <rect x="633" y="363" width="14" height="14"/><rect x="633" y="385" width="14" height="14"/><rect x="633" y="403" width="14" height="14"/>
+          <rect x="633" y="425" width="14" height="14"/><rect x="633" y="453" width="14" height="14"/><rect x="633" y="478" width="14" height="14"/>
+          <rect x="633" y="503" width="14" height="14"/><rect x="633" y="528" width="14" height="14"/><rect x="633" y="553" width="14" height="14"/>
+          <rect x="633" y="591" width="14" height="14"/><rect x="633" y="615" width="14" height="14"/>
+        </g>
+        <!-- encoder: casquillos con el color físico del conductor -->
+        <g font-size="14.5" fill="#23282C">
+          <circle cx="580" cy="80" r="5.5" fill="#C62828" stroke="#333"/><text x="592" y="84">rojo  +24 V</text>
+          <circle cx="580" cy="110" r="5.5" fill="#222" stroke="#333"/><text x="592" y="114">negro  0 V</text>
+          <circle cx="580" cy="190" r="5.5" fill="#2E8B45" stroke="#333"/><text x="592" y="194">verde  salida</text>
+        </g>
+        <!-- bornes MM440 -->
+        <g font-size="14.5" fill="#23282C">
+          <text x="656" y="374">19</text><text x="656" y="396">20</text><text x="656" y="414">21</text><text x="656" y="436">22</text>
+          <text x="656" y="464">9</text><text x="656" y="489">5</text><text x="656" y="514">6</text><text x="656" y="539">7</text>
+          <text x="656" y="564">28</text><text x="656" y="602">3</text><text x="656" y="626">4</text>
+          <text x="690" y="389">Relé 1: listo</text>
+          <text x="690" y="429">Relé 2: sin falla</text>
+          <text x="690" y="464">+24 V, máx. 100 mA</text>
+          <text x="690" y="489">DIN1: marcha</text>
+          <text x="690" y="514">DIN2: giro</text>
+          <text x="690" y="539">DIN3: reset</text>
+          <text x="690" y="564">0 V del MM440</text>
+          <text x="690" y="602">ADC1 +</text>
+          <text x="690" y="626">ADC1 −</text>
+        </g>
+        <!-- etiquetas de mandos -->
+        <g font-size="12" fill="#4B545A">
+          <text x="236" y="234">Marcha (NA)</text><text x="236" y="264">Paro (NC)</text>
+          <text x="236" y="294">Giro (selector)</text><text x="236" y="324">Reset (NA)</text>
+          <text x="436" y="364">listo</text><text x="436" y="404">sin falla</text>
+          <text x="244" y="454">+24 V MM440 → 1L</text>
+        </g>
+
+        <!-- CONDUCTORES (cada g es seleccionable) -->
+        <g class="wire new-only" data-k="rojo" tabindex="0" role="button" aria-label="Conductor rojo del encoder">
+          <path class="w cpu" d="M227,80 H553"/><path class="hit" d="M227,80 H553"/></g>
+        <g class="wire new-only" data-k="m1" tabindex="0" role="button" aria-label="Puente de 1M a L+">
+          <path class="w cpu" d="M250,80 V150 H227"/><path class="hit" d="M250,80 V150 H227"/><circle cx="250" cy="80" r="4" fill="var(--cpu)"/></g>
+        <g class="wire" data-k="bus" tabindex="0" role="button" aria-label="Retornos a M de la CPU">
+          <path class="w cpu0" d="M227,110 H420 V432"/><path class="hit" d="M227,110 H420 V432"/></g>
+        <g class="wire new-only" data-k="negro" tabindex="0" role="button" aria-label="Conductor negro del encoder">
+          <path class="w cpu0" d="M420,110 H553"/><path class="hit" d="M420,110 H553"/><circle cx="420" cy="110" r="4" fill="var(--cpu)"/></g>
+        <g class="wire" data-k="verde" tabindex="0" role="button" aria-label="Conductor verde del encoder a I0.0">
+          <path class="w sig" d="M227,190 H553"/><path class="hit" d="M227,190 H553"/></g>
+        <!-- pulsadores -->
+        <g class="wire" data-k="marcha" tabindex="0" role="button" aria-label="Pulsador de marcha a I0.4">
+          <path class="w cpu" d="M227,240 H302 M348,240 H420"/><path class="el" d="M304,240 L340,227" stroke="#23282C" stroke-width="2" fill="none"/>
+          <circle cx="420" cy="240" r="4" fill="var(--cpu)"/><path class="hit" d="M227,240 H420"/></g>
+        <g class="wire" data-k="paro" tabindex="0" role="button" aria-label="Pulsador de paro NC a I0.5">
+          <path class="w cpu" d="M227,270 H302 M348,270 H420"/><path d="M304,270 L346,266 M346,262 V276" stroke="#23282C" stroke-width="2" fill="none"/>
+          <circle cx="420" cy="270" r="4" fill="var(--cpu)"/><path class="hit" d="M227,270 H420"/></g>
+        <g class="wire" data-k="giro" tabindex="0" role="button" aria-label="Selector de giro a I0.6">
+          <path class="w cpu" d="M227,300 H302 M348,300 H420"/><path d="M304,300 L340,287 M318,292 v-8 h6" stroke="#23282C" stroke-width="2" fill="none"/>
+          <circle cx="420" cy="300" r="4" fill="var(--cpu)"/><path class="hit" d="M227,300 H420"/></g>
+        <g class="wire" data-k="reset" tabindex="0" role="button" aria-label="Pulsador de reset a I0.7">
+          <path class="w cpu" d="M227,330 H302 M348,330 H420"/><path d="M304,330 L340,317" stroke="#23282C" stroke-width="2" fill="none"/>
+          <circle cx="420" cy="330" r="4" fill="var(--cpu)"/><path class="hit" d="M227,330 H420"/></g>
+        <!-- retornos del variador -->
+        <g class="wire" data-k="listo" tabindex="0" role="button" aria-label="Relé listo, bornes 19 y 20, a I1.0">
+          <path class="w cpu" d="M227,370 H633"/><path class="w cpu0" d="M633,392 H420"/><circle cx="420" cy="392" r="4" fill="var(--cpu)"/>
+          <path class="hit" d="M227,370 H633 M633,392 H420"/></g>
+        <g class="wire" data-k="sinfalla" tabindex="0" role="button" aria-label="Relé sin falla, bornes 21 y 22, a I1.1">
+          <path class="w cpu" d="M227,410 H633"/><path class="w cpu0" d="M633,432 H420"/><circle cx="420" cy="432" r="4" fill="var(--cpu)"/>
+          <path class="hit" d="M227,410 H633 M633,432 H420"/></g>
+        <!-- mando por relevadores con fuente MM440 -->
+        <g class="wire" data-k="l1" tabindex="0" role="button" aria-label="Borne 9 del MM440 al común 1L">
+          <path class="w mm" d="M633,460 H227"/><path class="hit" d="M633,460 H227"/></g>
+        <g class="wire" data-k="q0" tabindex="0" role="button" aria-label="Q0.0 a borne 5, marcha">
+          <path class="w mm" d="M227,485 H633"/><path class="hit" d="M227,485 H633"/></g>
+        <g class="wire" data-k="q1" tabindex="0" role="button" aria-label="Q0.1 a borne 6, giro">
+          <path class="w mm" d="M227,510 H633"/><path class="hit" d="M227,510 H633"/></g>
+        <g class="wire" data-k="q2" tabindex="0" role="button" aria-label="Q0.2 a borne 7, reset">
+          <path class="w mm" d="M227,535 H633"/><path class="hit" d="M227,535 H633"/></g>
+        <g class="wire" data-k="ao" tabindex="0" role="button" aria-label="Salida analógica a bornes 3 y 4">
+          <path class="w ao" d="M227,598 H633 M227,622 H633"/><path class="hit" d="M227,598 H633 M227,622 H633"/></g>
+        <text x="560" y="574" font-size="13.5" fill="#4B545A" text-anchor="end">28: sin puente a M de la CPU</text>
+
+        <!-- montaje anterior -->
+        <g class="old-only">
+          <g class="wire" data-k="oldrojo" tabindex="0" role="button" aria-label="Montaje anterior: rojo desde borne 9">
+            <path class="w old" d="M553,80 H470"/><text x="464" y="84" font-size="13.5" text-anchor="end" fill="#8A5100">desde borne 9</text><path class="hit" d="M553,80 H470"/></g>
+          <g class="wire" data-k="oldnegro" tabindex="0" role="button" aria-label="Montaje anterior: negro al borne 28">
+            <path class="w old" d="M553,110 H470"/><text x="474" y="128" font-size="13.5" fill="#8A5100">a borne 28</text><path class="hit" d="M553,110 H470"/></g>
+          <g class="wire" data-k="old1m" tabindex="0" role="button" aria-label="Montaje anterior: 1M desde borne 9">
+            <path class="w old" d="M227,150 H280"/><text x="286" y="154" font-size="13.5" fill="#8A5100">desde borne 9</text><path class="hit" d="M227,150 H280"/></g>
+          <g class="wire" data-k="oldr" tabindex="0" role="button" aria-label="Montaje anterior: resistencia de 2.2 kilohms">
+            <path class="w old" d="M500,190 V206 l7,4 -14,6 14,6 -14,6 14,6 -14,6 7,4 V262"/><circle cx="500" cy="190" r="4" fill="var(--mm)"/>
+            <text x="514" y="232" font-size="13.5" fill="#8A5100">2.2 kΩ</text><text x="500" y="278" font-size="13.5" text-anchor="middle" fill="#8A5100">borne 9 (+24 V MM440)</text>
+            <path class="hit" d="M500,190 V262"/></g>
+        </g>
+      </svg>
+      <div class="legend">
+        <span><i style="background:var(--cpu)"></i>+24 V de la CPU</span>
+        <span><i style="background:repeating-linear-gradient(90deg,var(--cpu) 0 7px,transparent 7px 11px)"></i>0 V de la CPU (M)</span>
+        <span><i style="background:var(--mm)"></i>+24 V del MM440</span>
+        <span><i style="background:var(--sig)"></i>Señal de pulsos</span>
+        <span><i style="background:#6B7470"></i>Señal 0–10 V</span>
+      </div>
+    </figure>
+    <aside class="wire-info" id="wire-info" aria-live="polite">
+      <h4>Toca un conductor</h4>
+      <p>Cada línea del diagrama muestra a dónde se conecta, de qué fuente toma corriente y qué hacer con ella.</p>
+    </aside>
+  </div>
+
+  <div class="warn"><p><strong>No conectes L+ de la CPU al borne 9 del MM440.</strong> Son dos fuentes distintas. Revisa todos los puentes: no debe quedar una unión entre los positivos a través de 1M, 1L o la resistencia.</p></div>
+
+  <h3>Cómo circula la corriente del encoder</h3>
+  <p>Con el transistor NPN conduciendo, la corriente recorre L+ de la CPU, 1M, el circuito interno de entrada, I0.0, la salida verde del encoder y el conductor negro hasta M. La entrada está activa cuando existe corriente en ese recorrido. [S1, S2]</p>
+  <p>La corriente que atraviesa I0.0 se cuenta como carga de entrada. El consumo propio del encoder se suma aparte. Si una medición ya incluye ambos recorridos, no los sumes de nuevo.</p>
+
+  <h3>Mandos y señales de estado</h3>
+  <p>Como 1M está a +24 V, los pulsadores y contactos que activan las entradas cierran hacia M de la CPU. Los contactos secos del variador permiten usar esa misma fuente para las señales de retorno.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Circuito</th><th>Conexión después del cambio</th></tr></thead>
+    <tbody>
+      <tr><td>Marcha <code>I0.4</code></td><td>I0.4 → pulsador NA → M de la CPU.</td></tr>
+      <tr><td>Paro <code>I0.5</code></td><td>I0.5 → pulsador NC → M de la CPU. En reposo la entrada está activa.</td></tr>
+      <tr><td>Giro <code>I0.6</code> y Reset <code>I0.7</code></td><td>Cada entrada → su selector o pulsador → M de la CPU.</td></tr>
+      <tr><td>Listo <code>I1.0</code></td><td>19 → I1.0; común 20 → M de la CPU.</td></tr>
+      <tr><td>Sin falla <code>I1.1</code></td><td>21 → I1.1; común 22 → M de la CPU.</td></tr>
+      <tr><td>Relés de estado</td><td>Retira de 20/22 cualquier puente anterior a +24 V o al retorno de otra fuente. Conserva su parametrización de estado.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Salidas a relevador: se conserva la fuente del MM440</h3>
+  <p>Borne 9 → 1L; Q0.0 → 5; Q0.1 → 6; Q0.2 → 7. Verifica que 1L corresponde al grupo que incluye esas tres salidas y que no tiene otra alimentación conectada. Los contactos conmutan la fuente del MM440; no unen los positivos. [S2, S3]</p>
+  <p>Las bobinas internas de los relés del PLC pertenecen al consumo interno de la CPU. Los contactos solo conducen la corriente de las DIN del MM440, así que no se inventan tres consumos de bobina externos ni se restan de los 400 mA de sensores. Este mando por contactos no requiere, por sí solo, un puente entre M de la CPU y el borne 28. La referencia de la señal analógica se mantiene según el esquema de su módulo.</p>
+
+  <h3>Secuencia de cambio y verificación</h3>
+  <ol class="steps">
+    <li>Desenergiza el PLC y el variador. Respeta el tiempo de descarga indicado en el MM440 y verifica ausencia de tensión antes de cambiar conductores.</li>
+    <li>Identifica L+ y M de la salida para sensores. No uses L1/N de la alimentación AC. Traslada rojo, negro y 1M como en el diagrama y retira el pull-up de 2.2 kΩ.</li>
+    <li>Revisa los retornos de pulsadores y los comunes 20/22 hacia M de la CPU. Conserva el circuito 9 → 1L y Q0.0/Q0.1/Q0.2 → 5/6/7.</li>
+    <li>Comprueba que L+ de la CPU y el borne 9 no están unidos por ningún puente. Conserva AO+ → 3 y el retorno AO → 4 según el manual del módulo.</li>
+    <li>Con las órdenes de marcha inhibidas, verifica tensiones y señales. Para comprobar pulsos usa el HSC o el diagnóstico adecuado: el LED no permite evaluar trenes rápidos.</li>
+    <li>Mide corriente con un instrumento adecuado <strong>en serie</strong> en la rama elegida, insertándolo con el circuito desenergizado. Nunca coloques el amperímetro directamente entre +24 V y 0 V. Registra el estado y evita órdenes que puedan arrancar el motor de forma inesperada.</li>
+  </ol>
+</section>
+
+<hr class="duct" aria-hidden="true">
+
+<!-- =================== 2 BALANCE =================== -->
+<section id="balance" class="part" aria-labelledby="h2-bal">
+  <div class="part-head"><span class="scr" aria-hidden="true">2</span><div><h2 id="h2-bal">Balance de 24 V</h2>
+  <p>Cada fuente cumple su propio límite. Suma en mA y deja como pendiente lo que todavía no conoces: un dato desconocido no vale cero.</p></div></div>
+
+  <div class="note">
+    <p><b>Confirmado:</b> encoder NPN (verde a I0.0, rojo a +24 V, negro a 0 V), resistencia de 2.2 kΩ, CPU AC/DC/RLY, entrada IW64 y salida QW112 de 0–10 V.</p>
+    <p><b>Pendiente:</b> referencia 6ES7 exacta de la CPU, consumo propio del encoder y capacidad de su transistor, referencia y alimentación del módulo AO, resistencia total del divisor y cargas adicionales.</p>
+    <p><b>Base del cálculo:</b> CPU 1214C clásica, datos Siemens de la familia V4. Coteja la referencia de la CPU instalada; no se usan datos de la familia S7-1200 G2.</p>
+  </div>
+
+  <div class="cols">
+    <div class="meter" id="m-cpu">
+      <h3><span class="src-cpu">L+ de la CPU</span></h3>
+      <p class="cap">Límite 400 mA. Marca las entradas activas en el estado que quieras evaluar.</p>
+      <div class="btnrow" role="group" aria-label="Estados de ejemplo">
+        <button type="button" data-preset="parado">Detenido y listo</button>
+        <button type="button" data-preset="parado-enc">+ encoder conduciendo</button>
+        <button type="button" data-preset="todas">Las siete activas</button>
+      </div>
+      <div class="chk" id="inputs-chk"></div>
+      <div class="fields">
+        <label for="ienc">Electrónica del encoder, I<sub>enc</sub> (mA)</label><input type="number" id="ienc" min="0" step="1" placeholder="pendiente">
+        <label for="iao">Módulo AO, si usa L+ de la CPU, I<sub>AO</sub></label><input type="number" id="iao" min="0" step="1" placeholder="pendiente">
+        <label for="idiv">Divisor para IW64, si usa L+, I<sub>div</sub></label><input type="number" id="idiv" min="0" step="0.1" placeholder="pendiente">
+        <label for="iotr">Otras cargas de L+, I<sub>otras</sub></label><input type="number" id="iotr" min="0" step="1" placeholder="pendiente">
+      </div>
+      <label class="toggle"><input type="checkbox" id="r22"> Conservar el pull-up de 2.2 kΩ</label>
+      <div class="bar" id="bar-cpu" aria-hidden="true"></div>
+      <div class="bar-scale"><span>0</span><span>100</span><span>200</span><span>300</span><span>400 mA</span></div>
+      <div class="readout" id="ro-cpu" aria-live="polite"></div>
+      <div class="btnrow"><button type="button" id="ej-didac">Cargar el ejemplo didáctico</button><button type="button" id="ej-clear">Vaciar datos</button></div>
+    </div>
+
+    <div class="meter" id="m-mm">
+      <h3><span class="src-mm">Borne 9 del MM440</span></h3>
+      <p class="cap">Límite 100 mA. I<sub>MM</sub> = q0·I<sub>DIN1</sub> + q1·I<sub>DIN2</sub> + q2·I<sub>DIN3</sub> + I<sub>otras,MM</sub></p>
+      <div class="chk" id="q-chk"></div>
+      <div class="fields">
+        <label for="idin1">I<sub>DIN1</sub> borne 5 (mA)</label><input type="number" id="idin1" min="0" step="0.1" placeholder="pendiente">
+        <label for="idin2">I<sub>DIN2</sub> borne 6</label><input type="number" id="idin2" min="0" step="0.1" placeholder="pendiente">
+        <label for="idin3">I<sub>DIN3</sub> borne 7</label><input type="number" id="idin3" min="0" step="0.1" placeholder="pendiente">
+        <label for="iomm">Otras cargas del borne 9</label><input type="number" id="iomm" min="0" step="0.1" placeholder="pendiente">
+      </div>
+      <div class="bar" id="bar-mm" aria-hidden="true"></div>
+      <div class="bar-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100 mA</span></div>
+      <div class="readout" id="ro-mm" aria-live="polite"></div>
+      <p class="hint">Las corrientes de DIN1, DIN2 y DIN3 no están confirmadas en una ficha del equipo. Mídelas o búscalas en la especificación; aquí no se presenta un subtotal como si fuera un dato Siemens.</p>
+    </div>
+  </div>
+
+  <h3>Consumo de las entradas del PLC</h3>
+  <p>Para la CPU clásica de referencia, Siemens indica 6 mA nominales en las entradas rápidas y 4 mA en las estándar, a 24 V. Manda el tipo físico de entrada, aunque se use con un pulsador. [S2]</p>
+  <div class="tw"><table>
+    <thead><tr><th>Entrada</th><th>Uso</th><th>Tipo físico</th><th class="num">Activa a 24 V</th></tr></thead>
+    <tbody>
+      <tr><td><code>I0.0</code></td><td>Encoder / HSC</td><td>Rápida</td><td class="num">6 mA</td></tr>
+      <tr><td><code>I0.4</code></td><td>Marcha NA</td><td>Rápida</td><td class="num">6 mA</td></tr>
+      <tr><td><code>I0.5</code></td><td>Paro NC</td><td>Rápida</td><td class="num">6 mA</td></tr>
+      <tr><td><code>I0.6</code></td><td>Selector de giro</td><td>Estándar</td><td class="num">4 mA</td></tr>
+      <tr><td><code>I0.7</code></td><td>Reset NA</td><td>Estándar</td><td class="num">4 mA</td></tr>
+      <tr><td><code>I1.0</code></td><td>Variador listo</td><td>Estándar</td><td class="num">4 mA</td></tr>
+      <tr><td><code>I1.1</code></td><td>Variador sin falla</td><td>Estándar</td><td class="num">4 mA</td></tr>
+      <tr><td><b>Total</b></td><td>Las siete activas</td><td>3 rápidas + 4 estándar</td><td class="num"><b>34 mA</b></td></tr>
+    </tbody>
+  </table></div>
+  <p>3 × 6 mA + 4 × 4 mA = 34 mA. Es una envolvente para presupuestar; no implica que el programa active todas las señales al mismo tiempo. La ficha indica hasta 8 mA por entrada rápida y 6 mA por estándar a 30 V; como reserva, 3 × 8 + 4 × 6 = 48 mA. Ese valor no es una medición ni autoriza alimentar el HSC a 30 V.</p>
+  <div class="note"><p>Los contactos NA/NC no agregan una segunda carga: ya se contó la entrada que hacen circular. Los LED integrados del PLC tampoco se suman como lámparas externas. Si los pulsadores son iluminados, sus lámparas sí se agregan.</p></div>
+
+  <h3>Si se conserva la resistencia de 2.2 kΩ</h3>
+  <p>Con el transistor conduciendo añade 24 / 2200 = 10.91 mA al balance de la CPU y disipa 24² / 2200 = 0.262 W; a 28.8 V alcanza 0.377 W. Una resistencia de ¼ W es insuficiente; una de ½ W requiere además revisar temperatura y reducción de potencia. El transistor del encoder absorbería unos 6 + 10.91 = 16.91 mA con I0.0 activa, además de cualquier otra carga de su salida. Verifica la capacidad del transistor y la calidad de los pulsos.</p>
+
+  <h3>Salidas y parte analógica</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Salida</th><th>Carga conectada</th><th>Fuente que aporta la corriente</th></tr></thead>
+    <tbody>
+      <tr><td><code>Q0.0</code></td><td>DIN1, borne 5: marcha</td><td class="src-mm">Borne 9 del MM440, a través de 1L</td></tr>
+      <tr><td><code>Q0.1</code></td><td>DIN2, borne 6: giro</td><td class="src-mm">Borne 9 del MM440, a través de 1L</td></tr>
+      <tr><td><code>Q0.2</code></td><td>DIN3, borne 7: reset</td><td class="src-mm">Borne 9 del MM440, a través de 1L</td></tr>
+      <tr><td><code>QW112</code></td><td>Entrada analógica, bornes 3 (+) / 4 (−)</td><td>Módulo AO: revisa de dónde recibe sus 24 V</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>2 A por contacto no significa 2 A de consumo.</b> Es la capacidad de conmutación de la CPU de referencia; la corriente real la fija cada carga. En este montaje no se alimentan contactores ni el motor desde Q0.0, Q0.1 o Q0.2. [S2]</li>
+    <li><b>Módulo AO:</b> si su L+ sale de la CPU, suma su demanda de 24 V (con los canales y cargas usados) al balance de 400 mA. Si se alimenta de otra fuente, su demanda pertenece a esa fuente. QW112 es una dirección lógica; no identifica el modelo del módulo.</li>
+    <li><b>Señal 0–10 V:</b> el manual del MM440 indica una carga de entrada en tensión de al menos 4.7 kΩ. A 10 V, I ≤ 10 / 4700 = 2.13 mA en el lazo AO. Esa corriente de señal no se suma como 2.13 mA de alimentación a 24 V. [S3]</li>
+    <li><b>Divisor o potenciómetro para IW64:</b> suma su corriente a la fuente que lo alimenta. Para un divisor resistivo a 24 V, I = 24 / R<sub>total</sub>, considerando también la carga de la entrada.</li>
+  </ul>
+  <p>El inventario I<sub>CPU</sub> + I<sub>MM</sub> sirve para listar cargas, pero no se compara con una supuesta fuente de 500 mA. Este balance cubre las fuentes auxiliares de control; no dimensiona el motor, la acometida AC ni el bus interno de 5 V.</p>
+</section>
+
+<hr class="duct" aria-hidden="true">
+
+<!-- =================== 3 PROGRAMA =================== -->
+<section id="programa" class="part" aria-labelledby="h3-prog">
+  <div class="part-head"><span class="scr" aria-hidden="true">3</span><div><h2 id="h3-prog">Programa LAD</h2>
+  <p>22 redes en <code>FB_MICROMASTER 440</code>, la llamada en OB1 y tres redes posteriores para el HMI. Reconstrúyelas en TIA Portal V17.</p></div></div>
+
+  <div class="note">
+    <p>Los dibujos son redes para reconstruir, no un proyecto .ap17 ni una exportación compilada. La revisión lógica no sustituye compilar y probar en tu CPU.</p>
+    <p>Lectura: contacto abierto = condición TRUE; contacto con diagonal = condición FALSE; bobina normal = se actualiza a 0 o 1 en cada ciclo. Dentro del FB las variables son locales (#); los tags físicos se conectan solo en OB1.</p>
+    <p>Esta página usa los nombres de la edición integrada del 09/11/2026. En la guía del HMI del 27/10 aparecen como <code>FB_MM440</code>, <code>DB_MM440</code>, el pin <code>RPM_Referencia_HMI</code> y las subredes 9A–9F, que aquí son las redes 9 a 14.</p>
+  </div>
+
+  <h3>Etiquetas globales del PLC</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Nombre</th><th>Tipo</th><th>Dirección</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>Encoder_A</code></td><td>Bool</td><td><code>%I0.0</code></td><td>Pulsos al HSC1; no contar con contactos de OB1.</td></tr>
+      <tr><td><code>PB_Marcha</code></td><td>Bool</td><td><code>%I0.4</code></td><td>Pulsador NA.</td></tr>
+      <tr><td><code>PB_Paro_OK</code></td><td>Bool</td><td><code>%I0.5</code></td><td>Paro NC: liberado = TRUE; presionado = FALSE.</td></tr>
+      <tr><td><code>SW_Giro</code></td><td>Bool</td><td><code>%I0.6</code></td><td>Selector de sentido mantenido.</td></tr>
+      <tr><td><code>PB_Reset</code></td><td>Bool</td><td><code>%I0.7</code></td><td>Reconocimiento manual.</td></tr>
+      <tr><td><code>DI_Listo</code></td><td>Bool</td><td><code>%I1.0</code></td><td>Retorno del variador: TRUE habilita un nuevo arranque.</td></tr>
+      <tr><td><code>DI_SinFalla</code></td><td>Bool</td><td><code>%I1.1</code></td><td>TRUE significa sin falla. Confirma la polaridad real.</td></tr>
+      <tr><td><code>AI_Pot</code></td><td>Int</td><td><code>%IW64</code></td><td>0 a 10 V representados por 0 a 27648.</td></tr>
+      <tr><td><code>HSC_Frecuencia_Hz</code></td><td>DInt</td><td><code>%ID1000</code></td><td>Frecuencia en Hz; ocupa los bytes 1000 a 1003.</td></tr>
+      <tr><td><code>DO_Marcha</code></td><td>Bool</td><td><code>%Q0.0</code></td><td>Orden de marcha al variador.</td></tr>
+      <tr><td><code>DO_Giro</code></td><td>Bool</td><td><code>%Q0.1</code></td><td>Orden de inversión al variador.</td></tr>
+      <tr><td><code>DO_Reset</code></td><td>Bool</td><td><code>%Q0.2</code></td><td>Reconocimiento de fallo.</td></tr>
+      <tr><td><code>AO_Velocidad</code></td><td>Int</td><td><code>%QW112</code></td><td>0 a 27648 equivale a 0 a 10 V.</td></tr>
+      <tr><td><code>FirstScan</code></td><td>Bool</td><td>Bit de sistema</td><td>Asigna un byte de sistema libre en la CPU y usa su bit de primer ciclo.</td></tr>
+    </tbody>
+  </table></div>
+  <p>No asignes una marca cualquiera a FirstScan. No dupliques direcciones ni escribas las salidas desde otro FB, red o tabla de forzado. La resolución física del ADC no cambia la representación nominal 0…27648.</p>
+
+  <h3>Interfaz del FB</h3>
+  <p>Usa tu FB existente <code>FB_MICROMASTER 440</code>; su DB de instancia aparece como <code>FB_MICROMASTER 440_DB</code> (DB2). Si tu proyecto usa otros nombres, consérvalos con los mismos pines. Si tu DB global de parámetros se llama <code>DB_AJUSTE</code>, usa ese nombre donde aquí dice <code>DB_Ajustes</code>.</p>
+  <div class="cols">
+    <div class="tw"><table>
+      <caption>Input</caption>
+      <thead><tr><th>Pin</th><th>Tipo</th><th>Conectar en OB1</th></tr></thead>
+      <tbody>
+        <tr><td><code>Inicializar</code></td><td>Bool</td><td><code>FirstScan</code></td></tr>
+        <tr><td><code>Marcha</code></td><td>Bool</td><td><code>PB_Marcha</code></td></tr>
+        <tr><td><code>Paro_OK</code></td><td>Bool</td><td><code>PB_Paro_OK</code></td></tr>
+        <tr><td><code>Selector_Giro</code></td><td>Bool</td><td><code>SW_Giro</code></td></tr>
+        <tr><td><code>Reset</code></td><td>Bool</td><td><code>PB_Reset</code></td></tr>
+        <tr><td><code>Variador_Listo</code></td><td>Bool</td><td><code>DI_Listo</code></td></tr>
+        <tr><td><code>Variador_SinFalla</code></td><td>Bool</td><td><code>DI_SinFalla</code></td></tr>
+        <tr><td><code>Pot_Raw</code></td><td>Int</td><td><code>AI_Pot</code></td></tr>
+        <tr><td><code>Encoder_Hz</code></td><td>DInt</td><td><code>HSC_Frecuencia_Hz</code></td></tr>
+        <tr><td><code>HSC_Configurado</code></td><td>Bool</td><td><code>DB_Ajustes.HSC_OK</code></td></tr>
+        <tr><td><code>Pulsos_Rev</code></td><td>Real</td><td><code>DB_Ajustes.PPR</code></td></tr>
+        <tr><td><code>Usar_Referencia_HMI</code></td><td>Bool</td><td><code>DB_HMI.Usar_Referencia_HMI</code></td></tr>
+        <tr><td><code>RPM_Consigna_HMI</code></td><td>Real</td><td><code>DB_HMI.RPM_Consigna</code></td></tr>
+      </tbody>
+    </table></div>
+    <div>
+      <div class="tw"><table>
+        <caption>Output</caption>
+        <thead><tr><th>Pin</th><th>Tipo</th><th>Destino</th></tr></thead>
+        <tbody>
+          <tr><td><code>Cmd_Marcha</code></td><td>Bool</td><td><code>DO_Marcha</code></td></tr>
+          <tr><td><code>Cmd_Giro</code></td><td>Bool</td><td><code>DO_Giro</code></td></tr>
+          <tr><td><code>Cmd_Reset</code></td><td>Bool</td><td><code>DO_Reset</code></td></tr>
+          <tr><td><code>Entrada_Limitada</code></td><td>Int</td><td>Observar en el DB de instancia</td></tr>
+          <tr><td><code>Entrada_Normalizada</code></td><td>Real</td><td>Observar en el DB de instancia</td></tr>
+          <tr><td><code>Consigna_Hz</code></td><td>Real</td><td>Observar en el DB de instancia</td></tr>
+          <tr><td><code>Salida_Normalizada</code></td><td>Real</td><td>Observar en el DB de instancia</td></tr>
+          <tr><td><code>AO_Raw</code></td><td>Int</td><td><code>AO_Velocidad</code></td></tr>
+          <tr><td><code>RPM</code></td><td>Real</td><td>HMI: RPM reales</td></tr>
+          <tr><td><code>RPM_Config_OK</code></td><td>Bool</td><td>HMI: estado de configuración RPM</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tw"><table>
+        <caption>Static, sin retención</caption>
+        <thead><tr><th>Nombre</th><th>Tipo</th><th>Creación</th></tr></thead>
+        <tbody>
+          <tr><td><code>EnMarcha</code></td><td>Bool</td><td>FALSE, no retentiva.</td></tr>
+          <tr><td><code>TrigMarcha</code></td><td>R_TRIG</td><td>Inserta R_TRIG en LAD y elige multiinstancia dentro del FB.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="cols">
+    <div class="tw"><table>
+      <caption>Temp del FB, escrita antes de leerse</caption>
+      <thead><tr><th>Variables</th><th>Tipo</th><th>Red</th></tr></thead>
+      <tbody>
+        <tr><td><code>PulsoMarcha</code>, <code>Arranque_Valido</code></td><td>Bool</td><td>1 y 2</td></tr>
+        <tr><td><code>Hz_Pot</code></td><td>Real</td><td>9</td></tr>
+        <tr><td><code>RPM_HMI_Limitada</code>, <code>HMI_Normalizada</code>, <code>Hz_HMI</code></td><td>Real</td><td>10, 11 y 12</td></tr>
+        <tr><td><code>Consigna_Hz_Limitada</code></td><td>Real</td><td>13</td></tr>
+        <tr><td><code>PPR_Valido</code></td><td>Bool</td><td>17</td></tr>
+        <tr><td><code>Encoder_Real</code>, <code>Encoder_Abs</code>, <code>RPM_Numerador</code></td><td>Real</td><td>18, 19 y 20</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tw"><table>
+      <caption>DB globales, creados a mano</caption>
+      <thead><tr><th>Variable</th><th>Tipo</th><th>Inicial</th><th>Función</th></tr></thead>
+      <tbody>
+        <tr><td><code>DB_Ajustes.HSC_OK</code></td><td>Bool</td><td>FALSE</td><td>Confirma la configuración; no prueba el encoder.</td></tr>
+        <tr><td><code>DB_Ajustes.PPR</code></td><td>Real</td><td>400.0</td><td>Canal A ×1 y acoplamiento 1:1; confirma el montaje.</td></tr>
+        <tr><td><code>DB_HMI.Usar_Referencia_HMI</code></td><td>Bool</td><td>FALSE</td><td>FALSE = potenciómetro; TRUE = HMI.</td></tr>
+        <tr><td><code>DB_HMI.RPM_Consigna</code></td><td>Real</td><td>0.0</td><td>Escrita desde el HMI; límite PLC 0…1750.</td></tr>
+        <tr><td><code>DB_HMI.RPM_Referencia_Activa</code></td><td>Real</td><td>0.0</td><td>La escribe OB1 después de llamar al FB.</td></tr>
+        <tr><td><code>DB_HMI.Motor_EnMovimiento</code></td><td>Bool</td><td>FALSE</td><td>La escribe OB1: RPM válida y mayor que 20.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <p>En OB1 declara en Temp <code>Referencia_RPM_Producto : Real</code>; se escribe en la red 2 y se usa en la red 3. El DB de instancia lo genera TIA al llamar al FB. No habilites retención en la memoria de marcha ni en su flanco.</p>
+
+  <h3>Redes del FB, en orden de ejecución</h3>
+  <p class="hint">Abre cada red para ver el dibujo y la nota. Las redes 1 a 6 también corren en vivo en el banco virtual.</p>
+  <div class="btnrow"><button type="button" id="lad-open">Abrir todas</button><button type="button" id="lad-close">Cerrar todas</button></div>
+  <h4 class="grp">Mando: redes 1 a 6</h4>
+  <div id="lad-mando"></div>
+  <h4 class="grp">Referencia de velocidad: redes 7 a 16</h4>
+  <div id="lad-ref"></div>
+  <h4 class="grp">Medición de RPM: redes 17 a 22</h4>
+  <div id="lad-med"></div>
+  <h4 class="grp">OB1</h4>
+  <div id="lad-ob1"></div>
+
+  <h3>Configuración del HSC1</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Ajuste</th><th>Valor confirmado en las capturas del proyecto</th></tr></thead>
+    <tbody>
+      <tr><td>General</td><td>Enable this high-speed counter: activado.</td></tr>
+      <tr><td>Type of counting</td><td>Frequency.</td></tr>
+      <tr><td>Operating phase / direction</td><td>Single phase / User program (internal direction control) / Count up.</td></tr>
+      <tr><td>Frequency measuring period</td><td>1.0 s. Se conserva el ajuste actual.</td></tr>
+      <tr><td>Hardware inputs</td><td>Clock generator input = <code>%I0.0</code>; sin dirección ni sincronización externas.</td></tr>
+      <tr><td>I/O addresses</td><td>Start = 1000; End = 1003. <code>HSC_Frecuencia_Hz</code>: DInt, <code>%ID1000</code>.</td></tr>
+      <tr><td>Process image</td><td>Automatic update. Mantenla para leer el equipo físico.</td></tr>
+    </tbody>
+  </table></div>
+  <p>La frecuencia se lee directamente de <code>%ID1000</code>: no hace falta MOVE, ni un contador CTU, ni insertar CTRL_HSC. Si cambias la configuración, descarga hardware y software con la máquina detenida.</p>
+  <p>Antes de validar las RPM revisa el filtro de I0.0: a 1750 rpm y 400 pulsos/vuelta hay unos 11 667 Hz (periodo de 85.7 µs). El filtro debe admitir el ancho mínimo real del pulso; no se fija aquí un valor sin comprobar las opciones de la CPU y la señal. HSC_OK confirma la configuración, no un cableado sano.</p>
+
+  <div class="meter" style="margin-top:14px">
+    <h3>Comprueba el cálculo de RPM</h3>
+    <p class="cap">RPM = |frecuencia del HSC en Hz| × 60 / PPR. Con 400 PPR, RPM = Hz × 0.15.</p>
+    <div class="fields" style="grid-template-columns:1fr 130px;max-width:420px">
+      <label for="calc-hz">Frecuencia en %ID1000 (Hz)</label><input type="number" id="calc-hz" value="6000" step="1">
+      <label for="calc-ppr">DB_Ajustes.PPR</label><input type="number" id="calc-ppr" value="400" step="1">
+      <label for="calc-ok">DB_Ajustes.HSC_OK</label><span><input type="checkbox" id="calc-ok" checked></span>
+    </div>
+    <div class="readout" id="calc-out" aria-live="polite"></div>
+    <div class="tw"><table style="max-width:520px">
+      <thead><tr><th class="num">Frecuencia</th><th class="num">PPR</th><th class="num">RPM esperadas</th></tr></thead>
+      <tbody><tr><td class="num">0 Hz</td><td class="num">400.0</td><td class="num">0.0</td></tr>
+      <tr><td class="num">1000 Hz</td><td class="num">400.0</td><td class="num">150.0</td></tr>
+      <tr><td class="num">6000 Hz</td><td class="num">400.0</td><td class="num">900.0</td></tr>
+      <tr><td class="num">10000 Hz</td><td class="num">400.0</td><td class="num">1500.0</td></tr></tbody>
+    </table></div>
+  </div>
+</section>
+
+<hr class="duct" aria-hidden="true">
+
+<!-- =================== 4 BANCO VIRTUAL =================== -->
+<section id="banco" class="part" aria-labelledby="h4-banco">
+  <div class="part-head"><span class="scr" aria-hidden="true">4</span><div><h2 id="h4-banco">Banco virtual</h2>
+  <p>Ensaya la lógica del FB y la pantalla antes de ir al laboratorio. Cada ciclo de 100 ms ejecuta las redes en orden, como un scan.</p></div></div>
+  <div class="note"><p>Es una simulación didáctica. El motor responde con una rampa y una caída de velocidad por carga inventadas para ilustrar; no reproduce el MM440 ni sustituye las pruebas en el equipo real.</p></div>
+
+  <div class="bench">
+    <div>
+      <div class="tp-wrap"><div class="tp" id="tp">
+        <div class="tp-screen" id="tp-screen">
+          <div class="tp-o tp-title"><b>Control de motor | MM440</b><small>TP700 Comfort, TecNM Culiacán</small></div>
+          <div class="tp-o tp-lbl" style="left:4.75%;top:23%">RPM REALES</div>
+          <div class="tp-o tp-field" id="tp-real" style="left:4.75%;top:29.17%;width:41.5%;height:15.42%">0.0</div>
+          <div class="tp-o tp-unit" style="left:47%;top:39%">rpm</div>
+          <div class="tp-o tp-lbl" style="left:53.5%;top:23%">RPM SOLICITADAS</div>
+          <div class="tp-o tp-field io" id="tp-sol" role="button" tabindex="0" aria-label="RPM solicitadas, tocar para escribir" style="left:53.5%;top:29.17%;width:41.5%;height:15.42%">0.0</div>
+          <div class="tp-o tp-unit" style="left:95.6%;top:39%">rpm</div>
+          <div class="tp-o" style="left:53.5%;top:45.5%;font-size:1.8cqw;color:#B8C3D9">Tocar para escribir, 0 a 1750 rpm</div>
+          <div class="tp-o tp-lbl" style="left:2.5%;top:54%">ORIGEN DE LA REFERENCIA</div>
+          <div class="tp-o tp-sw" id="tp-sw" role="switch" tabindex="0" aria-checked="true" aria-label="Origen de la referencia" style="left:2.5%;top:60.42%;width:46.25%;height:10%"><span id="tp-sw0">POTENCIÓMETRO</span><span id="tp-sw1" class="on">HMI</span></div>
+          <div class="tp-o tp-lbl" style="left:52.5%;top:54%">REFERENCIA ACTIVA</div>
+          <div class="tp-o tp-field" id="tp-ref" style="left:52.5%;top:61.67%;width:42.5%;height:8.33%;font-size:3.2cqw">0.0 rpm</div>
+          <div class="tp-o tp-ind" style="left:2.5%;top:74.38%;width:95%;height:12.08%">
+            <div><span class="tp-led" id="tp-led-m"></span><span>ORDEN DE<br>MARCHA</span></div>
+            <div><span class="tp-led" id="tp-led-v"></span><span>MOVIMIENTO<br>DETECTADO</span></div>
+            <div><span>SENTIDO<br>ORDENADO</span><span class="tp-sym" id="tp-dir">ADELANTE</span></div>
+          </div>
+          <div class="tp-o tp-cfg" id="tp-cfg">REVISAR CONFIGURACIÓN RPM</div>
+          <div class="tp-keypad" id="tp-kp" role="dialog" aria-modal="true" aria-label="Teclado numérico del panel">
+            <div class="kp"><div>RPM_Solicitadas</div><input type="number" id="kp-in" step="0.1" inputmode="decimal"><div class="kp-msg" id="kp-msg"></div>
+              <div class="kp-btns"><button type="button" id="kp-cancel">Cancelar</button><button type="button" id="kp-ok">Aceptar</button></div></div>
+          </div>
+        </div>
+        <div class="tp-brand"><span>Réplica didáctica de la pantalla Motor_Principal, 800 × 480</span><span id="tp-comm">Conexion_PLC en línea</span></div>
+      </div></div>
+
+      <h3>Redes 1 a 6 en vivo</h3>
+      <p class="hint">Verde = la condición deja pasar corriente lógica en este scan.</p>
+      <div id="lad-live"></div>
+    </div>
+
+    <div>
+      <div class="panelbox">
+        <h3>Botonera</h3>
+        <div class="pb-row">
+          <div class="pb"><button type="button" class="cap green" id="b-marcha" aria-pressed="false">I0.4</button>Marcha<label class="lock"><input type="checkbox" id="lk-marcha">sostener</label></div>
+          <div class="pb"><button type="button" class="cap red" id="b-paro" aria-pressed="false">I0.5</button>Paro (NC)<label class="lock"><input type="checkbox" id="lk-paro">enclavar</label></div>
+          <div class="selector"><button type="button" id="b-giro" aria-pressed="false" aria-label="Selector de giro"></button><span id="giro-txt">Giro: 0</span></div>
+          <div class="pb"><button type="button" class="cap blue" id="b-reset" aria-pressed="false">I0.7</button>Reset<label class="lock"><input type="checkbox" id="lk-reset">sostener</label></div>
+        </div>
+        <label class="ctl" style="margin-top:10px"><span>Potenciómetro (%IW64)</span>
+          <span class="rangebox"><input type="range" id="potV2" min="0" max="10" step="0.05" value="3.2"><output id="potVo2" class="mono">3.20 V</output></span></label>
+        <div class="leds" id="leds" aria-label="LED de entradas y salidas"></div>
+      </div>
+
+      <div class="panelbox">
+        <h3>Variador y medición</h3>
+        <div style="display:grid;gap:6px">
+          <label class="toggle"><input type="checkbox" id="s-listo" checked> Relé listo cerrado (I1.0)</label>
+          <label class="toggle"><input type="checkbox" id="s-sinfalla" checked> Relé sin falla cerrado (I1.1)</label>
+          <div class="btnrow" style="margin:2px 0"><button type="button" id="s-falla">Provocar una falla</button></div>
+          <label class="toggle"><input type="checkbox" id="s-hscok" checked> DB_Ajustes.HSC_OK</label>
+          <label class="toggle">DB_Ajustes.PPR <input type="number" id="s-ppr" value="400" step="1" style="width:84px"></label>
+          <label class="toggle"><input type="checkbox" id="s-enc" checked> Cable del encoder conectado</label>
+          <label class="toggle"><input type="checkbox" id="s-fix"> Sustituir el encoder por <input type="number" id="s-fixhz" value="6000" step="1" style="width:84px"> Hz</label>
+          <label class="ctl" style="min-width:0"><span>Carga en el eje (simulada)</span><span class="rangebox"><input type="range" id="s-load" min="0" max="100" value="30"><output id="s-loado" class="mono">30 %</output></span></label>
+        </div>
+      </div>
+
+      <div class="panelbox">
+        <h3>CPU</h3>
+        <div class="scanbar">
+          <button type="button" id="cpu-run" aria-pressed="true">RUN</button>
+          <button type="button" id="cpu-step">Ejecutar 1 scan</button>
+          <button type="button" id="cpu-restart">STOP → RUN</button>
+          <span class="count" id="scan-n">scan 0</span>
+        </div>
+        <p class="hint">STOP → RUN activa FirstScan en el primer ciclo y devuelve a su valor inicial las variables sin retención, incluidas las de DB_HMI.</p>
+      </div>
+
+      <div class="tw" style="margin-top:12px"><table class="watch" id="watch">
+        <caption>Tabla de observación</caption>
+        <thead><tr><th>Variable</th><th>Dirección</th><th>Valor</th></tr></thead><tbody></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <h3>Pruebas de la lógica</h3>
+  <p>“Preparar” deja el banco en la condición inicial de cada prueba. Luego haz la acción indicada y compara con el resultado esperado.</p>
+  <ol class="tests" id="tests"></ol>
+  <p class="hint">Para reconocer fallas, primero pulsa Paro y después pulsa y suelta Reset. El programa no garantiza un retardo físico entre los contactos de los relés. El flanco evita el rearranque por botón mantenido; no diagnostica una avería mecánica del pulsador.</p>
+</section>
+
+<hr class="duct" aria-hidden="true">
+
+<!-- =================== 5 HMI =================== -->
+<section id="hmi" class="part" aria-labelledby="h5-hmi">
+  <div class="part-head"><span class="scr" aria-hidden="true">5</span><div><h2 id="h5-hmi">HMI TP700 en TIA Portal</h2>
+  <p>Leer y solicitar RPM, y observar la marcha y el sentido ordenado. La pantalla modifica la referencia de velocidad; no agrega un arranque automático.</p></div></div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Indicación</th><th>Dato utilizado</th><th>Interpretación</th></tr></thead>
+    <tbody>
+      <tr><td>RPM reales</td><td>Encoder → HSC → <code>FB_MICROMASTER 440_DB.RPM</code></td><td>Magnitud de velocidad medida.</td></tr>
+      <tr><td>RPM solicitadas</td><td><code>DB_HMI.RPM_Consigna</code></td><td>Referencia que escribe el operador.</td></tr>
+      <tr><td>Referencia activa</td><td><code>DB_HMI.RPM_Referencia_Activa</code></td><td>Equivalente nominal de la fuente seleccionada.</td></tr>
+      <tr><td>Orden de marcha</td><td><code>DO_Marcha</code> / <code>Q0.0</code></td><td>El PLC pide marcha al MM440.</td></tr>
+      <tr><td>Movimiento detectado</td><td>RPM &gt; 20 y configuración válida</td><td>Indicación visual, no confirmación segura de parada.</td></tr>
+      <tr><td>Sentido ordenado</td><td><code>DO_Giro</code> / <code>Q0.1</code></td><td>0 adelante, 1 reversa, según parametrización.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Alimentación y red</h3>
+  <p>Alimenta el TP700 con una fuente externa adecuada de 24 VDC en los bornes del panel, según su marcado. Para el TP700 Comfort estándar se documentan 0.5 A nominales; considera accesorios y condiciones del fabricante al dimensionarla. [S4]</p>
+  <div class="warn"><p><strong>No alimentes el TP700 desde los 100 mA del MM440 ni desde los 400 mA para sensores de la CPU.</strong> No unas los positivos de fuentes diferentes. Conecta la puesta a tierra y equipotencialidad conforme a los manuales.</p></div>
+  <p>El encoder por canal A mide RPM sin signo. Q0.1 indica el sentido ordenado, no una medición del sentido del eje. La conversión 1750 rpm ↔ 60 Hz es nominal: no es un regulador con realimentación.</p>
+
+  <h3>A. Agregar el TP700 y crear la conexión</h3>
+  <ol class="steps">
+    <li>Guarda una copia del proyecto del PLC con un nombre nuevo, por ejemplo <code>Practica2_MM440_HMI</code>, y abre la vista de proyecto.</li>
+    <li>Agregar dispositivo → HMI → SIMATIC Comfort Panel → 7 pulgadas → TP700 Comfort. El catálogo puede mostrar carpetas con nombres ligeramente distintos.</li>
+    <li>Compara la referencia con la etiqueta del panel; la estándar es <code>6AV2124-0GC01-0AX0</code>. Elige una versión de dispositivo compatible con la imagen instalada. Nombre: <code>HMI_Motor</code>. [S4]</li>
+    <li>En el asistente, selecciona tu S7-1214C y crea una pantalla inicial. Si no aparece el asistente, configura la conexión y la pantalla desde el árbol del HMI.</li>
+    <li>Dispositivos y redes → Vista de redes: une PLC y TP700 en la misma subred Ethernet. En modo Conexiones elige Conexión HMI y establece la pareja HMI-CPU.</li>
+    <li>En HMI_Motor → Conexiones, comprueba el controlador SIMATIC S7-1200/1500 y el PLC asociado. Nombra la conexión <code>Conexion_PLC</code>. [S5]</li>
+  </ol>
+  <div class="tw"><table style="max-width:560px">
+    <thead><tr><th>Equipo</th><th>IP de ejemplo</th><th>Máscara</th></tr></thead>
+    <tbody><tr><td>PLC</td><td class="mono">192.168.0.1</td><td class="mono">255.255.255.0</td></tr>
+    <tr><td>TP700</td><td class="mono">192.168.0.2</td><td class="mono">255.255.255.0</td></tr>
+    <tr><td>Computadora</td><td class="mono">192.168.0.10</td><td class="mono">255.255.255.0</td></tr></tbody>
+  </table></div>
+  <p>Las IP son un ejemplo: si tu PLC ya usa otra subred, conserva esa dirección y adapta el HMI y la PC. No repitas una IP. Una línea de red no sustituye la conexión HMI; verifica ambas. Antes de continuar debes ver PLC_1 y HMI_Motor en el árbol, una red común y Conexion_PLC en la tabla de conexiones. Si el TP700 no aparece, verifica la instalación de WinCC Comfort; no elijas un MTP Unified como sustituto.</p>
+
+  <h3>B. Preparar DB_HMI y los pines del FB</h3>
+  <ol class="steps">
+    <li>Bloques de programa → Agregar nuevo bloque → Bloque de datos → DB global. Llámalo <code>DB_HMI</code>. No es el DB de instancia del FB.</li>
+    <li>Agrega <code>Usar_Referencia_HMI</code> (Bool, FALSE), <code>RPM_Consigna</code> (Real, 0.0), <code>RPM_Referencia_Activa</code> (Real, 0.0) y <code>Motor_EnMovimiento</code> (Bool, FALSE), con su valor de arranque. Para esta práctica, déjalas sin retención.</li>
+    <li>Agrega en Input del FB los pines <code>Usar_Referencia_HMI</code> (Bool) y <code>RPM_Consigna_HMI</code> (Real), y en Temp las variables de las redes 9 a 13.</li>
+    <li>Actualiza la llamada en OB1 y conecta los dos pines nuevos. El FB se ejecuta una vez por ciclo, sin condicionar EN a la marcha.</li>
+  </ol>
+  <div class="warn"><p><strong>No programes un MOVE permanente que ponga RPM_Consigna en cero:</strong> borraría lo escrito desde el panel en cada ciclo. No escribas la consigna en <code>FB_MICROMASTER 440_DB.RPM</code>, que contiene la medición.</p></div>
+
+  <h3>C. Cambiar la consigna en LAD</h3>
+  <p>Conserva las redes 7 y 8, que limitan IW64 y normalizan el potenciómetro. En la red 9 cambia el destino del SCALE_X existente a <code>#Hz_Pot</code> y agrega las redes 10 a 14 en orden (están dibujadas en la sección 3). No dejes la red antigua escribiendo también Consigna_Hz. En la red 11, 875.0 rpm deben producir 0.5 y 1750.0 rpm deben producir 1.0. LIMIT puede mostrar MIN/MAX o MN/MX según el editor. SEL con G = FALSE copia IN0 y con G = TRUE copia IN1. [S8]</p>
+  <div class="warn"><p><strong>Solo AO_Raw se conecta a AO_Velocidad (%QW112).</strong> No escribas QW112 desde el HMI ni desde otra red. Las RPM del encoder siguen calculándose en las redes 17 a 22; no se reemplazan por las RPM solicitadas.</p></div>
+
+  <h3>D. Conectar OB1 y crear las indicaciones</h3>
+  <p>No conectes <code>FB_MICROMASTER 440_DB.RPM</code> al pin RPM de esa misma instancia: para observarlo no hace falta cablearlo a su propio DB. Mantén Encoder_Hz conectado a la frecuencia real del HSC, no a cuentas acumuladas. Después de la llamada, OB1 calcula la referencia activa (MUL × 1750.0 y DIV ÷ 60.0) y el indicador de movimiento (RPM &gt; 20.0 en serie con RPM_Config_OK, bobina normal).</p>
+  <div class="note"><p>20 rpm es un umbral visual propuesto. Si falla el cable del encoder, RPM puede quedar en cero con el eje girando. El indicador no se usa como protección ni como prueba segura de parada.</p></div>
+
+  <h3>E. Variables del TP700</h3>
+  <p>HMI_Motor → Variables HMI → nueva tabla <code>Motor</code>. Para cada fila indica nombre y Conexion_PLC; en Variable del PLC pulsa el botón de selección y elige el miembro del DB. El tipo debe coincidir con el del PLC. No inventes direcciones DBW/DBD.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Variable HMI</th><th>Tipo</th><th>Seleccionar en el PLC</th><th>Objeto</th></tr></thead>
+    <tbody>
+      <tr><td><code>RPM_Reales</code></td><td>Real</td><td><code>FB_MICROMASTER 440_DB.RPM</code></td><td>Campo de salida</td></tr>
+      <tr><td><code>RPM_Solicitadas</code></td><td>Real</td><td><code>DB_HMI.RPM_Consigna</code></td><td>Campo entrada/salida</td></tr>
+      <tr><td><code>Seleccion_HMI</code></td><td>Bool</td><td><code>DB_HMI.Usar_Referencia_HMI</code></td><td>Interruptor</td></tr>
+      <tr><td><code>Referencia_Activa</code></td><td>Real</td><td><code>DB_HMI.RPM_Referencia_Activa</code></td><td>Campo de salida</td></tr>
+      <tr><td><code>Movimiento</code></td><td>Bool</td><td><code>DB_HMI.Motor_EnMovimiento</code></td><td>Círculo animado</td></tr>
+      <tr><td><code>Marcha_Activa</code></td><td>Bool</td><td><code>DO_Marcha</code> (%Q0.0)</td><td>Círculo animado</td></tr>
+      <tr><td><code>Giro_Ordenado</code></td><td>Bool</td><td><code>DO_Giro</code> (%Q0.1)</td><td>Campo simbólico</td></tr>
+      <tr><td><code>Configuracion_RPM</code></td><td>Bool</td><td><code>FB_MICROMASTER 440_DB.RPM_Config_OK</code></td><td>Texto de estado</td></tr>
+    </tbody>
+  </table></div>
+  <p>Configura 500 ms de adquisición cíclica para las variables mostradas; el HSC del PLC ya procesa los pulsos. [S6] RPM_Solicitadas y Seleccion_HMI se usan en objetos operables; el resto, como salida. Evita copias internas del HMI sin conexión al PLC: cambiarían solo dentro del panel. Si no encuentras un miembro del DB, compila primero el PLC, verifica el nombre exacto y la instancia, y actualiza la selección simbólica después de cambiar interfaces.</p>
+
+  <h3>F. Construir la pantalla de 800 × 480</h3>
+  <p>Crea <code>Motor_Principal</code> y establécela como pantalla inicial. Fondo azul marino, texto de título, y en cada objeto Propiedades → Disposición para posición y tamaño (X crece a la derecha; Y, hacia abajo). La réplica del banco virtual usa estas mismas coordenadas.</p>
+  <div class="tw"><table style="max-width:640px">
+    <thead><tr><th>Objeto</th><th class="num">X / Y</th><th class="num">Ancho / alto</th></tr></thead>
+    <tbody>
+      <tr><td>Título</td><td class="num">20 / 10</td><td class="num">760 / 40</td></tr>
+      <tr><td>RPM_Reales, campo numérico</td><td class="num">38 / 140</td><td class="num">332 / 74</td></tr>
+      <tr><td>RPM_Solicitadas, campo numérico</td><td class="num">428 / 140</td><td class="num">332 / 74</td></tr>
+      <tr><td>Selector de referencia</td><td class="num">20 / 290</td><td class="num">370 / 48</td></tr>
+      <tr><td>Referencia_Activa, campo de salida</td><td class="num">420 / 296</td><td class="num">340 / 40</td></tr>
+      <tr><td>Indicadores y giro</td><td class="num">20 / 357</td><td class="num">760 / 58</td></tr>
+    </tbody>
+  </table></div>
+  <p class="hint">Coordenadas sugeridas para el área de contenido completa. Si usas una plantilla con cabecera o pie, ajusta los objetos para no superponerlos. Los textos “rpm” son etiquetas fijas.</p>
+
+  <h3>G. Configurar los objetos</h3>
+  <ol class="steps">
+    <li><b>RPM reales:</b> Campo E/S, variable RPM_Reales, modo Salida. Formato decimal con al menos cuatro cifras enteras y una decimal, letra de 32–36 puntos, números negros sobre fondo blanco.</li>
+    <li><b>RPM solicitadas:</b> segundo Campo E/S con RPM_Solicitadas en modo Entrada/salida. Si duplicas el primero, cambia variable y modo. En la tabla de variables HMI, RPM_Solicitadas → Propiedades → Límites: inferior 0.0, superior 1750.0. [S7]</li>
+    <li><b>Referencia activa:</b> tercer Campo E/S en modo Salida con Referencia_Activa y una decimal. En modo potenciómetro puede diferir del valor escrito.</li>
+    <li><b>Selector:</b> un Interruptor vinculado a Seleccion_HMI, con textos 0 = POTENCIÓMETRO y 1 = HMI. No uses un Campo E/S de salida para esta función.</li>
+    <li><b>Marcha y movimiento:</b> dos círculos con animación de Apariencia, 0 gris y 1 verde, vinculados a Marcha_Activa y Movimiento.</li>
+    <li><b>Sentido:</b> lista de textos <code>Lista_Giro</code> (0 → ADELANTE, 1 → REVERSA) en un Campo E/S simbólico de salida con Giro_Ordenado. [S9]</li>
+    <li><b>Configuración:</b> lista <code>Lista_ConfigRPM</code> (0 → REVISAR CONFIGURACIÓN RPM, 1 → CONFIGURACIÓN RPM HABILITADA) con Configuracion_RPM. No rotules “ENCODER OK”: ese Bool no comprueba el cable ni la mecánica.</li>
+  </ol>
+  <div class="warn"><p><strong>El LIMIT del PLC sigue siendo obligatorio.</strong> Los límites visuales no sustituyen el cálculo del PLC. No impongas 1750 como límite de la lectura real: un motor descargado puede medir más que sus rpm nominales.</p>
+  <p><strong>El cambio de fuente es directo:</strong> no hay transferencia sin salto ni enclavamiento por motor parado. Cambia de fuente solo con el motor detenido. Este selector no es un selector de seguridad local/remoto.</p></div>
+  <p>Escribir RPM o seleccionar HMI no modifica el enclavamiento de marcha: el pulsador físico sigue arrancando y Paro sigue deteniendo. Con la marcha retirada, QW112 puede mantener una referencia; Q0.0 es la orden ON/OFF1 del MM440. La referencia escrita queda guardada mientras el operador selecciona potenciómetro, y volver a HMI la recupera.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Situación</th><th>Qué puede mostrar la pantalla</th></tr></thead>
+    <tbody>
+      <tr><td>Marcha activa, eje acelerando</td><td>Orden en verde y RPM subiendo; el movimiento puede cambiar después.</td></tr>
+      <tr><td>Paro pulsado y desacelerando</td><td>Orden en gris; movimiento en verde hasta bajar del umbral.</td></tr>
+      <tr><td>Encoder desconectado o mal configurado</td><td>RPM en cero o incorrectas; no acredita que el eje esté parado.</td></tr>
+      <tr><td>Selector de giro cambiado</td><td>Cambia el sentido ordenado; durante la rampa el eje puede seguir en el sentido anterior.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<hr class="duct" aria-hidden="true">
+
+<!-- =================== 6 PRUEBAS =================== -->
+<section id="pruebas" class="part" aria-labelledby="h6-pr">
+  <div class="part-head"><span class="scr" aria-hidden="true">6</span><div><h2 id="h6-pr">Descarga, pruebas y diagnóstico</h2>
+  <p>Primero la cadena numérica con la marcha retirada; después, una prueba de giro controlada.</p></div></div>
+
+  <h3>Compilar y cargar</h3>
+  <ol class="steps">
+    <li>Guarda y compila el PLC. Corrige errores de tipo, variables o llamada del FB. Verifica que QW112 tiene una sola ruta de escritura.</li>
+    <li>Con el motor detenido y las órdenes controladas, descarga los cambios del PLC. Confirma en línea los dos pines nuevos y DB_HMI. No hace falta forzar salidas para probar el HMI.</li>
+    <li>HMI_Motor → Compilar → Software. Revisa errores y advertencias: una variable sin conexión puede compilar y aun así no intercambiar datos.</li>
+    <li>En el TP700, sal del Runtime y abre Settings / Control Panel. Introduce la IP y la máscara del proyecto; confirma el cable y que la PC usa el adaptador Ethernet correcto.</li>
+    <li>En Transfer habilita el canal Ethernet/PN-IE y entra en modo Transfer. [S10]</li>
+    <li>En TIA, HMI_Motor → Cargar en dispositivo → Software. Elige la interfaz PN/IE y el adaptador físico de tu computadora, busca el panel, comprueba identidad e IP, carga y arranca el Runtime. Si TIA pide cambiar la imagen del panel, verifica versión y respaldo primero: la descarga ordinaria y una actualización de sistema no son el mismo procedimiento.</li>
+    <li>Abre Motor_Principal. Los campos deben mostrar datos sin errores de comunicación. Escribe un valor con el motor parado y confírmalo en línea en DB_HMI.</li>
+  </ol>
+  <div class="warn"><p><strong>No descargues mientras el motor hace una prueba de giro.</strong> Si no conoces la IP o la imagen del panel, identifícalas en su Control Panel antes de sustituir configuración.</p></div>
+
+  <h3>Cadena numérica, con la orden de marcha retirada</h3>
+  <p>P2000 y la escala analógica del MM440 deben corresponder a 60 Hz y 0–10 V, según la configuración previa.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="num">RPM HMI</th><th class="num">Normalizada</th><th class="num">Consigna Hz</th><th class="num">QW112</th><th class="num">AO ideal</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0.0</td><td class="num">0.00</td><td class="num">0.0</td><td class="num">0</td><td class="num">0 V</td></tr>
+      <tr><td class="num">437.5</td><td class="num">0.25</td><td class="num">15.0</td><td class="num">6912</td><td class="num">2.5 V</td></tr>
+      <tr><td class="num">875.0</td><td class="num">0.50</td><td class="num">30.0</td><td class="num">13824</td><td class="num">5 V</td></tr>
+      <tr><td class="num">1312.5</td><td class="num">0.75</td><td class="num">45.0</td><td class="num">20736</td><td class="num">7.5 V</td></tr>
+      <tr><td class="num">1750.0</td><td class="num">1.00</td><td class="num">60.0</td><td class="num">27648</td><td class="num">10 V</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Prueba controlada, paso a paso</h3>
+  <ol class="steps">
+    <li>Selecciona HMI con el motor detenido y escribe 875.0. Comprueba <code>DB_HMI.RPM_Consigna</code> = 875.0 y <code>Consigna_Hz</code> = 30.0.</li>
+    <li>Observa AO_Velocidad en QW112: unos 13824. Si mides, debe haber unos 5 V entre el positivo y el retorno de ese canal. No uses PE como sustituto del retorno analógico.</li>
+    <li>Comprueba los permisos de marcha y pulsa Marcha. Debe activarse Q0.0; el motor acelera según la rampa del MM440.</li>
+    <li>Compara las RPM reales con la referencia. Pueden diferir por carga, deslizamiento y precisión del sistema. No ajustes la fórmula del encoder para obligar a que coincidan.</li>
+    <li>Pulsa Paro. La orden de marcha pasa a gris; el movimiento puede seguir en verde durante la desaceleración. Escribir otra consigna no debe arrancar por sí solo.</li>
+    <li>Verifica el sentido con una prueba autorizada: Q0.1 y el texto deben coincidir. El texto indica la orden; el canal A no valida la dirección.</li>
+  </ol>
+  <p>875 rpm equivalen aquí a 30 Hz por la relación nominal 1750/60; eso no garantiza 875 rpm medidas. No hay PID de velocidad en esta práctica.</p>
+
+  <h3>Diagnóstico</h3>
+  <label class="search"><span>Buscar síntoma</span><input type="text" id="diag-q" placeholder="por ejemplo: cero, panel, potenciómetro"></label>
+  <div class="tw"><table id="diag">
+    <thead><tr><th>Síntoma</th><th>Revisión concreta</th></tr></thead>
+    <tbody>
+      <tr><td>El panel no aparece al descargar</td><td>Alimentación externa, cable/switch, IP y máscara, modo Transfer y adaptador Ethernet seleccionado en la carga.</td></tr>
+      <tr><td>Campos con #### o error</td><td>Revisa avisos, conexión y variable. Verifica también el formato y ancho del campo: un valor que no cabe puede producir una indicación de error.</td></tr>
+      <tr><td>Escribo pero vuelve a cero</td><td>Mira DB_HMI en línea. Busca una red que sobrescriba RPM_Consigna cada scan; confirma variable externa y modo Entrada/salida.</td></tr>
+      <tr><td>El número cambia pero no la velocidad</td><td>Comprueba Usar_Referencia_HMI = TRUE, el pin conectado en OB1, el SEL y la salida seleccionada. Después verifica QW112 y la escala del MM440.</td></tr>
+      <tr><td>Solo responde al potenciómetro</td><td>Observa G del SEL y su IN1. No deben ser una copia interna del HMI sin enlace ni una entrada del FB sin conectar.</td></tr>
+      <tr><td>RPM siempre en cero</td><td>Frecuencia del HSC, canal I0.0, configuración/PPR y RPM_Config_OK. No leas el bit I0.0 como si fuera un número de RPM.</td></tr>
+      <tr><td>RPM incorrectas con el motor girando</td><td>Hz frente a cuentas, factor ×1/×4, PPR, relación mecánica, filtro de entrada y cableado. Compara con un tacómetro.</td></tr>
+      <tr><td>El texto de giro parece invertido</td><td>Comprueba Q0.1 y la asignación del MM440. Define qué sentido físico llamarás adelante; no cambies el cálculo de RPM.</td></tr>
+      <tr><td>El selector cambia pero no el DB</td><td>Revisa conexión, variable PLC enlazada y función del objeto. No uses una indicación de solo salida como mando.</td></tr>
+    </tbody>
+  </table></div>
+  <p id="diag-none" class="hint" hidden>Ningún síntoma coincide. Prueba con otra palabra.</p>
+  <div class="note"><p><b>Si se pierde la comunicación:</b> esta propuesta no agrega un watchdog que detenga el PLC por pérdida del panel. El PLC puede conservar la última consigna mientras los mandos físicos sigan actuando. Mantén el paro físico operativo; una política automática ante pérdida del HMI requiere diseño adicional. No deshabilites todas las protecciones de la CPU ni cambies accesos al azar.</p></div>
+</section>
+
+<hr class="duct" aria-hidden="true">
+
+<!-- =================== 7 LISTA =================== -->
+<section id="lista" class="part" aria-labelledby="h7-lista">
+  <div class="part-head"><span class="scr" aria-hidden="true">7</span><div><h2 id="h7-lista">Lista final y registro</h2>
+  <p>Tus marcas y datos se guardan en este navegador. Imprime la página para entregar el registro.</p></div></div>
+  <p class="progress" id="prog">0 de 10 comprobaciones</p>
+  <div class="tw"><table id="final">
+    <thead><tr><th>Hecho</th><th>Comprobación</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+
+  <h3>Mediciones e identificación</h3>
+  <div class="tw"><table class="record" id="record">
+    <thead><tr><th>Medición o identificación</th><th>Resultado</th><th>Estado o fuente del dato</th></tr></thead>
+    <tbody>
+      <tr><td>Referencia de la CPU (6ES7)</td><td><input type="text" data-rec="cpu"></td><td><input type="text" data-rec="cpu-f"></td></tr>
+      <tr><td>Referencia del módulo AO (6ES7)</td><td><input type="text" data-rec="ao"></td><td><input type="text" data-rec="ao-f"></td></tr>
+      <tr><td>Encoder: consumo propio máximo (mA)</td><td><input type="text" data-rec="enc"></td><td><input type="text" data-rec="enc-f"></td></tr>
+      <tr><td>Rama L+ de la CPU, total externo (mA)</td><td><input type="text" data-rec="lp"></td><td><input type="text" data-rec="lp-f"></td></tr>
+      <tr><td>Rama 9 → 1L, órdenes usadas (mA)</td><td><input type="text" data-rec="b9"></td><td><input type="text" data-rec="b9-f" placeholder="Q0.0 / Q0.1 / Q0.2"></td></tr>
+      <tr><td>Cargas de 24 V por rutas adicionales (mA)</td><td><input type="text" data-rec="ad"></td><td><input type="text" data-rec="ad-f" placeholder="no duplicar lo ya medido"></td></tr>
+    </tbody>
+  </table></div>
+  <div class="btnrow"><button type="button" id="print">Imprimir registro</button><button type="button" id="clear-all">Borrar mis marcas</button></div>
+
+  <h3>Fuentes</h3>
+  <ol class="sources">
+    <li>[S1] Siemens S7-1200: <a href="https://docs.tia.siemens.cloud/r/simatic_s7_1200_manual_collection_itit_20/technical-specifications/cpu-1214c/power-supply-and-power-sensor">CPU 1214C, alimentación y salida para sensores</a>.</li>
+    <li>[S2] Siemens S7-1200: <a href="https://docs.tia.siemens.cloud/r/simatic_s7_1200_manual_collection_enus_20/technical-specifications/cpu-1214c/digital-inputs-and-outputs">CPU 1214C, entradas y salidas digitales</a>.</li>
+    <li>[S3] Siemens: <a href="https://support.industry.siemens.com/cs/attachments/24291961/440_COM_24291961_en_1006.pdf">MICROMASTER 440, guía de puesta en servicio 10/2006</a>; lista de parámetros, edición 03/2005.</li>
+    <li>[S4] Siemens: <a href="https://sieportal.siemens.com/en-ww/products-services/10233970">TP700 Comfort, 6AV2124-0GC01-0AX0</a>.</li>
+    <li>[S5] WinCC: <a href="https://docs.tia.siemens.cloud/r/en-us/v20/communicating-with-plcs-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/communicating-with-simatic-s7-1200-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/communication-via-profinet-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/configuring-an-hmi-connection-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/configuring-an-hmi-connection-via-profinet-basic-panels-panels-comfort-panels-rt-advanced-rt-professional">configurar una conexión HMI con S7-1200 por PROFINET</a>.</li>
+    <li>[S6] WinCC: <a href="https://docs.tia.siemens.cloud/r/en-us/v21/communicating-with-plcs-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/data-exchange-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/data-exchange-using-tags-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/basics-of-tags-basic-panels-panels-comfort-panels-rt-advanced-rt-professional">fundamentos de variables y enlace con el PLC</a>.</li>
+    <li>[S7] WinCC: <a href="https://docs.tia.siemens.cloud/r/en-us/v20/creating-screens-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/display-and-operating-elements-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/objects-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/i/o-field-basic-panels-panels-comfort-panels-rt-advanced-rt-professional?contentId=JyzbxH8LvCSz8ZA5eCplrQ">Campo E/S: modos, formato y límites</a>.</li>
+    <li>[S8] STEP 7: <a href="https://docs.tia.siemens.cloud/r/en-us/v20/lad-s7-1200-s7-1500/word-logic-operations-s7-1200-s7-1500/sel-select-s7-1200-s7-1500">SEL en LAD para S7-1200/S7-1500</a>.</li>
+    <li>[S9] WinCC: <a href="https://docs.tia.siemens.cloud/r/en-us/v20/creating-screens-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/display-and-operating-elements-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/objects-basic-panels-panels-comfort-panels-rt-advanced-rt-professional/symbolic-i/o-field-basic-panels-panels-comfort-panels-rt-advanced">Campo E/S simbólico y listas de textos</a>.</li>
+    <li>[S10] Siemens: <a href="https://support.industry.siemens.com/cs/attachments/49313233/HWComfortPanelsenUS_en-US.pdf">manual de operación de Comfort Panels</a>.</li>
+    <li>Siemens S7-1200: <a href="https://docs.tia.siemens.cloud/r/simatic_s7_1200_manual_collection_enus_20/technology-instructions/counting-high-speed-counters/legacy-ctrl_hsc-control-high-speed-counter-instruction/hsc-current-count-value">valor del HSC y frecuencia en Hz</a> y <a href="https://docs.tia.siemens.cloud/r/simatic_s7_1200_manual_collection_eses_20/plc-concepts/processing-of-analog-values">procesamiento de valores analógicos</a>.</li>
+  </ol>
+  <p class="hint">Datos consultados el 24/10/2026 y el 27/10/2026. Los nombres de menús se orientan a V17; algunas referencias públicas corresponden a ediciones posteriores de funciones compartidas. Colores, posiciones, umbral de movimiento y escalas nominales son decisiones didácticas. Pendiente: compilar la edición integrada en TIA, comprobar el filtro y la adquisición del HSC, la polaridad de los retornos y las pruebas en CPU y variador.</p>
+</section>
+
+<footer>
+  Práctica 2, Laboratorio de Automatización, TecNM Campus Culiacán. Basada en la guía de conexión y consumo (rev. 24/10/2026), la guía del HMI TP700 (27/10/2026) y el programa completo en Ladder (edición integrada 09/11/2026).
+</footer>
+</main>
+</div>
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s);};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+function clamp(x,a,b){return Math.min(b,Math.max(a,x));}
+function f(x,d){return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function store(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r?JSON.parse(r):null;}localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+var KEY="p2mm440:";
+
+/* ============ estado compartido ============ */
+var S={
+  potV:3.2, rpmCons:875, useHMI:true,          // DB_HMI y entrada analógica
+  hscOK:true, ppr:400,                        // DB_Ajustes
+  marcha:false, lkMarcha:false, paro:false, lkParo:false, giro:false, reset:false, lkReset:false,
+  listo:true, sinFalla:true, fault:false,
+  encOK:true, fix:false, fixHz:6000, load:30,
+  // memoria del FB
+  prevClk:false, en:false, pulso:false, arr:false, cmdM:false, cmdG:false, cmdR:false, init:false,
+  firstPending:false, scan:0, running:true,
+  // proceso
+  fOut:0, rpmMot:0, pulseAcc:0, accT:0, hscHz:0,
+  rpm:0, cfg:false, pprV:true, mov:false, refAct:0, ch:null,
+  f:"", cnt:0, qw:0                            // falla oculta (versión docente)
+};
+
+/* ============ cadena de referencia (redes 7–16 y OB1) ============ */
+function chain(potV,rpmCons,useHMI){
+  var c={};
+  c.raw=Math.round(clamp(potV,0,11.759)/10*27648);
+  c.lim=clamp(c.raw,0,27648);
+  c.nor=c.lim/27648;
+  c.hzp=c.nor*60;
+  c.rpm=rpmCons;
+  c.rpml=clamp(rpmCons,0,1750);
+  c.hmin=c.rpml/1750;
+  c.hzh=c.hmin*60;
+  c.sel=useHMI?c.hzh:c.hzp;
+  c.hz=clamp(c.sel,0,60);
+  c.son=c.hz/60;
+  c.ao=Math.round(c.son*27648);
+  c.v=c.ao/27648*10;
+  c.mmhz=c.v/10*60;
+  c.ref=c.hz*1750/60;
+  return c;
+}
+function renderChain(){
+  var c=chain(S.potV,S.rpmCons,S.useHMI);
+  $("#c-raw").textContent=c.raw;
+  $("#c-lim").textContent=c.lim;
+  $("#c-nor").textContent=f(c.nor,4);
+  $("#c-hzp").textContent=f(c.hzp,2)+" Hz";
+  $("#c-rpm").textContent=f(c.rpm,1);
+  $("#c-rpml").textContent=f(c.rpml,1);
+  var n10=$("#n10"),cl=c.rpml!==c.rpm;
+  n10.classList.toggle("clamped",cl);
+  $(".flag",n10).textContent=cl?"recortado por LIMIT":"";
+  $("#c-hmin").textContent=f(c.hmin,4);
+  $("#c-hzh").textContent=f(c.hzh,2)+" Hz";
+  $("#c-sel").textContent=f(c.sel,2)+" Hz";
+  $("#c-g").textContent=S.useHMI?"G = TRUE → IN1 (HMI)":"G = FALSE → IN0 (potenciómetro)";
+  $("#c-hz").textContent=f(c.hz,2)+" Hz";
+  $("#c-son").textContent=f(c.son,4);
+  $("#c-ao").textContent=c.ao;
+  $("#c-v").textContent=f(c.v,2)+" V";
+  $("#c-mmhz").textContent="≈ "+f(c.mmhz,1)+" Hz";
+  $("#c-ref").textContent=f(c.ref,1);
+  $("#br-pot").classList.toggle("idle",S.useHMI);
+  $("#br-hmi").classList.toggle("idle",!S.useHMI);
+}
+function syncInputs(){
+  $("#potV").value=S.potV; $("#potV2").value=S.potV;
+  $("#potVo").textContent=f(S.potV,2)+" V"; $("#potVo2").textContent=f(S.potV,2)+" V";
+  $("#rpmR").value=clamp(S.rpmCons,0,2000);
+  if(document.activeElement!==$("#rpmN")) $("#rpmN").value=f(S.rpmCons,1);
+  $("#g0").checked=!S.useHMI; $("#g1").checked=S.useHMI;
+  renderChain();
+}
+$("#potV").addEventListener("input",function(e){S.potV=+e.target.value;syncInputs();});
+$("#potV2").addEventListener("input",function(e){S.potV=+e.target.value;syncInputs();});
+$("#rpmR").addEventListener("input",function(e){S.rpmCons=+e.target.value;$("#rpmN").value=f(S.rpmCons,1);syncInputs();});
+$("#rpmN").addEventListener("input",function(e){var v=parseFloat(e.target.value);if(!isNaN(v)){S.rpmCons=v;syncInputs();}});
+$("#rpmN").addEventListener("change",function(){$("#rpmN").value=f(S.rpmCons,1);});
+$$("input[name=g]").forEach(function(r){r.addEventListener("change",function(){S.useHMI=$("#g1").checked;syncInputs();updateTP(true);});});
+
+/* ============ 1 · cableado ============ */
+var WIRES={
+  rojo:{t:"Rojo del encoder",src:"cpu",to:"L+ de la CPU",a:"Retirar del borne 9 del MM440 y llevar a L+."},
+  negro:{t:"Negro del encoder",src:"cpu",to:"M de la CPU",a:"Retirar su retorno del borne 28 y llevar a M."},
+  verde:{t:"Verde del encoder",src:"sig",to:"I0.0 del PLC (HSC1)",a:"Conservar la conexión de señal."},
+  m1:{t:"Común de entradas 1M",src:"cpu",to:"L+ de la CPU",a:"Retirar su alimentación desde el borne 9. Con 1M a +24 V, cada entrada se activa al cerrar hacia M."},
+  bus:{t:"Retornos a M",src:"cpu",to:"M de la CPU",a:"Pulsadores, selector y comunes 20/22 cierran hacia M. M permanece como retorno de 0 V."},
+  marcha:{t:"Marcha, pulsador NA",src:"cpu",to:"I0.4 → pulsador → M",a:"Entrada rápida, 6 mA nominales activa."},
+  paro:{t:"Paro, pulsador NC",src:"cpu",to:"I0.5 → pulsador → M",a:"En reposo la entrada está activa (PB_Paro_OK = TRUE). Entrada rápida, 6 mA."},
+  giro:{t:"Selector de giro",src:"cpu",to:"I0.6 → selector → M",a:"Selector mantenido. Entrada estándar, 4 mA."},
+  reset:{t:"Reset, pulsador NA",src:"cpu",to:"I0.7 → pulsador → M",a:"Entrada estándar, 4 mA."},
+  listo:{t:"Relé listo del MM440",src:"cpu",to:"19 → I1.0; común 20 → M",a:"Contacto seco: usa la fuente de la CPU. Retira de 20 cualquier puente anterior a +24 V o a otra fuente."},
+  sinfalla:{t:"Relé sin falla del MM440",src:"cpu",to:"21 → I1.1; común 22 → M",a:"Contacto seco: usa la fuente de la CPU. Confirma la polaridad real de la señal."},
+  l1:{t:"Común de salidas 1L",src:"mm",to:"Borne 9 del MM440 (+24 V)",a:"Conservar. Verifica que 1L corresponde al grupo de Q0.0 a Q0.2 y que no tiene otra alimentación."},
+  q0:{t:"Q0.0, orden de marcha",src:"mm",to:"Borne 5, DIN1",a:"El contacto conmuta la fuente del MM440. Su corriente cuenta contra los 100 mA del borne 9."},
+  q1:{t:"Q0.1, orden de giro",src:"mm",to:"Borne 6, DIN2",a:"0 adelante, 1 reversa según la parametrización del MM440."},
+  q2:{t:"Q0.2, reconocimiento",src:"mm",to:"Borne 7, DIN3",a:"Activa mientras se pulsa Reset (salvo en el primer ciclo)."},
+  ao:{t:"Salida analógica QW112",src:"ao",to:"AO+ → 3, retorno AO → 4",a:"0–10 V. Mantén la referencia según el manual del módulo. No uses PE como retorno analógico."},
+  oldrojo:{t:"Montaje anterior: rojo",src:"mm",to:"Borne 9 del MM440",a:"Retirar. En la propuesta, el rojo va a L+ de la CPU."},
+  oldnegro:{t:"Montaje anterior: negro",src:"mm",to:"Borne 28 del MM440",a:"Retirar. En la propuesta, el negro va a M de la CPU."},
+  old1m:{t:"Montaje anterior: 1M",src:"mm",to:"Borne 9 del MM440",a:"Retirar. En la propuesta, 1M va a L+ de la CPU."},
+  oldr:{t:"Montaje anterior: pull-up de 2.2 kΩ",src:"mm",to:"Entre borne 9 y la línea de I0.0",a:"Retirar con el equipo desenergizado. Con el transistor conduciendo añadiría 10.91 mA y disiparía 0.262 W a 24 V."}
+};
+var SRC={cpu:["Fuente de la CPU (L+ / M)","src-cpu"],mm:["Fuente del MM440 (9 / 28)","src-mm"],sig:["Señal de pulsos","status-ok"],ao:["Señal 0–10 V",""]};
+function showWire(k,g){
+  var w=WIRES[k]; if(!w) return;
+  $$("#wsvg g.wire.on").forEach(function(x){x.classList.remove("on");});
+  if(g) g.classList.add("on");
+  var s=SRC[w.src];
+  $("#wire-info").innerHTML="<h4>"+esc(w.t)+"</h4><dl><dt>Conectar a</dt><dd>"+esc(w.to)+"</dd><dt>Fuente</dt><dd class=\""+s[1]+"\">"+esc(s[0])+"</dd><dt>Acción</dt><dd style=\"grid-column:2 / -1\">"+esc(w.a)+"</dd></dl>";
+}
+$$("#wsvg g.wire").forEach(function(g){
+  g.addEventListener("click",function(){showWire(g.getAttribute("data-k"),g);});
+  g.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();showWire(g.getAttribute("data-k"),g);}});
+});
+function setView(old){
+  $("#wiring").classList.toggle("show-old",old);
+  $("#v-old").setAttribute("aria-pressed",old);$("#v-new").setAttribute("aria-pressed",!old);
+  $("#wire-info").innerHTML=old?"<h4>Montaje anterior</h4><p>El encoder y 1M tomaban +24 V del borne 9 del MM440, con un pull-up de 2.2 kΩ. Toca las líneas punteadas para ver qué retirar.</p>":"<h4>Toca un conductor</h4><p>Cada línea del diagrama muestra a dónde se conecta, de qué fuente toma corriente y qué hacer con ella.</p>";
+}
+$("#v-old").addEventListener("click",function(){setView(true);});
+$("#v-new").addEventListener("click",function(){setView(false);});
+
+/* ============ 2 · balance de 24 V ============ */
+var INS=[["I0.0","Encoder / HSC",1],["I0.4","Marcha NA",1],["I0.5","Paro NC",1],["I0.6","Selector de giro",0],["I0.7","Reset NA",0],["I1.0","Variador listo",0],["I1.1","Variador sin falla",0]];
+var chk=$("#inputs-chk");
+chk.innerHTML=INS.map(function(r,i){return "<label><input type=\"checkbox\" data-i=\""+i+"\" checked><span><code>"+r[0]+"</code> "+r[1]+"</span><span class=\"ma\">"+(r[2]?"6 mA, rápida":"4 mA, estándar")+"</span></label>";}).join("");
+var QS=[["Q0.0","marcha, borne 5","idin1"],["Q0.1","giro, borne 6","idin2"],["Q0.2","reset, borne 7","idin3"]];
+$("#q-chk").innerHTML=QS.map(function(r,i){return "<label><input type=\"checkbox\" data-q=\""+i+"\"><span><code>"+r[0]+"</code> cerrado: "+r[1]+"</span><span class=\"ma\">q"+i+"</span></label>";}).join("");
+function num(id){var v=$("#"+id).value;if(v===""||isNaN(parseFloat(v)))return null;return Math.max(0,parseFloat(v));}
+function seg(w,max,color,label){return "<span title=\""+esc(label)+"\" style=\"width:"+(Math.max(0,w)/max*100)+"%;background:"+color+"\"></span>";}
+function renderBalance(){
+  var nom=0,res=0,i0=false;
+  $$("#inputs-chk input").forEach(function(c){var r=INS[+c.dataset.i];if(c.checked){nom+=r[2]?6:4;res+=r[2]?8:6;if(r[0]==="I0.0")i0=true;}});
+  var r22=$("#r22").checked&&i0?24/2.2:0;
+  var parts=[["ienc","I<sub>enc</sub>"],["iao","I<sub>AO</sub>"],["idiv","I<sub>div</sub>"],["iotr","I<sub>otras</sub>"]],known=0,pend=[];
+  parts.forEach(function(p){var v=num(p[0]);if(v===null)pend.push(p[1]);else known+=v;});
+  var totN=nom+r22+known,totR=res+r22+known,margin=400-totR;
+  var html=seg(nom,400,"var(--cpu)","Entradas, nominal")+seg(res-nom,400,"#7FB0B4","Reserva de entradas a 30 V")+seg(r22,400,"var(--mm)","Pull-up 2.2 kΩ")+seg(known,400,"#3D8D95","Cargas conocidas");
+  if(pend.length) html+="<span class=\"pend\" style=\"flex:1\" title=\"Falta sumar datos pendientes\"></span>";
+  $("#bar-cpu").innerHTML=html;
+  var over=totR>400;
+  $("#ro-cpu").innerHTML="<span>Nominal <b>"+f(totN,1)+"</b> mA</span><span>Con reserva <b>"+f(totR,1)+"</b> mA</span><span>Margen "+(pend.length?"≤ ":"")+"<b class=\""+(over?"status-bad":"")+"\">"+f(margin,1)+"</b> mA</span>"+
+    "<span style=\"flex-basis:100%\">"+(pend.length?"<span class=\"status-pend\">Pendiente: "+pend.join(", ")+".</span> El total real es mayor que lo mostrado.":(over?"<span class=\"status-bad\">Excede los 400 mA de la salida para sensores.</span>":"<span class=\"status-ok\">Dentro del límite con los datos introducidos.</span> Sustituye supuestos por mediciones antes de aprobar el montaje."))+
+    (r22?" El pull-up añade 10.91 mA y disipa 0.262 W a 24 V.":"")+"</span>";
+  // MM440
+  var mm=0,mp=[];
+  $$("#q-chk input").forEach(function(c){var q=QS[+c.dataset.q];if(c.checked){var v=num(q[2]);if(v===null)mp.push("I<sub>DIN"+(+c.dataset.q+1)+"</sub>");else mm+=v;}});
+  var om=num("iomm");if(om===null)mp.push("otras cargas del borne 9");else mm+=om;
+  var hm=seg(mm,100,"var(--mm)","Cargas conocidas del borne 9");
+  if(mp.length) hm+="<span class=\"pend\" style=\"flex:1\"></span>";
+  $("#bar-mm").innerHTML=hm;
+  var o2=mm>100;
+  $("#ro-mm").innerHTML="<span>I<sub>MM</sub> <b class=\""+(o2?"status-bad":"")+"\">"+f(mm,1)+"</b> mA</span><span>Margen "+(mp.length?"≤ ":"")+"<b>"+f(100-mm,1)+"</b> mA</span>"+
+    "<span style=\"flex-basis:100%\">"+(mp.length?"<span class=\"status-pend\">Pendiente: "+mp.join(", ")+".</span>":(o2?"<span class=\"status-bad\">Excede los 100 mA del borne 9.</span>":"<span class=\"status-ok\">Condición I<sub>MM</sub> ≤ 100 mA cumplida con los datos introducidos.</span>"))+"</span>";
+}
+var PRE={parado:["I0.5","I1.0","I1.1"],"parado-enc":["I0.0","I0.5","I1.0","I1.1"],todas:INS.map(function(r){return r[0];})};
+$$("[data-preset]").forEach(function(b){b.addEventListener("click",function(){var on=PRE[b.dataset.preset];$$("#inputs-chk input").forEach(function(c){c.checked=on.indexOf(INS[+c.dataset.i][0])>=0;});renderBalance();});});
+$$("#balance input").forEach(function(i){i.addEventListener("input",renderBalance);});
+$("#ej-didac").addEventListener("click",function(){$("#ienc").value=50;$("#iao").value=40;$("#idiv").value=2;$("#iotr").value=0;$("#r22").checked=false;$$("#inputs-chk input").forEach(function(c){c.checked=true;});renderBalance();
+  $("#ro-cpu").insertAdjacentHTML("beforeend","<span style=\"flex-basis:100%\"><b style=\"font-size:inherit\">Ejemplo didáctico, no consumo medido de tu equipo.</b></span>");});
+$("#ej-clear").addEventListener("click",function(){["ienc","iao","idiv","iotr"].forEach(function(id){$("#"+id).value="";});renderBalance();});
+
+/* ============ 3 · renderizador LAD ============ */
+var CW=7.4;
+function isLit(s){return /^[0-9\-]/.test(s)||/#/.test(s)&&/^(INT|REAL|DINT)#/.test(s);}
+function opn(s,fb){if(!s)return "…";if(!fb||isLit(s)||s.charAt(0)==="\""||s.charAt(0)==="#")return s;return "#"+s;}
+function tw(s){return String(s).length*CW;}
+function measure(el,fb){
+  switch(el.t){
+    case "no":case "nc":return {w:Math.max(80,tw(opn(el.v,fb))+18),b:22};
+    case "coil":return {w:Math.max(80,tw(opn(el.v,fb))+18),b:22};
+    case "cmp":return {w:Math.max(96,tw(opn(el.a,fb))+16,tw(opn(el.b,fb))+16),b:44};
+    case "par":var W=0,B=0;el.br.forEach(function(r){var m=mrow(r,fb);W=Math.max(W,m.w);B=Math.max(B,m.b);});
+      el._h=Math.max(58,B+40);return {w:W+20,b:el._h*(el.br.length-1)+B};
+    case "box":var lw=0,rw=0;el.ins.forEach(function(p){lw=Math.max(lw,tw(opn(p[1],fb)));});el.outs.forEach(function(p){rw=Math.max(rw,tw(opn(p[1],fb)));});
+      el._lw=lw?lw+30:24;el._rw=rw?rw+30:24;var pl=0,pr=0;el.ins.forEach(function(q){pl=Math.max(pl,q[0].length);});el.outs.forEach(function(q){pr=Math.max(pr,q[0].length);});
+      el._bw=Math.max(110,tw(el.name)+30,(pl+pr)*6.9+30);
+      var n=Math.max(el.ins.length,el.outs.length);return {w:el._lw+el._bw+el._rw,b:n*24+16};
+  }
+}
+function mrow(row,fb){var w=0,b=0;row.forEach(function(el){var m=measure(el,fb);w+=m.w;b=Math.max(b,m.b);});return {w:w,b:b};}
+function val(ctx,name){if(!ctx)return undefined;return ctx[name];}
+function cls(p){return p===true?" p":"";}
+function drawRow(row,x,y,p,o,fb,ctx){row.forEach(function(el){var m=measure(el,fb);p=drawEl(el,x,y,p,o,fb,ctx,m.w);x+=m.w;});return p;}
+function drawEl(el,x,y,p,o,fb,ctx,w){
+  var v,cond,out,t;
+  if(el.t==="no"||el.t==="nc"){
+    v=val(ctx,el.v);cond=v===undefined?undefined:(el.t==="no"?!!v:!v);out=(p===undefined||cond===undefined)?undefined:(p&&cond);
+    var cx=x+w/2;
+    o.push("<path class=\"wr"+cls(p)+"\" d=\"M"+x+","+y+" H"+(cx-12)+"\"/>");
+    o.push("<path class=\"el"+cls(out)+"\" d=\"M"+(cx-12)+","+(y-13)+" V"+(y+13)+" M"+(cx+12)+","+(y-13)+" V"+(y+13)+(el.t==="nc"?" M"+(cx-9)+","+(y+11)+" L"+(cx+9)+","+(y-11):"")+"\"/>");
+    o.push("<path class=\"wr"+cls(out)+"\" d=\"M"+(cx+12)+","+y+" H"+(x+w)+"\"/>");
+    o.push("<text x=\""+cx+"\" y=\""+(y-20)+"\" text-anchor=\"middle\">"+esc(opn(el.v,fb))+"</text>");
+    if(v!==undefined)o.push("<text class=\"val\" x=\""+cx+"\" y=\""+(y+27)+"\" text-anchor=\"middle\">"+(v?"1":"0")+"</text>");
+    return out;
+  }
+  if(el.t==="coil"){
+    var c2=x+w/2-11;
+    o.push("<path class=\"wr"+cls(p)+"\" d=\"M"+x+","+y+" H"+(c2-6)+"\"/>");
+    o.push("<path class=\"el"+cls(p)+"\" d=\"M"+(c2)+","+(y-12)+" Q"+(c2-9)+","+y+" "+c2+","+(y+12)+" M"+(c2+22)+","+(y-12)+" Q"+(c2+31)+","+y+" "+(c2+22)+","+(y+12)+"\"/>");
+    o.push("<text x=\""+(c2+11)+"\" y=\""+(y-20)+"\" text-anchor=\"middle\">"+esc(opn(el.v,fb))+"</text>");
+    v=val(ctx,el.v);if(v!==undefined)o.push("<text class=\"val\" x=\""+(c2+11)+"\" y=\""+(y+27)+"\" text-anchor=\"middle\">"+(v?"1":"0")+"</text>");
+    return p;
+  }
+  if(el.t==="cmp"){
+    var mx=x+w/2,a=val(ctx,el.a),b=parseFloat(el.b);cond=(a===undefined)?undefined:(a>b);out=(p===undefined||cond===undefined)?undefined:(p&&cond);
+    o.push("<path class=\"wr"+cls(p)+"\" d=\"M"+x+","+y+" H"+(mx-22)+"\"/>");
+    o.push("<rect class=\"bx\" x=\""+(mx-22)+"\" y=\""+(y-16)+"\" width=\"44\" height=\"32\"/>");
+    o.push("<text class=\"t-ins\" x=\""+mx+"\" y=\""+(y-2)+"\" text-anchor=\"middle\">&gt;</text><text class=\"t-pin\" x=\""+mx+"\" y=\""+(y+11)+"\" text-anchor=\"middle\">Real</text>");
+    o.push("<path class=\"wr"+cls(out)+"\" d=\"M"+(mx+22)+","+y+" H"+(x+w)+"\"/>");
+    o.push("<text x=\""+mx+"\" y=\""+(y-22)+"\" text-anchor=\"middle\">"+esc(opn(el.a,fb))+"</text><text x=\""+mx+"\" y=\""+(y+32)+"\" text-anchor=\"middle\">"+esc(opn(el.b,fb))+"</text>");
+    return out;
+  }
+  if(el.t==="par"){
+    var outs=[],H=el._h,last=y+H*(el.br.length-1),any;
+    o.push("<path class=\"wr"+cls(p)+"\" d=\"M"+x+","+y+" V"+last+"\"/>");
+    el.br.forEach(function(r,i){var yy=y+H*i,m=mrow(r,fb);
+      o.push("<path class=\"wr"+cls(p)+"\" d=\"M"+x+","+yy+" H"+(x+10)+"\"/>");
+      var po=drawRow(r,x+10,yy,p,o,fb,ctx);outs.push(po);
+      o.push("<path class=\"wr"+cls(po)+"\" d=\"M"+(x+10+m.w)+","+yy+" H"+(x+w)+"\"/>");});
+    any=outs.some(function(z){return z===undefined;})?undefined:outs.some(function(z){return z;});
+    o.push("<path class=\"wr"+cls(any)+"\" d=\"M"+(x+w)+","+y+" V"+last+"\"/>");
+    return any;
+  }
+  if(el.t==="box"){
+    var bx=x+el._lw,bw=el._bw,top=y-36,n=Math.max(el.ins.length,el.outs.length),bot=y+n*24+12;
+    o.push("<path class=\"wr"+cls(p)+"\" d=\"M"+x+","+y+" H"+bx+"\"/>");
+    o.push("<rect class=\"bx\" x=\""+bx+"\" y=\""+top+"\" width=\""+bw+"\" height=\""+(bot-top)+"\"/>");
+    if(el.inst)o.push("<text x=\""+(bx+bw/2)+"\" y=\""+(top-6)+"\" text-anchor=\"middle\">"+esc(el.inst)+"</text>");
+    o.push("<text class=\"t-ins\" x=\""+(bx+bw/2)+"\" y=\""+(top+15)+"\" text-anchor=\"middle\">"+esc(el.name)+"</text>");
+    if(el.ty)o.push("<text class=\"t-pin\" x=\""+(bx+bw/2)+"\" y=\""+(top+28)+"\" text-anchor=\"middle\">"+esc(el.ty)+"</text>");
+    o.push("<text class=\"t-pin\" x=\""+(bx+5)+"\" y=\""+(y+4)+"\">"+(el.pin||"EN")+"</text><text class=\"t-pin\" x=\""+(bx+bw-5)+"\" y=\""+(y+4)+"\" text-anchor=\"end\">"+(el.pout||"ENO")+"</text>");
+    el.ins.forEach(function(pn,i){var yy=y+24*(i+1);o.push("<path class=\"wr\" d=\"M"+(bx-12)+","+yy+" H"+bx+"\"/><text class=\"t-pin\" x=\""+(bx+5)+"\" y=\""+(yy+4)+"\">"+esc(pn[0])+"</text><text x=\""+(bx-16)+"\" y=\""+(yy+4)+"\" text-anchor=\"end\">"+esc(opn(pn[1],fb))+"</text>");});
+    el.outs.forEach(function(pn,i){var yy=y+24*(i+1);o.push("<path class=\"wr\" d=\"M"+(bx+bw)+","+yy+" H"+(bx+bw+12)+"\"/><text class=\"t-pin\" x=\""+(bx+bw-5)+"\" y=\""+(yy+4)+"\" text-anchor=\"end\">"+esc(pn[0])+"</text><text x=\""+(bx+bw+16)+"\" y=\""+(yy+4)+"\">"+esc(opn(pn[1],fb))+"</text>");});
+    out=el.q?val(ctx,el.q):p;
+    if(el.q&&p!==undefined&&out!==undefined)out=!!out;
+    o.push("<path class=\"wr"+cls(out)+"\" d=\"M"+(bx+bw)+","+y+" H"+(x+el._lw+bw+el._rw)+"\"/>");
+    return out;
+  }
+}
+function svgNet(net,ctx){
+  var o=[],fb=net.fb!==false,y=0,W=0,parts=[];
+  net.rungs.forEach(function(r){var m=mrow(r,fb);W=Math.max(W,m.w);parts.push(m);});
+  var x0=14;y=62;
+  net.rungs.forEach(function(r,i){
+    var pw=ctx?true:undefined;
+    o.push("<path class=\"rail"+(ctx?" p":"")+"\" d=\"M"+(x0-6)+","+(y-30)+" V"+(y+parts[i].b+6)+"\"/>");
+    drawRow(r,x0-6,y,pw,o,fb,ctx);
+    y+=parts[i].b+62;
+  });
+  var H=y-44;
+  return "<svg viewBox=\"0 0 "+(W+x0+20)+" "+H+"\" width=\""+(W+x0+20)+"\" height=\""+H+"\" role=\"img\" aria-label=\""+esc(net.n+", "+net.t)+"\">"+o.join("")+"</svg>";
+}
+var C=function(v){return {t:"no",v:v};},N=function(v){return {t:"nc",v:v};},K=function(v){return {t:"coil",v:v};};
+function B(name,ty,ins,outs,extra){var b={t:"box",name:name,ty:ty,ins:ins,outs:outs};for(var k in extra)b[k]=extra[k];return b;}
+var NETS={
+ mando:[
+  {n:"Red 01",t:"Flanco positivo de marcha",d:"R_TRIG se ejecuta en todos los ciclos. Su memoria se conserva en la multiinstancia TrigMarcha. Q es un pulso de un scan.",rungs:[[C("Marcha"),B("R_TRIG","",[],[],{inst:"#TrigMarcha",pin:"CLK",pout:"Q",q:"PulsoMarcha"}),K("PulsoMarcha")]]},
+  {n:"Red 02",t:"Autorizar el nuevo arranque",d:"Variador_Listo (I1.0) solo condiciona el nuevo pulso; no se coloca en serie con la rama de mantenimiento.",rungs:[[C("PulsoMarcha"),C("Variador_Listo"),K("Arranque_Valido")]]},
+  {n:"Red 03",t:"Enclavamiento con prioridad de paro",d:"Inicializar es el bit FirstScan: su negación descarta el pulso inicial de un botón sostenido. Paro_OK = 0, Reset = 1 o Variador_SinFalla = 0 detienen el mando. No pongas la marcha física en la rama de autoenclavamiento.",rungs:[[{t:"par",br:[[C("EnMarcha")],[C("Arranque_Valido")]]},C("Paro_OK"),C("Variador_SinFalla"),N("Reset"),N("Inicializar"),K("EnMarcha")]]},
+  {n:"Red 04",t:"Marcha del variador",d:"Cmd_Marcha se conecta a Q0.0, borne 5 del MM440.",rungs:[[C("EnMarcha"),K("Cmd_Marcha")]]},
+  {n:"Red 05",t:"Sentido de giro",d:"Cmd_Giro va a Q0.1, borne 6. Cambiar el selector no rompe el enclavamiento; el variador gestiona la inversión.",rungs:[[C("Selector_Giro"),K("Cmd_Giro")]]},
+  {n:"Red 06",t:"Reconocimiento manual de falla",d:"Cmd_Reset va a Q0.2, borne 7, y sigue a Reset excepto durante FirstScan. La red 3 ya retiró la marcha, así que soltar Reset no vuelve a arrancar. Para reconocer: Paro, después mantener y soltar Reset. No hay espera temporizada entre ambas salidas.",rungs:[[C("Reset"),N("Cmd_Marcha"),N("Inicializar"),K("Cmd_Reset")]]}
+ ],
+ ref:[
+  {n:"Red 07",t:"Limitar la entrada del potenciómetro",d:"LIMIT de tipo Int: acota el dato a la escala nominal antes de normalizar.",rungs:[[B("LIMIT","Int",[["MN","INT#0"],["IN","Pot_Raw"],["MX","INT#27648"]],[["OUT","Entrada_Limitada"]])]]},
+  {n:"Red 08",t:"Normalizar la entrada 0…27648",d:"NORM_X Int a Real; resultado 0.0…1.0. No uses 1023 como máximo.",rungs:[[B("NORM_X","Int → Real",[["MIN","INT#0"],["VALUE","Entrada_Limitada"],["MAX","INT#27648"]],[["OUT","Entrada_Normalizada"]])]]},
+  {n:"Red 09",t:"Referencia del potenciómetro en Hz",d:"SCALE_X Real a Real. El resultado va a Hz_Pot; todavía no escribe Consigna_Hz.",rungs:[[B("SCALE_X","Real → Real",[["MIN","REAL#0.0"],["VALUE","Entrada_Normalizada"],["MAX","REAL#60.0"]],[["OUT","Hz_Pot"]])]]},
+  {n:"Red 10",t:"Limitar la solicitud del HMI",d:"LIMIT Real. La limitación se hace también en el PLC, aunque el HMI tenga límites de entrada.",rungs:[[B("LIMIT","Real",[["MN","0.0"],["IN","RPM_Consigna_HMI"],["MX","1750.0"]],[["OUT","RPM_HMI_Limitada"]])]]},
+  {n:"Red 11",t:"Normalizar las rpm solicitadas",d:"NORM_X Real a Real: 0…1750 rpm se convierten a 0.0…1.0. 875.0 rpm deben dar 0.5.",rungs:[[B("NORM_X","Real → Real",[["MIN","0.0"],["VALUE","RPM_HMI_Limitada"],["MAX","1750.0"]],[["OUT","HMI_Normalizada"]])]]},
+  {n:"Red 12",t:"Escalar la referencia del HMI a Hz",d:"SCALE_X Real a Real: convierte la solicitud normalizada a 0…60 Hz.",rungs:[[B("SCALE_X","Real → Real",[["MIN","0.0"],["VALUE","HMI_Normalizada"],["MAX","60.0"]],[["OUT","Hz_HMI"]])]]},
+  {n:"Red 13",t:"Seleccionar el origen de la referencia",d:"SEL: G = FALSE selecciona IN0 (potenciómetro); G = TRUE selecciona IN1 (HMI). IN0, IN1 y OUT son Real.",rungs:[[B("SEL","Real",[["G","Usar_Referencia_HMI"],["IN0","Hz_Pot"],["IN1","Hz_HMI"]],[["OUT","Consigna_Hz_Limitada"]])]]},
+  {n:"Red 14",t:"Limitar la referencia seleccionada",d:"LIMIT Real: fija Consigna_Hz en 0…60. El HMI muestra esta referencia convertida a rpm.",rungs:[[B("LIMIT","Real",[["MN","0.0"],["IN","Consigna_Hz_Limitada"],["MX","60.0"]],[["OUT","Consigna_Hz"]])]]},
+  {n:"Red 15",t:"Normalizar la frecuencia solicitada",d:"NORM_X con todos sus datos Real: convierte 0…60 Hz a 0…1.",rungs:[[B("NORM_X","Real → Real",[["MIN","REAL#0.0"],["VALUE","Consigna_Hz"],["MAX","REAL#60.0"]],[["OUT","Salida_Normalizada"]])]]},
+  {n:"Red 16",t:"Escalar para la salida analógica",d:"SCALE_X con VALUE Real y MIN, MAX y OUT Int. AO_Raw se conecta a QW112: es la única ruta que escribe esa salida.",rungs:[[B("SCALE_X","Real → Int",[["MIN","INT#0"],["VALUE","Salida_Normalizada"],["MAX","INT#27648"]],[["OUT","AO_Raw"]])]]}
+ ],
+ med:[
+  {n:"Red 17",t:"Validar la configuración de RPM",d:"Impide la división entre cero. RPM_Config_OK no detecta cables rotos ni acredita que el eje esté detenido.",rungs:[[{t:"cmp",a:"Pulsos_Rev",b:"0.0"},K("PPR_Valido")],[C("HSC_Configurado"),C("PPR_Valido"),K("RPM_Config_OK")]]},
+  {n:"Red 18",t:"Convertir la frecuencia del HSC",d:"Encoder_Hz es DInt y debe contener frecuencia en Hz, no cuentas acumuladas.",rungs:[[B("CONV","DInt → Real",[["IN","Encoder_Hz"]],[["OUT","Encoder_Real"]])]]},
+  {n:"Red 19",t:"Obtener la magnitud",d:"RPM sin signo para esta práctica.",rungs:[[B("ABS","Real",[["IN","Encoder_Real"]],[["OUT","Encoder_Abs"]])]]},
+  {n:"Red 20",t:"Multiplicar por 60",d:"Conversión de segundos a minutos.",rungs:[[B("MUL","Real",[["IN1","Encoder_Abs"],["IN2","60.0"]],[["OUT","RPM_Numerador"]])]]},
+  {n:"Red 21",t:"Dividir entre pulsos por vuelta",d:"División habilitada solo con configuración válida. Con 400 pulsos/vuelta, canal A ×1 y acoplamiento 1:1: RPM = Hz × 0.15.",rungs:[[C("RPM_Config_OK"),B("DIV","Real",[["IN1","RPM_Numerador"],["IN2","Pulsos_Rev"]],[["OUT","RPM"]])]]},
+  {n:"Red 22",t:"RPM sin configuración válida",d:"La rama negada escribe 0.0. Esta red y la anterior se habilitan en condiciones mutuamente excluyentes.",rungs:[[N("RPM_Config_OK"),B("MOVE","",[["IN","0.0"]],[["OUT1","RPM"]])]]}
+ ],
+ ob1:[
+  {n:"OB1-1",fb:false,t:"Llamada incondicional al FB",d:"Usa el DB de instancia existente. EN permanece habilitado; la llamada se ejecuta una vez por ciclo y antes de las redes del HMI. Los miembros no conectados siguen accesibles en el DB.",
+   rungs:[[B("\"FB_MICROMASTER 440\"","",[["Inicializar","\"FirstScan\""],["Marcha","\"PB_Marcha\""],["Paro_OK","\"PB_Paro_OK\""],["Selector_Giro","\"SW_Giro\""],["Reset","\"PB_Reset\""],["Variador_Listo","\"DI_Listo\""],["Variador_SinFalla","\"DI_SinFalla\""],["Pot_Raw","\"AI_Pot\""],["Encoder_Hz","\"HSC_Frecuencia_Hz\""],["HSC_Configurado","\"DB_Ajustes\".HSC_OK"],["Pulsos_Rev","\"DB_Ajustes\".PPR"],["Usar_Referencia_HMI","\"DB_HMI\".Usar_Referencia_HMI"],["RPM_Consigna_HMI","\"DB_HMI\".RPM_Consigna"]],
+     [["Cmd_Marcha","\"DO_Marcha\""],["Cmd_Giro","\"DO_Giro\""],["Cmd_Reset","\"DO_Reset\""],["Entrada_Limitada",""],["Entrada_Normalizada",""],["Consigna_Hz",""],["Salida_Normalizada",""],["AO_Raw","\"AO_Velocidad\""],["RPM",""],["RPM_Config_OK",""]],{inst:"\"FB_MICROMASTER 440_DB\""})]]},
+  {n:"OB1-2",fb:false,t:"Numerador de la referencia activa",d:"Después de la llamada al FB. En IN1 selecciona el miembro Consigna_Hz de tu DB de instancia.",rungs:[[B("MUL","Real",[["IN1","\"FB_MICROMASTER 440_DB\".Consigna_Hz"],["IN2","1750.0"]],[["OUT","#Referencia_RPM_Producto"]])]]},
+  {n:"OB1-3",fb:false,t:"Referencia activa en rpm",d:"DIV Real con salida directa a DB_HMI.RPM_Referencia_Activa. El divisor constante 60.0 no puede ser cero.",rungs:[[B("DIV","Real",[["IN1","#Referencia_RPM_Producto"],["IN2","60.0"]],[["OUT","\"DB_HMI\".RPM_Referencia_Activa"]])]]},
+  {n:"OB1-4",fb:false,t:"Indicador de movimiento",d:"Contacto NA de RPM_Config_OK en serie con RPM > 20.0 y bobina normal: FALSE escribe cero en cada ciclo. No uses bobina SET.",rungs:[[C("\"FB_MICROMASTER 440_DB\".RPM_Config_OK"),{t:"cmp",a:"\"FB_MICROMASTER 440_DB\".RPM",b:"20.0"},K("\"DB_HMI\".Motor_EnMovimiento")]]}
+ ]
+};
+function netHTML(net,open){
+  return "<details class=\"net\""+(open?" open":"")+"><summary><span class=\"n\">"+esc(net.n)+"</span><span>"+esc(net.t)+"</span></summary><div class=\"net-body\"><p>"+esc(net.d)+"</p><div class=\"lad\">"+svgNet(net)+"</div></div></details>";
+}
+$("#lad-mando").innerHTML=NETS.mando.map(function(n,i){return netHTML(n,i===2);}).join("");
+$("#lad-ref").innerHTML=NETS.ref.map(function(n){return netHTML(n,false);}).join("");
+$("#lad-med").innerHTML=NETS.med.map(function(n){return netHTML(n,false);}).join("");
+$("#lad-ob1").innerHTML=NETS.ob1.map(function(n){return netHTML(n,false);}).join("");
+$("#lad-open").addEventListener("click",function(){$$("#programa details.net").forEach(function(d){d.open=true;});});
+$("#lad-close").addEventListener("click",function(){$$("#programa details.net").forEach(function(d){d.open=false;});});
+
+/* cálculo de RPM */
+function calcRPM(){
+  var hz=parseFloat($("#calc-hz").value)||0,ppr=parseFloat($("#calc-ppr").value),ok=$("#calc-ok").checked;
+  var pv=ppr>0,cfg=ok&&pv,rpm=cfg?Math.abs(hz)*60/ppr:0;
+  $("#calc-out").innerHTML="<span>PPR_Valido <b>"+(pv?"TRUE":"FALSE")+"</b></span><span>RPM_Config_OK <b class=\""+(cfg?"status-ok":"status-bad")+"\">"+(cfg?"TRUE":"FALSE")+"</b></span><span>RPM <b>"+f(rpm,1)+"</b></span>"+(cfg?"":"<span style=\"flex-basis:100%\">La red 22 escribe 0.0: sin configuración válida no se divide.</span>");
+}
+["calc-hz","calc-ppr","calc-ok"].forEach(function(id){$("#"+id).addEventListener("input",calcRPM);});
+
+/* ============ 4 · banco virtual ============ */
+var DT=0.1;
+function I(){var pp=S.paro||S.lkParo;return {I04:S.marcha||S.lkMarcha,I05:S.f==="F"?pp:!pp,I06:S.giro,I07:S.reset||S.lkReset,I10:S.listo,I11:S.f==="G"?!S.sinFalla:S.sinFalla};}
+function doScan(){
+  var x=I(),init=S.firstPending;S.firstPending=false;S.init=init;
+  // FB redes 1–6
+  S.pulso=x.I04&&!S.prevClk;S.prevClk=x.I04;
+  S.arr=S.pulso&&x.I10;
+  S.en=(S.en||S.arr)&&x.I05&&x.I11&&!x.I07&&!init;
+  S.cmdM=S.en;S.cmdG=x.I06;S.cmdR=x.I07&&!S.cmdM&&!init;
+  // redes 7–16
+  if(S.f==="A"&&S.rpmCons!==0){S.rpmCons=0;syncInputs();}
+  S.ch=chain(S.potV,S.rpmCons,S.f==="B"?false:S.useHMI);
+  S.qw=S.f==="H"?0:S.ch.ao;
+  // redes 17–22
+  var ppr=S.f==="D"?100:S.ppr;
+  S.pprV=ppr>0;S.cfg=S.hscOK&&S.pprV;
+  S.rpm=S.cfg?Math.abs(S.hscHz)*60/ppr:0;
+  // OB1
+  S.refAct=S.ch.hz*1750/60;S.mov=S.cfg&&S.rpm>20;
+  S.scan++;
+  process();
+}
+function process(){
+  // variador: reconocimiento de falla con DIN3
+  if(S.fault&&S.cmdR){S.fault=false;S.listo=true;S.sinFalla=true;$("#s-listo").checked=true;$("#s-sinfalla").checked=true;}
+  var target=0;
+  if(S.cmdM&&!S.fault){target=S.qw/27648*60*(S.cmdG?-1:1);}
+  var step=12*DT;
+  if(S.fault){S.fOut=0;}else if(Math.abs(target-S.fOut)<=step)S.fOut=target;else S.fOut+=target>S.fOut?step:-step;
+  var sync=Math.abs(S.fOut)*30,slip=S.load/100*50,r=Math.max(0,sync-(sync>0?slip:0));
+  if(S.fault)S.rpmMot*=0.9;else S.rpmMot=r*(S.fOut<0?-1:1);
+  var encHz=S.fix?S.fixHz:((S.encOK&&S.f!=="E")?Math.abs(S.rpmMot)*400/60:0);
+  if(S.f==="C"){S.cnt+=encHz*DT;S.hscHz=Math.round(S.cnt);}
+  else{S.pulseAcc+=encHz*DT;S.accT+=DT;
+  if(S.accT>=0.999){S.hscHz=Math.round(S.pulseAcc/S.accT);S.pulseAcc=0;S.accT=0;}}
+  S.encHz=encHz;
+}
+function restart(){
+  S.en=false;S.prevClk=false;S.pulso=false;S.arr=false;S.cmdM=false;S.cmdG=false;S.cmdR=false;
+  S.rpmCons=0;S.useHMI=false;S.hscHz=0;S.pulseAcc=0;S.accT=0;S.cnt=0;S.firstPending=true;S.scan=0;
+  syncInputs();
+}
+// HMI
+var tpTick=0,lastTP="";
+function updateTP(force){
+  tpTick++;
+  if(!force&&tpTick%5!==0)return;            // adquisición cíclica de 500 ms
+  $("#tp-real").textContent=f(S.rpm,1);
+  $("#tp-sol").textContent=f(S.rpmCons,1);
+  $("#tp-ref").textContent=f(S.refAct,1)+" rpm";
+  $("#tp-sw0").classList.toggle("on",!S.useHMI);$("#tp-sw1").classList.toggle("on",S.useHMI);
+  $("#tp-sw").setAttribute("aria-checked",S.useHMI);
+  $("#tp-led-m").classList.toggle("on",S.cmdM);
+  $("#tp-led-v").classList.toggle("on",S.mov);
+  $("#tp-dir").textContent=S.cmdG?"REVERSA":"ADELANTE";
+  var c=$("#tp-cfg");c.textContent=S.cfg?"CONFIGURACIÓN RPM HABILITADA":"REVISAR CONFIGURACIÓN RPM";c.classList.toggle("ok",S.cfg);
+}
+var kp=$("#tp-kp"),kpIn=$("#kp-in"),kpBack=null;
+function openKP(){kpBack=document.activeElement;kp.classList.add("open");kpIn.value=f(S.rpmCons,1);$("#kp-msg").textContent="";kpIn.focus();kpIn.select();}
+function closeKP(){kp.classList.remove("open");if(kpBack)kpBack.focus();}
+function okKP(){
+  var v=parseFloat(kpIn.value);
+  if(isNaN(v)||v<0||v>1750){$("#kp-msg").textContent="Valor fuera de límites: 0.0 a 1750.0. La variable HMI lo rechaza.";return;}
+  S.rpmCons=v;syncInputs();updateTP(true);closeKP();
+}
+$("#tp-sol").addEventListener("click",openKP);
+$("#tp-sol").addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openKP();}});
+$("#kp-ok").addEventListener("click",okKP);$("#kp-cancel").addEventListener("click",closeKP);
+kpIn.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();okKP();}if(e.key==="Escape")closeKP();});
+kp.addEventListener("keydown",function(e){if(e.key==="Escape")closeKP();});
+function toggleSrc(){S.useHMI=!S.useHMI;syncInputs();updateTP(true);}
+$("#tp-sw").addEventListener("click",toggleSrc);
+$("#tp-sw").addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleSrc();}});
+
+// botonera momentánea
+function momentary(btn,key){
+  var down=function(e){e.preventDefault();S[key]=true;btn.setAttribute("aria-pressed","true");if(btn.setPointerCapture&&e.pointerId!==undefined)try{btn.setPointerCapture(e.pointerId);}catch(_){}};
+  var up=function(){S[key]=false;btn.setAttribute("aria-pressed","false");};
+  btn.addEventListener("pointerdown",down);btn.addEventListener("pointerup",up);btn.addEventListener("pointercancel",up);btn.addEventListener("lostpointercapture",up);
+  btn.addEventListener("keydown",function(e){if((e.key===" "||e.key==="Enter")&&!e.repeat){e.preventDefault();S[key]=true;btn.setAttribute("aria-pressed","true");}});
+  btn.addEventListener("keyup",function(e){if(e.key===" "||e.key==="Enter"){S[key]=false;btn.setAttribute("aria-pressed","false");}});
+  btn.addEventListener("blur",up);
+}
+momentary($("#b-marcha"),"marcha");momentary($("#b-paro"),"paro");momentary($("#b-reset"),"reset");
+function bindLock(id,key){$("#"+id).addEventListener("change",function(e){S[key]=e.target.checked;});}
+bindLock("lk-marcha","lkMarcha");bindLock("lk-paro","lkParo");bindLock("lk-reset","lkReset");
+function setGiro(v){S.giro=v;$("#b-giro").setAttribute("aria-pressed",v);$("#giro-txt").textContent="Giro: "+(v?"1":"0");}
+$("#b-giro").addEventListener("click",function(){setGiro(!S.giro);});
+$("#s-listo").addEventListener("change",function(e){S.listo=e.target.checked;});
+$("#s-sinfalla").addEventListener("change",function(e){S.sinFalla=e.target.checked;});
+$("#s-falla").addEventListener("click",function(){S.fault=true;S.listo=false;S.sinFalla=false;$("#s-listo").checked=false;$("#s-sinfalla").checked=false;});
+$("#s-hscok").addEventListener("change",function(e){S.hscOK=e.target.checked;});
+$("#s-ppr").addEventListener("input",function(e){var v=parseFloat(e.target.value);S.ppr=isNaN(v)?0:v;});
+$("#s-enc").addEventListener("change",function(e){S.encOK=e.target.checked;});
+$("#s-fix").addEventListener("change",function(e){S.fix=e.target.checked;});
+$("#s-fixhz").addEventListener("input",function(e){S.fixHz=parseFloat(e.target.value)||0;});
+$("#s-load").addEventListener("input",function(e){S.load=+e.target.value;$("#s-loado").textContent=S.load+" %";});
+
+// LED y tabla de observación
+var LEDS=[["I0.0",function(){return S.encHz>0;}],["I0.4",function(){return I().I04;}],["I0.5",function(){return I().I05;}],["I0.6",function(){return I().I06;}],["I0.7",function(){return I().I07;}],["I1.0",function(){return I().I10;}],["I1.1",function(){return I().I11;}],["Q0.0",function(){return S.cmdM;}],["Q0.1",function(){return S.cmdG;}],["Q0.2",function(){return S.cmdR;}]];
+$("#leds").innerHTML=LEDS.map(function(l,i){return "<span data-l=\""+i+"\">"+l[0]+"</span>";}).join("");
+var B2=function(v){return v?"TRUE":"FALSE";};
+var WATCH=[
+ ["PB_Marcha","%I0.4",function(){return B2(I().I04);}],["PB_Paro_OK","%I0.5",function(){return B2(I().I05);}],["SW_Giro","%I0.6",function(){return B2(I().I06);}],["PB_Reset","%I0.7",function(){return B2(I().I07);}],
+ ["DI_Listo","%I1.0",function(){return B2(I().I10);}],["DI_SinFalla","%I1.1",function(){return B2(I().I11);}],["FirstScan","bit de sistema",function(){return B2(S.init);}],
+ ["#PulsoMarcha","Temp",function(){return B2(S.pulso);}],["#EnMarcha","Static",function(){return B2(S.en);}],
+ ["DO_Marcha","%Q0.0",function(){return B2(S.cmdM);}],["DO_Giro","%Q0.1",function(){return B2(S.cmdG);}],["DO_Reset","%Q0.2",function(){return B2(S.cmdR);}],
+ ["AI_Pot","%IW64",function(){return S.ch?S.ch.raw:0;}],["DB_HMI.Usar_Referencia_HMI","DB",function(){return B2(S.useHMI);}],["DB_HMI.RPM_Consigna","DB",function(){return f(S.rpmCons,1);}],
+ ["Consigna_Hz","DB inst.",function(){return S.ch?f(S.ch.hz,2):"0.00";}],["AO_Velocidad","%QW112",function(){return S.qw;}],
+ ["HSC_Frecuencia_Hz","%ID1000",function(){return S.hscHz;}],["RPM_Config_OK","DB inst.",function(){return B2(S.cfg);}],["RPM","DB inst.",function(){return f(S.rpm,1);}],
+ ["DB_HMI.RPM_Referencia_Activa","DB",function(){return f(S.refAct,1);}],["DB_HMI.Motor_EnMovimiento","DB",function(){return B2(S.mov);}]
+];
+var wtb=$("#watch tbody");
+wtb.innerHTML=WATCH.map(function(w){return "<tr><td><code>"+esc(w[0])+"</code></td><td>"+esc(w[1])+"</td><td></td></tr>";}).join("");
+var wrows=$$("tr",wtb),wprev=[];
+var liveBox=$("#lad-live"),liveKey="";
+function renderLive(){
+  var x=I(),ctx={Marcha:x.I04,PulsoMarcha:S.pulso,Variador_Listo:x.I10,Arranque_Valido:S.arr,EnMarcha:S.en,Paro_OK:x.I05,Variador_SinFalla:x.I11,Reset:x.I07,Inicializar:S.init,Cmd_Marcha:S.cmdM,Selector_Giro:x.I06,Cmd_Giro:S.cmdG,Cmd_Reset:S.cmdR};
+  var key=JSON.stringify(ctx);if(key===liveKey)return;liveKey=key;
+  var openState=$$("details",liveBox).map(function(d){return d.open;});
+  liveBox.innerHTML=NETS.mando.map(function(n,i){var op=openState.length?openState[i]:(i<=3);return "<details class=\"net\""+(op?" open":"")+"><summary><span class=\"n\">"+esc(n.n)+"</span><span>"+esc(n.t)+"</span></summary><div class=\"net-body\"><div class=\"lad\">"+svgNet(n,ctx)+"</div></div></details>";}).join("");
+}
+function renderBench(){
+  $$("#leds span").forEach(function(s,i){s.classList.toggle("on",!!LEDS[i][1]());});
+  WATCH.forEach(function(w,i){var v=String(w[2]());var td=wrows[i].children[2];if(td.textContent!==v){td.textContent=v;wrows[i].classList.add("chg");wprev[i]=S.scan;}else if(wprev[i]!==undefined&&S.scan-wprev[i]>4){wrows[i].classList.remove("chg");}});
+  $("#scan-n").textContent="scan "+S.scan+(S.init?" (FirstScan)":"");
+  updateTP(false);renderLive();
+}
+var timer=null;
+function loop(){if(document.hidden)return;doScan();renderBench();}
+function setRun(r){S.running=r;$("#cpu-run").setAttribute("aria-pressed",r);$("#cpu-run").textContent=r?"RUN":"Pausa";if(timer){clearInterval(timer);timer=null;}if(r)timer=setInterval(loop,100);}
+$("#cpu-run").addEventListener("click",function(){setRun(!S.running);});
+$("#cpu-step").addEventListener("click",function(){setRun(false);doScan();renderBench();updateTP(true);});
+$("#cpu-restart").addEventListener("click",function(){restart();if(!S.running){doScan();renderBench();updateTP(true);}});
+
+// pruebas guiadas
+function base(){S.lkMarcha=false;S.lkParo=false;S.lkReset=false;$("#lk-marcha").checked=false;$("#lk-paro").checked=false;$("#lk-reset").checked=false;
+  S.fault=false;S.listo=true;S.sinFalla=true;$("#s-listo").checked=true;$("#s-sinfalla").checked=true;
+  S.hscOK=true;$("#s-hscok").checked=true;S.ppr=400;$("#s-ppr").value=400;S.fix=false;$("#s-fix").checked=false;S.encOK=true;$("#s-enc").checked=true;
+  if(!S.running)setRun(true);}
+var TESTS=[
+ {t:"Primer ciclo con Marcha sostenida",a:"Se sostiene Marcha y se pasa la CPU de STOP a RUN. Observa EnMarcha; después desmarca “sostener” y pulsa Marcha otra vez.",e:"EnMarcha y Cmd_Marcha permanecen FALSE. Hay que soltar y volver a pulsar.",p:function(){base();S.lkMarcha=true;$("#lk-marcha").checked=true;restart();}},
+ {t:"Marcha con Listo = FALSE",a:"Con el relé listo abierto, pulsa Marcha. Después vuelve a cerrar el relé listo.",e:"No arranca ni deja una petición pendiente.",p:function(){base();S.en=false;S.listo=false;$("#s-listo").checked=false;}},
+ {t:"Arrancar con permisos y luego Listo = FALSE",a:"Pulsa Marcha y, ya en marcha, desmarca “Relé listo cerrado”.",e:"La marcha permanece: Listo solo condiciona un nuevo arranque.",p:function(){base();S.en=false;}},
+ {t:"Paro_OK = FALSE o SinFalla = FALSE",a:"Con el motor en marcha, pulsa Paro o desmarca “Relé sin falla cerrado”.",e:"EnMarcha y Cmd_Marcha pasan a FALSE.",p:function(){base();S.en=true;}},
+ {t:"Restituir permisos con Marcha aún sostenida",a:"Marcha está sostenida y Paro enclavado. Desmarca “enclavar” del Paro sin soltar Marcha.",e:"No rearranca; hace falta un nuevo flanco.",p:function(){base();S.en=false;S.lkMarcha=true;$("#lk-marcha").checked=true;S.lkParo=true;$("#lk-paro").checked=true;}},
+ {t:"Cambiar SW_Giro",a:"Con el motor en marcha, gira el selector.",e:"Cmd_Giro cambia y no borra EnMarcha. El variador realiza la inversión.",p:function(){base();S.en=true;}},
+ {t:"Pulsar Reset",a:"Con el motor en marcha, pulsa Reset y suéltalo.",e:"Cmd_Marcha = FALSE; Cmd_Reset sigue a Reset salvo en FirstScan. Soltar no arranca.",p:function(){base();S.en=true;}},
+ {t:"HSC_OK = FALSE o PPR ≤ 0",a:"HSC_OK queda en FALSE. Prueba también PPR = 0 con HSC_OK en TRUE.",e:"RPM_Config_OK = FALSE; RPM = 0.0; movimiento desactivado.",p:function(){base();S.en=true;S.hscOK=false;$("#s-hscok").checked=false;}},
+ {t:"HSC_OK = TRUE, PPR = 400, 6000 Hz",a:"El encoder se sustituye por 6000 Hz con la marcha desactivada. Espera un periodo de medición de 1 s.",e:"RPM = 900.0; movimiento = TRUE, aunque la marcha esté desactivada.",p:function(){base();S.en=false;S.fix=true;S.fixHz=6000;$("#s-fix").checked=true;$("#s-fixhz").value=6000;}}
+];
+var tState=store(KEY+"tests")||{};
+$("#tests").innerHTML=TESTS.map(function(t,i){return "<li><div><b>"+esc(t.t)+"</b><p class=\"exp\">"+esc(t.a)+"</p><p class=\"exp\"><b>Esperado:</b> "+esc(t.e)+"</p></div><div class=\"do\"><button type=\"button\" data-t=\""+i+"\">Preparar</button><label><input type=\"checkbox\" data-tc=\""+i+"\""+(tState[i]?" checked":"")+"> Comprobado</label></div></li>";}).join("");
+$$("[data-t]").forEach(function(b){b.addEventListener("click",function(){TESTS[+b.dataset.t].p();renderBench();updateTP(true);var bb=$("#banco .bench");if(bb.getBoundingClientRect().top<-200)bb.scrollIntoView({block:"start"});});});
+$$("[data-tc]").forEach(function(c){c.addEventListener("change",function(){tState[c.dataset.tc]=c.checked;store(KEY+"tests",tState);});});
+
+/* falla oculta: solo existe el selector en la versión docente */
+var df=$("#doc-fault");
+if(df){df.addEventListener("change",function(){S.f=df.value;S.cnt=0;S.hscHz=0;S.pulseAcc=0;S.accT=0;$("#doc-fault-st").textContent=S.f?"Falla activa. Proyecta solo el TP700 y la tabla de observación.":"Sin falla.";});}
+
+/* ============ 6 · diagnóstico ============ */
+function norm(s){return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();}
+$("#diag-q").addEventListener("input",function(e){var q=norm(e.target.value.trim()),n=0;$$("#diag tbody tr").forEach(function(r){var ok=!q||norm(r.textContent).indexOf(q)>=0;r.hidden=!ok;if(ok)n++;});$("#diag-none").hidden=n>0;});
+
+/* ============ 7 · lista final ============ */
+var FINAL=["TP700 identificado; fuente externa de 24 V dimensionada.","PLC, HMI y PC con IP diferentes; conexión HMI verificada.","DB_HMI creado y dos entradas nuevas conectadas al FB.","Redes 9 a 14 completas; escrituras antiguas de Consigna_Hz retiradas.","QW112 con una única ruta de escritura.","RPM reales en modo Salida; solicitadas en Entrada/salida.","Límites HMI 0–1750 y LIMIT en el PLC.","Referencia seleccionada comprobada con el motor parado.","Estados rotulados como orden, movimiento y configuración.","Proyecto compilado y pruebas documentadas en el equipo real."];
+var fState=store(KEY+"final")||{};
+$("#final tbody").innerHTML=FINAL.map(function(t,i){return "<tr class=\"done-row\"><td><input type=\"checkbox\" id=\"fc"+i+"\" data-f=\""+i+"\""+(fState[i]?" checked":"")+"></td><td><label for=\"fc"+i+"\">"+esc(t)+"</label></td></tr>";}).join("");
+function prog(){var n=$$("[data-f]").filter(function(c){return c.checked;}).length;$("#prog").textContent=n+" de "+FINAL.length+" comprobaciones"+(n===FINAL.length?". Lista completa.":"");}
+$$("[data-f]").forEach(function(c){c.addEventListener("change",function(){fState[c.dataset.f]=c.checked;store(KEY+"final",fState);prog();});});
+prog();
+var rState=store(KEY+"rec")||{};
+$$("[data-rec]").forEach(function(i){if(rState[i.dataset.rec])i.value=rState[i.dataset.rec];i.addEventListener("input",function(){rState[i.dataset.rec]=i.value;store(KEY+"rec",rState);});});
+$("#print").addEventListener("click",function(){try{window.print();}catch(e){}});
+var armT=null;
+$("#clear-all").addEventListener("click",function(){
+  var b=$("#clear-all");
+  if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Pulsa otra vez para borrar todo";armT=setTimeout(function(){delete b.dataset.armed;b.textContent="Borrar mis marcas";},4000);return;}
+  clearTimeout(armT);delete b.dataset.armed;b.textContent="Borrar mis marcas";
+  fState={};rState={};tState={};store(KEY+"final",fState);store(KEY+"rec",rState);store(KEY+"tests",tState);
+  $$("[data-f],[data-tc]").forEach(function(c){c.checked=false;});$$("[data-rec]").forEach(function(i){i.value="";});prog();
+});
+
+/* ============ navegación ============ */
+var links=$$(".rail a");
+if("IntersectionObserver" in window){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.setAttribute("aria-current",a.getAttribute("href")==="#"+e.target.id?"true":"false");});
+    var cur=$(".rail a[aria-current=true]");if(cur&&window.innerWidth<=900&&cur.scrollIntoView)cur.parentNode.scrollTo({left:cur.offsetLeft-12,behavior:"auto"});}});},{rootMargin:"-35% 0px -60% 0px"});
+  $$("#cadena, section.part").forEach(function(s){io.observe(s);});
+}
+
+/* ============ arranque ============ */
+syncInputs();renderBalance();calcRPM();
+doScan();renderBench();updateTP(true);
+setRun(true);
+})();
+</script>
+</body>
+</html>

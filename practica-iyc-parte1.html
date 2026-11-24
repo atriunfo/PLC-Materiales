@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Práctica Parte 1 · Instrumentos, variables y simbología ISA · Instrumentación y Control</title>
+<style>
+:root{--plate:#E3E6E1;--plate-2:#D3D8D1;--paper:#F4F6F3;--ink:#23282C;--ink-2:#4B545A;--line:#B4BBB3;--line-2:#9AA29A;
+ --cpu:#00646E;--cpu-tint:#D2E5E4;--sig:#2E7D3A;--mm:#C77700;--mm-ink:#8A5100;--alert:#B3261E;--alert-tint:#F3D9D5;--doc:#6B2C5F;--doc-tint:#F0E4EC;
+ --f-label:"Bahnschrift","DIN Alternate","DIN Next LT Pro","Roboto Condensed","Arial Narrow",sans-serif;
+ --f-text:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+ --f-mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,"DejaVu Sans Mono",monospace;--r:4px}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--plate);color:var(--ink);font:17px/1.55 var(--f-text)}
+:focus-visible{outline:3px solid var(--cpu);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--f-label);font-weight:600;line-height:1.15;margin:0}
+h2{font-size:26px}h3{font-size:19px;margin-top:18px}
+p{margin:.55rem 0}ul{padding-left:1.2rem}li{margin:.2rem 0}
+code{font-family:var(--f-mono);font-size:.88em;background:rgba(255,255,255,.6);padding:0 .25em;border-radius:3px}
+.wrap{max-width:980px;margin:0 auto;padding:0 clamp(14px,4vw,36px) 120px}
+.inst{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 30px;font-size:14.5px;color:var(--ink-2);border-bottom:1px solid var(--line);padding:22px 0 14px}
+.inst b{font-family:var(--f-label);font-weight:600;color:var(--ink);font-size:16px}
+.inst dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;margin:0}.inst dd{margin:0;color:var(--ink)}
+.tb{padding:24px 0 6px}.tb .u{font-family:var(--f-label);font-size:17px;color:var(--ink-2)}
+.tb h1{font-size:clamp(30px,4.6vw,46px);font-weight:700;letter-spacing:-.012em;margin:4px 0 6px;max-width:24ch}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin:14px 0}
+.warn{border-left:4px solid var(--alert);background:var(--alert-tint);padding:10px 14px;margin:14px 0;border-radius:0 var(--r) var(--r) 0}
+.warn h3{margin:0 0 4px;color:var(--alert);font-size:17px}
+.note{border-left:4px solid var(--line-2);background:var(--paper);padding:10px 14px;margin:12px 0;border-radius:0 var(--r) var(--r) 0}
+details.theory{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:10px 16px;margin:14px 0}
+details.theory summary{cursor:pointer;font-family:var(--f-label);font-size:18px;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:15px;background:#fff;border:1px solid var(--line)}
+th,td{text-align:left;vertical-align:middle;padding:6px 8px;border-bottom:1px solid #D6DAD4}
+th{font-family:var(--f-label);font-weight:600;background:var(--plate-2);font-size:14.5px;vertical-align:bottom}
+td.calc{font-family:var(--f-mono);background:#F1F5F4;color:var(--cpu);text-align:right;white-space:nowrap}
+td.lab{font-weight:600}
+table.mini{max-width:640px;margin:8px 0}
+.tw{overflow-x:auto;margin:10px 0}
+.tw input,.tw select{width:100%;min-width:90px}
+input[type=text],input[type=date],select,textarea{font:inherit;font-size:16px;color:var(--ink);padding:6px 8px;border:1px solid var(--line-2);border-radius:3px;background:#fff;max-width:100%}
+input.n{font-family:var(--f-mono);text-align:right}
+textarea{width:100%;min-height:110px;resize:vertical}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 18px;margin:8px 0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:14.5px;color:var(--ink-2);margin:6px 0}
+label.f .in{display:flex;gap:8px;align-items:center}label.f .in input,label.f .in select{flex:1;min-width:0}
+label.f .u{font-family:var(--f-label);color:var(--ink-2);white-space:nowrap}
+.calcs{display:grid;gap:4px;margin:8px 0;font-size:15px}.calcs b{font-family:var(--f-mono);color:var(--cpu)}
+.sums{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 16px;margin:6px 0 4px;font-size:15px}
+.sums b{font-family:var(--f-mono);color:var(--cpu);font-size:17px}
+section.sec{padding-top:30px}
+.sec-head{display:flex;gap:12px;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:4px}
+.sec-head .st{font-family:var(--f-label);font-size:15px;color:var(--ink-2);white-space:nowrap}
+.sec-head .st.ok{color:var(--sig)}
+.photo{display:grid;grid-template-columns:170px minmax(0,1fr);gap:14px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin:10px 0}
+.photo .thumb{width:170px;height:120px;border:1px dashed var(--line-2);border-radius:3px;background:#fff center/cover no-repeat;display:grid;place-items:center;font-size:13px;color:var(--ink-2);text-align:center;padding:6px}
+.photo .thumb.has{border-style:solid;color:transparent}
+.photo .err{color:var(--alert);font-size:14px;min-height:1em;margin:4px 0 0}
+@media (max-width:560px){.photo{grid-template-columns:1fr}.photo .thumb{width:100%;height:190px}}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:10px 0}
+.q.ok{border-left:4px solid var(--sig)}
+.q .stem{margin:0 0 8px}.q .qn{font-family:var(--f-label);font-weight:700;color:var(--ink-2);margin-right:6px}
+.opt{display:grid;grid-template-columns:24px 1fr;gap:8px;padding:7px 10px;border:1px solid #D3D8D1;border-radius:3px;background:#fff;cursor:pointer;margin:5px 0}
+.opt input{margin:4px 0 0;width:18px;height:18px;accent-color:var(--cpu)}
+.opt:has(input:checked){border-color:var(--cpu);background:#EEF6F5}
+.team td input{width:100%}
+.chart{display:block;width:100%;max-width:620px;height:auto;background:#fff;border:1px solid var(--line);border-radius:3px;margin-top:8px}
+.ch-grid{stroke:#E2E6E1}.ch-ax{stroke:#4B545A;stroke-width:1.2}.ch-t{font:11px var(--f-mono);fill:#4B545A}.ch-l{font:13px var(--f-label);fill:#23282C}
+.ch-pt{fill:var(--cpu)}.ch-fit{stroke:var(--cpu);stroke-width:1.8}.ch-theo{stroke:var(--mm);stroke-width:1.6;stroke-dasharray:6 4}.ch-empty{font:14px var(--f-text);fill:#4B545A}
+.ch-info{font-size:14.5px;margin:6px 0}.ch-info b{font-family:var(--f-mono)}.k-fit{color:var(--cpu);font-weight:600}.k-theo{color:var(--mm-ink);font-weight:600}
+button{font:inherit;font-family:var(--f-label);font-size:16px;padding:8px 15px;border:1px solid var(--line-2);background:#fff;color:var(--ink);border-radius:3px;cursor:pointer}
+button:hover{background:#EEF1ED}button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hint{font-size:14px;color:var(--ink-2)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;z-index:10}
+.bar .in{max-width:980px;margin:0 auto;padding:9px clamp(14px,4vw,36px);display:flex;gap:10px 16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.bar .prog{font-family:var(--f-label);font-size:16px}.bar .sv{font-size:13.5px;color:#C9D0D4}
+.bar button{background:#fff;color:var(--ink);border-color:#fff;padding:6px 12px;font-size:15px}
+.bar .msg{flex-basis:100%;margin:0;font-size:14px;color:#F1E1C6}
+[hidden]{display:none!important}
+/* rúbrica */
+.docband{background:var(--doc);color:#fff;padding:10px 16px;border-radius:var(--r);margin-top:14px}
+.dropzone{border:2px dashed var(--doc);background:var(--doc-tint);border-radius:var(--r);padding:18px;text-align:center}
+.crit{background:#fff;border:1px solid var(--line);border-radius:var(--r);margin:12px 0}
+.crit-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline;padding:10px 14px;background:var(--plate-2);border-bottom:1px solid var(--line)}
+.crit-h b{font-family:var(--f-label);font-size:17px}
+.crit-b{padding:10px 14px}
+.levels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:8px 0}
+.levels label{border:1px solid var(--line);border-radius:3px;padding:6px 8px;font-size:13.5px;cursor:pointer;background:var(--paper)}
+.levels label b{display:block;font-family:var(--f-label);font-size:14.5px}
+.levels label:has(input:checked){border-color:var(--doc);background:var(--doc-tint)}
+.levels input{accent-color:var(--doc)}
+.levels label.sug{box-shadow:inset 0 0 0 2px var(--sig)}
+@media (max-width:760px){.levels{grid-template-columns:1fr 1fr}}
+.ev{font-size:14.5px;color:var(--ink-2)}.ev .ok{color:var(--sig);font-weight:700}.ev .bad{color:var(--alert);font-weight:700}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:8px 0}
+.gal figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:3px;padding:6px}.gal img{width:100%;height:170px;object-fit:cover;display:block;cursor:zoom-in}
+.gal figcaption{font-size:13px;color:var(--ink-2);margin-top:4px}
+.ans{background:#fff;border:1px solid var(--line);border-radius:3px;padding:8px 10px;margin:6px 0;white-space:pre-wrap;font-size:15px}
+.total{font-family:var(--f-label);font-size:22px}.total b{font-family:var(--f-mono)}
+#saved td.n,#saved th.n,#list td.n,#list th.n{text-align:right}
+tr.sel td{background:var(--doc-tint)}
+.ok{color:var(--sig);font-weight:700}.bad{color:var(--alert);font-weight:700}
+.lightbox{position:fixed;inset:0;background:rgba(10,14,20,.86);display:grid;place-items:center;z-index:50;cursor:zoom-out}.lightbox img{max-width:94vw;max-height:92vh}
+@media print{.bar,.dropzone,button,.noprint{display:none!important}body{background:#fff}.wrap{max-width:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="bar noprint"><div class="in"><span class="prog" id="prog"></span><span class="sv" id="sv"></span><button type="button" onclick="document.getElementById('b-dl').click()">Descargar archivo</button></div></div>
+<script>
+/* ===== utilidades compartidas: práctica y rúbrica ===== */
+var U=(function(){
+"use strict";
+var U={};
+U.$=function(s,r){return (r||document).querySelector(s);};
+U.$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+U.esc=function(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
+U.num=function(s){if(s==null)return NaN;s=String(s).trim().replace(/\s/g,"").replace(",",".");if(!/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(s))return NaN;return parseFloat(s);};
+U.fmt=function(x,d){if(x==null||!isFinite(x))return "—";return (Math.round(x*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);};
+U.st=function(k,v){try{if(v===undefined){var r=localStorage.getItem(k);return r?JSON.parse(r):null;}if(v===null){localStorage.removeItem(k);return true;}localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}};
+U.hash=function(s){var h=2166136261>>>0;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h>>>0;};
+U.sumOf=function(o){var c=JSON.parse(JSON.stringify(o));delete c.sum;return U.hash(JSON.stringify(c)+"|IYC2026B").toString(36);};
+U.stats=function(a){a=a.filter(function(x){return isFinite(x);});var n=a.length;if(!n)return {n:0,mean:NaN,sd:NaN,min:NaN,max:NaN};
+  var m=a.reduce(function(s,x){return s+x;},0)/n,v=n>1?a.reduce(function(s,x){return s+(x-m)*(x-m);},0)/(n-1):NaN;
+  return {n:n,mean:m,sd:Math.sqrt(v),min:Math.min.apply(null,a),max:Math.max.apply(null,a)};};
+U.reg=function(xs,ys){var P=[];for(var i=0;i<xs.length;i++)if(isFinite(xs[i])&&isFinite(ys[i]))P.push([xs[i],ys[i]]);var n=P.length;if(n<2)return {n:n,m:NaN,b:NaN,r2:NaN};
+  var sx=0,sy=0,sxx=0,sxy=0,syy=0;P.forEach(function(p){sx+=p[0];sy+=p[1];sxx+=p[0]*p[0];sxy+=p[0]*p[1];syy+=p[1]*p[1];});
+  var d=n*sxx-sx*sx;if(d===0)return {n:n,m:NaN,b:NaN,r2:NaN};var m=(n*sxy-sx*sy)/d,b=(sy-m*sx)/n;
+  var my=sy/n,sst=syy-n*my*my,sse=0;P.forEach(function(p){var e=p[1]-(m*p[0]+b);sse+=e*e;});
+  return {n:n,m:m,b:b,r2:sst>0?1-sse/sst:NaN};};
+
+/* contexto numérico de los campos */
+U.ctx=function(S){return {n:function(id,def){var v=U.num(S.f&&S.f[id]);return isFinite(v)?v:(def===undefined?NaN:def);},s:function(id){return (S.f&&S.f[id])||"";}};};
+
+/* filas numéricas de una tabla con columnas calculadas */
+U.rows=function(T,S){
+  var raw=(S.t&&S.t[T.id])||[],c=U.ctx(S),n=T.labels?T.labels.length:T.rows,out=[];
+  for(var i=0;i<n;i++){var r=raw[i]||{},o={_i:i,_lab:T.labels?T.labels[i]:String(i+1),_filled:false};
+    T.cols.forEach(function(col){if(col.kind==="num"){var v=r[col.k];if((v===undefined||v==="")&&col.def)v=col.def[i];o[col.k]=U.num(v);if(r[col.k]!==undefined&&r[col.k]!==""&&!col.def)o._filled=true;}
+      else if(col.kind==="txt"){o[col.k]=r[col.k]||"";}});
+    T.cols.forEach(function(col){if(col.kind==="calc"){var v;try{v=col.f(o,c,i);}catch(e){v=NaN;}o[col.k]=v;}});
+    o._filled=T.cols.filter(function(col){return col.kind==="num"&&col.req!==false&&!col.def;}).every(function(col){return isFinite(o[col.k]);});
+    out.push(o);}
+  if(T.post)try{T.post(out,c);}catch(e){}
+  return out;};
+
+/* gráfica de dispersión con recta de ajuste */
+U.chart=function(pts,o){
+  var W=560,H=300,L=62,R=18,T=16,B=48,P=pts.filter(function(p){return isFinite(p.x)&&isFinite(p.y);});
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" class="chart" role="img" aria-label="'+U.esc(o.yl+" contra "+o.xl)+'">';
+  if(P.length<2){return svg+'<text x="'+W/2+'" y="'+H/2+'" text-anchor="middle" class="ch-empty">Captura al menos dos puntos para ver la gráfica</text></svg>';}
+  var xs=P.map(function(p){return p.x;}),ys=P.map(function(p){return p.y;});
+  var x0=Math.min(0,Math.min.apply(null,xs)),x1=Math.max.apply(null,xs),y0=Math.min(0,Math.min.apply(null,ys)),y1=Math.max.apply(null,ys);
+  if(x1===x0)x1=x0+1;if(y1===y0)y1=y0+1;x1*=1.08;y1*=1.1;
+  var sx=function(x){return L+(x-x0)/(x1-x0)*(W-L-R);},sy=function(y){return H-B-(y-y0)/(y1-y0)*(H-T-B);};
+  var nice=function(a,b){var st=Math.pow(10,Math.floor(Math.log10((b-a)/5)));var m=(b-a)/st;st*=m>20?5:m>10?2:1;var t=[];for(var v=Math.ceil(a/st)*st;v<=b+1e-9;v+=st)t.push(v);return t;};
+  nice(x0,x1).forEach(function(v){svg+='<line x1="'+sx(v)+'" x2="'+sx(v)+'" y1="'+T+'" y2="'+(H-B)+'" class="ch-grid"/><text x="'+sx(v)+'" y="'+(H-B+16)+'" text-anchor="middle" class="ch-t">'+(+v.toPrecision(6))+'</text>';});
+  nice(y0,y1).forEach(function(v){svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+sy(v)+'" y2="'+sy(v)+'" class="ch-grid"/><text x="'+(L-6)+'" y="'+(sy(v)+4)+'" text-anchor="end" class="ch-t">'+(+v.toPrecision(6))+'</text>';});
+  svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+(H-B)+'" y2="'+(H-B)+'" class="ch-ax"/><line x1="'+L+'" x2="'+L+'" y1="'+T+'" y2="'+(H-B)+'" class="ch-ax"/>';
+  svg+='<text x="'+((L+W-R)/2)+'" y="'+(H-8)+'" text-anchor="middle" class="ch-l">'+U.esc(o.xl)+'</text><text x="14" y="'+((T+H-B)/2)+'" text-anchor="middle" class="ch-l" transform="rotate(-90 14 '+((T+H-B)/2)+')">'+U.esc(o.yl)+'</text>';
+  if(o.theo&&isFinite(o.theo.m)){svg+='<line x1="'+sx(x0)+'" y1="'+sy(o.theo.m*x0+o.theo.b)+'" x2="'+sx(x1)+'" y2="'+sy(o.theo.m*x1+o.theo.b)+'" class="ch-theo"/>';}
+  var g=U.reg(xs,ys);if(isFinite(g.m))svg+='<line x1="'+sx(x0)+'" y1="'+sy(g.m*x0+g.b)+'" x2="'+sx(x1)+'" y2="'+sy(g.m*x1+g.b)+'" class="ch-fit"/>';
+  P.forEach(function(p){svg+='<circle cx="'+sx(p.x)+'" cy="'+sy(p.y)+'" r="4.5" class="ch-pt"/>';});
+  return svg+'</svg>';};
+U.tableChart=function(T,R,S){var ch=T.chart,c=U.ctx(S);var pts=R.map(function(r){return {x:r[ch.x],y:r[ch.y]};});var g=U.reg(pts.map(function(p){return p.x;}),pts.map(function(p){return p.y;}));
+  var th=ch.theo?ch.theo(c):null;
+  var info='<p class="ch-info"><span class="k-fit">Ajuste lineal:</span> pendiente <b>'+U.fmt(g.m,ch.dm||4)+'</b> '+U.esc(ch.mu||"")+' · R² <b>'+U.fmt(g.r2,4)+'</b>'+(th&&isFinite(th.m)?' · <span class="k-theo">teórica</span> <b>'+U.fmt(th.m,ch.dm||4)+'</b>':'')+'</p>';
+  return U.chart(pts,{xl:ch.xl,yl:ch.yl,theo:th})+info;};
+return U;})();
+U.blockDone=function(b,S){
+  if(b.type==="grid"){var g=(S.g&&S.g[b.id])||{};return b.labels.every(function(_,i){return b.cells.every(function(c){return g[i]&&g[i][c.k];});});}
+  if(b.type==="fields"){return b.items.every(function(it){var v=S.f&&S.f[it.id];return v!==undefined&&String(v).trim()!=="";});}
+  if(b.type==="table"){var R=U.rows(b,S);return R.filter(function(r){return r._filled;}).length>=(b.minRows||R.length);}
+  if(b.type==="photo"){return !!(S.ph&&S.ph[b.id]);}
+  return true;};
+U.secDone=function(sec,S){return sec.blocks.every(function(b){return U.blockDone(b,S);});};
+U.photos=function(cfg){var L=[];cfg.secciones.forEach(function(s){s.blocks.forEach(function(b){if(b.type==="photo")L.push(b);});});return L;};
+U.lbl=function(opts,v){for(var i=0;i<opts.length;i++)if(opts[i][0]===v)return opts[i][1];return "—";};
+
+/* ===== contenido de las dos partes ===== */
+var CFG=(function(){
+var TIPOS=[["pri","Primario: mide la variable"],["sec","Secundario: transmite, convierte o indica"],["fin","Final de control: actúa sobre el proceso"],["man","Mando manual del operador"]];
+var ISA=[["SE","SE"],["ST","ST"],["SI","SI"],["SC","SC"],["SY","SY"],["SZ","SZ"],["HS","HS"],["HC","HC"],["M","Símbolo de motor (M)"]];
+var VARS=[["vel","Velocidad del eje (rpm)"],["frec","Frecuencia de salida del variador (consigna de 0 a 10 V)"],["carga","Carga mecánica en el eje"],["corr","Corriente del motor"],["pul","Pulsos del encoder (Hz)"]];
+var BTIPO=[["na","Contacto NA"],["nc","Contacto NC"],["sel","Selector mantenido"],["rel","Contacto de relé del variador"],["npn","Transistor NPN"]];
+var BEST=[["0","0 (LED apagado)"],["1","1 (LED encendido)"],["rap","Cambia muy rápido"],["pos","Depende de la posición"]];
+var PPR=function(c){return c.n("ppr",400);};
+
+var COMUN={
+  equipo:["PLC S7-1214C con módulo de salida analógica","Variador MICROMASTER 440","Motor trifásico de inducción","Encoder incremental de 400 pulsos por vuelta acoplado al eje","HMI TP700 (simulado en la PC)","Multímetro y amperímetro de gancho","Tacómetro óptico, si se dispone","Celular con cámara para las evidencias"],
+  seguridad:["Solo el docente energiza y opera el tablero. Los alumnos miden cuando el docente lo indica.","Con el multímetro, mide solo bornes de control de 0–10 V y 24 V. No abras el variador ni toques bornes de potencia.","El variador conserva tensión peligrosa después de apagarse: respeta el tiempo de descarga indicado en el equipo.","No acerques manos, ropa suelta ni cabello al eje o al acoplamiento del encoder mientras el motor gira."]
+};
+
+var P1={
+ part:1,app:"IYC-PRACT-2026B",unidad:"Unidad 1. Objetivos de la instrumentación",
+ titulo:"Instrumentos, variables y simbología ISA del lazo de velocidad",
+ objetivo:"Identificar en un sistema real los elementos de instrumentación, sus variables y su terminología (campo, alcance, resolución, repetitividad, histéresis y exactitud), y representarlo con simbología ISA.",
+ competencia:"Aplica los conceptos básicos de la instrumentación en la medición de un experimento; analiza e interpreta la simbología de instrumentación basada en normas.",
+ teoria:'<p><b>Elementos.</b> El <i>elemento primario</i> está en contacto con la variable y la convierte en señal (el encoder). Los <i>elementos secundarios</i> transmiten, convierten o indican esa señal (el contador rápido del PLC, la salida analógica, el HMI). El <i>elemento final de control</i> actúa sobre el proceso (el variador y el motor).</p>'+
+  '<p><b>Variables.</b> La <i>variable controlada</i> es la que se quiere mantener en un valor. La <i>variable manipulada</i> es la que se ajusta para influir en ella. Una <i>variable incontrolada</i> o perturbación la modifica sin que la decidamos.</p>'+
+  '<p><b>Terminología.</b> <i>Campo de medida o rango</i>: valores entre el límite inferior y el superior. <i>Alcance</i>: diferencia entre ambos límites. <i>Resolución</i>: menor cambio que el instrumento puede indicar. <i>Exactitud</i>: cercanía al valor verdadero. <i>Precisión y repetitividad</i>: qué tan iguales son las lecturas al medir lo mismo varias veces en las mismas condiciones. <i>Histéresis</i>: diferencia entre lecturas del mismo valor al recorrer la escala subiendo y bajando. <i>Supresión de cero</i>: el límite inferior del campo es mayor que cero; <i>elevación de cero</i>: el límite inferior es negativo.</p>'+
+  '<p><b>Simbología ISA.</b> La primera letra indica la variable y las siguientes, la función.</p>'+
+  '<table class="mini"><thead><tr><th>Primera letra</th><th>Variable</th><th>Letra siguiente</th><th>Función</th></tr></thead><tbody>'+
+  '<tr><td>S</td><td>Velocidad o frecuencia</td><td>E</td><td>Elemento primario</td></tr>'+
+  '<tr><td>H</td><td>Manual (mando del operador)</td><td>T</td><td>Transmisor</td></tr>'+
+  '<tr><td></td><td></td><td>I</td><td>Indicador</td></tr>'+
+  '<tr><td></td><td></td><td>C</td><td>Controlador</td></tr>'+
+  '<tr><td></td><td></td><td>Y</td><td>Relé, convertidor o cálculo</td></tr>'+
+  '<tr><td></td><td></td><td>S</td><td>Interruptor</td></tr>'+
+  '<tr><td></td><td></td><td>Z</td><td>Actuador o elemento final no clasificado</td></tr></tbody></table>',
+ secciones:[
+  {id:"s1",t:"Elementos, variables y etiquetas ISA",intro:"<p>Con el sistema detenido, recorran el tablero e identifiquen cada equipo. Asignen el tipo de elemento y la etiqueta ISA que le corresponde. Luego dibujen a mano el diagrama de lazo con círculos y etiquetas, y suban la foto.</p>",
+   blocks:[
+    {type:"grid",id:"elem",head:["Equipo o señal","Tipo de elemento","Etiqueta ISA"],
+     labels:["Encoder incremental acoplado al eje","Cálculo de RPM en el PLC (contador rápido → RPM) enviado al HMI","Indicación de RPM reales en el HMI","Conversión de la consigna a 0–10 V (salida analógica %QW112)","Variador MICROMASTER 440","Motor trifásico","Pulsadores de marcha y paro","Potenciómetro de ajuste de velocidad"],
+     cells:[{k:"tipo",opts:TIPOS},{k:"isa",opts:ISA}]},
+    {type:"fields",items:[{id:"v_ctl",l:"Variable controlada",kind:"sel",opts:VARS},{id:"v_man",l:"Variable manipulada",kind:"sel",opts:VARS},{id:"v_per",l:"Variable incontrolada (perturbación)",kind:"sel",opts:VARS}]},
+    {type:"photo",id:"f_lazo",l:"Diagrama de lazo ISA dibujado a mano"}]},
+  {id:"s2",t:"Datos de placa del motor",intro:"<p>Lean la placa de datos del motor y anoten sus valores. Si la placa indica el número de polos, anótenlo.</p>",
+   blocks:[
+    {type:"fields",items:[{id:"pl_pot",l:"Potencia",u:"kW o HP",kind:"text"},{id:"pl_v",l:"Tensión",u:"V",kind:"text"},{id:"pl_i",l:"Corriente",u:"A",kind:"text"},{id:"pl_f",l:"Frecuencia",u:"Hz",kind:"num"},{id:"pl_rpm",l:"Velocidad nominal",u:"rpm",kind:"num"},{id:"pl_p",l:"Número de polos (si aparece)",u:"",kind:"num"}]},
+    {type:"calc",items:[{l:"Velocidad síncrona: 120 · f / polos",u:"rpm",d:0,f:function(c){return 120*c.n("pl_f")/c.n("pl_p");}},{l:"Deslizamiento nominal: (síncrona − nominal) / síncrona",u:"%",d:2,f:function(c){var ns=120*c.n("pl_f")/c.n("pl_p");return (ns-c.n("pl_rpm"))/ns*100;}}]},
+    {type:"photo",id:"f_placa",l:"Placa de datos del motor"}]},
+  {id:"s3",t:"Campo de medida, alcance y resolución",intro:"<p>En la práctica, la escala de velocidad va de 0 a 1750 rpm y la consigna analógica de 0 a 10 V se representa con 0 a 27648 cuentas. Calculen ustedes los valores; no se llenan solos.</p>",
+   blocks:[
+    {type:"fields",items:[
+     {id:"li",l:"Límite inferior del campo de velocidad",u:"rpm",kind:"num"},{id:"ls",l:"Límite superior del campo de velocidad",u:"rpm",kind:"num"},
+     {id:"alc",l:"Alcance de la escala de velocidad",u:"rpm",kind:"num"},
+     {id:"ppr",l:"Pulsos por vuelta del encoder",u:"PPR",kind:"num",def:"400"},
+     {id:"res_rpm",l:"Resolución de la velocidad medida con 1 Hz de cambio (60 / PPR)",u:"rpm",kind:"num"},
+     {id:"res_mv",l:"Resolución de la salida analógica: 10 V / 27648",u:"mV por cuenta",kind:"num"},
+     {id:"alc_sup",l:"Si un indicador tuviera un campo de 500 a 1750 rpm, ¿cuál sería su alcance?",u:"rpm",kind:"num"}]}]},
+  {id:"s4",t:"Repetitividad",intro:"<p>El docente fija una consigna (por ejemplo, 875 rpm). Repitan cinco veces: detener el motor, arrancarlo, esperar a que se estabilice y anotar la frecuencia de <code>%ID1000</code> y las RPM del HMI.</p>",
+   blocks:[
+    {type:"fields",items:[{id:"rep_c",l:"Consigna usada",u:"rpm",kind:"num",def:"875"}]},
+    {type:"table",id:"rep",rows:5,cols:[{k:"hz",h:"%ID1000 (Hz)",kind:"num"},{k:"rpm",h:"RPM en el HMI",kind:"num"},{k:"rc",h:"RPM calculadas: Hz · 60 / PPR",kind:"calc",d:1,f:function(r,c){return r.hz*60/PPR(c);}}],
+     sum:[{l:"Promedio de RPM en el HMI",u:"rpm",d:1,f:function(R){return U.stats(R.map(function(r){return r.rpm;})).mean;}},
+          {l:"Desviación estándar",u:"rpm",d:2,f:function(R){return U.stats(R.map(function(r){return r.rpm;})).sd;}},
+          {l:"Repetitividad: lectura máxima − mínima",u:"rpm",d:1,f:function(R){var s=U.stats(R.map(function(r){return r.rpm;}));return s.max-s.min;}},
+          {l:"Repetitividad en % del alcance",u:"%",d:2,f:function(R,c){var s=U.stats(R.map(function(r){return r.rpm;}));return (s.max-s.min)/(c.n("ls",1750)-c.n("li",0))*100;}}]}]},
+  {id:"s5",t:"Histéresis",intro:"<p>Suban la consigna desde 0 pasando por cada valor de la tabla, sin regresar, y anoten las RPM estabilizadas. Después bajen por los mismos valores. Si el docente usa otras consignas, cámbienlas en la primera columna.</p>",
+   blocks:[
+    {type:"table",id:"his",rows:4,cols:[{k:"c",h:"Consigna (rpm)",kind:"num",def:["350","700","1050","1400"]},{k:"sub",h:"RPM subiendo",kind:"num"},{k:"baj",h:"RPM bajando",kind:"num"},{k:"d",h:"Diferencia |subiendo − bajando|",kind:"calc",d:1,f:function(r){return Math.abs(r.sub-r.baj);}}],
+     sum:[{l:"Histéresis máxima",u:"rpm",d:1,f:function(R){return U.stats(R.map(function(r){return r.d;})).max;}},
+          {l:"Histéresis en % del alcance",u:"%",d:2,f:function(R,c){return U.stats(R.map(function(r){return r.d;})).max/(c.n("ls",1750)-c.n("li",0))*100;}}]}]},
+  {id:"s6",t:"Exactitud y error",intro:"<p>Comparen la lectura del HMI contra una referencia. Si hay tacómetro óptico, úsenlo como valor de referencia; si no, usen la consigna y anoten que lo hicieron así.</p>",
+   blocks:[
+    {type:"fields",items:[{id:"ref",l:"Referencia usada",kind:"sel",opts:[["taco","Tacómetro óptico"],["cons","Consigna (sin tacómetro)"]]}]},
+    {type:"table",id:"exa",rows:3,cols:[{k:"c",h:"Consigna (rpm)",kind:"num",def:["525","875","1225"]},{k:"hmi",h:"RPM en el HMI",kind:"num"},{k:"ref",h:"RPM de referencia",kind:"num"},
+      {k:"ea",h:"Error absoluto (rpm)",kind:"calc",d:1,f:function(r){return r.hmi-r.ref;}},
+      {k:"er",h:"Error % de la lectura",kind:"calc",d:2,f:function(r){return (r.hmi-r.ref)/r.ref*100;}},
+      {k:"ef",h:"Error % del alcance",kind:"calc",d:2,f:function(r,c){return (r.hmi-r.ref)/(c.n("ls",1750)-c.n("li",0))*100;}}]},
+    {type:"photo",id:"f_hmi",l:"Pantalla del HMI con las RPM reales"},
+    {type:"photo",id:"f_enc",l:"Encoder montado en el eje (elemento primario)"},
+    {type:"photo",id:"f_var",l:"Variador MICROMASTER 440 (elemento final de control)"}]}
+ ],
+ mc:[
+  {id:"q1",q:"La variable controlada en este sistema es:",o:["La frecuencia de salida del variador","La velocidad del eje del motor","La tensión de 0 a 10 V de la consigna","La corriente de una fase del motor"]},
+  {id:"q2",q:"La variable manipulada, es decir, la que se ajusta para influir en la controlada, es:",o:["La carga mecánica en el eje","Los pulsos del encoder","La frecuencia de salida del variador, fijada por la consigna de 0 a 10 V","La velocidad mostrada en el HMI"]},
+  {id:"q3",q:"¿Cuál es un ejemplo de variable incontrolada (perturbación) en este sistema?",o:["Un cambio en la carga mecánica del eje","La consigna escrita en el HMI","El número de pulsos por vuelta del encoder","El selector de sentido de giro"]},
+  {id:"q4",q:"En este sistema, el encoder es un elemento:",o:["Secundario","Final de control","Primario","De mando manual"]},
+  {id:"q5",q:"En la simbología ISA, la primera letra S de etiquetas como SE o SI se refiere a:",o:["Señal","Velocidad o frecuencia","Seguridad","Suministro eléctrico"]},
+  {id:"q6",q:"Un indicador cuyo campo de medida va de 500 a 1750 rpm tiene:",o:["Elevación de cero","Histéresis","Supresión de cero","Resolución variable"]},
+  {id:"q7",q:"Medir cinco veces la misma consigna en las mismas condiciones y comparar las lecturas sirve para evaluar la:",o:["Exactitud","Repetitividad","Histéresis","Supresión de cero"]},
+  {id:"q8",q:"La histéresis de un instrumento es:",o:["La diferencia entre lecturas del mismo valor al recorrer la escala subiendo y bajando","La menor variación que puede detectar","El error respecto al valor verdadero","La diferencia entre los límites del campo de medida"]}
+ ],
+ open:[
+  {id:"o1",q:"¿Por qué este sistema funciona en lazo abierto aunque tenga un encoder? ¿Qué le faltaría para cerrar el lazo de velocidad?"},
+  {id:"o2",q:"Con sus datos de repetitividad y de error, expliquen la diferencia entre exactitud y precisión. ¿Su sistema es más preciso o más exacto?"},
+  {id:"o3",q:"¿Qué errores de calibración, de montaje o de escala podrían explicar las diferencias entre las RPM del HMI y la referencia?"},
+  {id:"o4",q:"Comparen la velocidad nominal de la placa con los 1750 rpm de la escala y con la velocidad síncrona. ¿Por qué un motor de inducción no gira a la velocidad síncrona?"}
+ ]
+};
+
+var P2={
+ part:2,app:"IYC-PRACT-2026B",unidad:"Unidad 2. Sensores",
+ titulo:"Sensores binarios, de velocidad y de posición en el lazo PLC–variador–motor",
+ objetivo:"Identificar y caracterizar los sensores del sistema: contactos y salidas binarias, el encoder como sensor de velocidad y el potenciómetro como sensor de posición proporcional, y estimar la aceleración del eje.",
+ competencia:"Identifica las características técnicas de los sensores usados en sistemas industriales; selecciona y aplica sensores según las características del sistema.",
+ teoria:'<p><b>Sensores binarios.</b> Entregan solo dos estados. Un contacto <i>NA</i> (normalmente abierto) se cierra al accionarse; uno <i>NC</i> (normalmente cerrado) se abre. Los sensores electrónicos tienen salida de transistor: una salida <i>NPN</i> conecta la señal a 0 V cuando conduce; una <i>PNP</i>, a +24 V. Los sensores de proximidad <i>inductivos</i> detectan metales sin contacto; los <i>capacitivos</i> también detectan plásticos, madera o líquidos; los <i>fotoeléctricos</i> usan un haz de luz y los <i>finales de carrera</i>, un contacto mecánico.</p>'+
+  '<p><b>Sensor de velocidad.</b> Un encoder incremental entrega un número fijo de pulsos por vuelta (PPR). Su frecuencia es <i>f</i> = <i>n</i> · PPR / 60, con <i>n</i> en rpm. El contador rápido del PLC cuenta los pulsos durante un periodo de medición (1 s en la práctica) y entrega la frecuencia en Hz.</p>'+
+  '<p><b>Sensor de posición proporcional.</b> Un potenciómetro alimentado con una tensión fija funciona como divisor de tensión: la tensión del cursor es proporcional al ángulo de giro.</p>'+
+  '<p><b>Aceleración.</b> La aceleración angular media entre dos lecturas es α = Δ<i>n</i> / Δ<i>t</i>, en rpm/s; multiplicada por 2π/60 queda en rad/s².</p>',
+ secciones:[
+  {id:"s1",t:"Sensores binarios del sistema",intro:"<p>Con el PLC energizado y el motor detenido, observen el LED de cada entrada. Anoten el tipo de contacto o salida y el estado del LED en reposo y al accionar el elemento. Para los relés del variador, <i>reposo</i> significa variador energizado y sin falla; <i>accionado</i>, lo que indique el docente. Para el encoder, <i>accionado</i> significa motor girando.</p>",
+   blocks:[
+    {type:"grid",id:"bin",head:["Elemento (entrada)","Tipo","Estado en reposo","Estado accionado"],
+     labels:["Pulsador de marcha (I0.4)","Pulsador de paro (I0.5)","Selector de giro (I0.6)","Pulsador de reset (I0.7)","Relé “listo” del variador (I1.0)","Relé “sin falla” del variador (I1.1)","Salida del encoder (I0.0)"],
+     cells:[{k:"tipo",opts:BTIPO},{k:"rep",opts:BEST},{k:"acc",opts:BEST}]},
+    {type:"photo",id:"f_leds",l:"LED de entradas del PLC"}]},
+  {id:"s2",t:"Encoder como sensor de velocidad",intro:"<p>El docente fija cada consigna. Con la velocidad estabilizada, anoten la frecuencia de <code>%ID1000</code> y las RPM del HMI. Si hay tacómetro, anoten también su lectura.</p>",
+   blocks:[
+    {type:"fields",items:[{id:"ppr",l:"Pulsos por vuelta del encoder",u:"PPR",kind:"num",def:"400"}]},
+    {type:"table",id:"enc",rows:5,cols:[{k:"c",h:"Consigna (rpm)",kind:"num",def:["350","700","1050","1400","1750"]},{k:"hz",h:"%ID1000 (Hz)",kind:"num"},{k:"rpm",h:"RPM en el HMI",kind:"num"},{k:"taco",h:"Tacómetro (opcional)",kind:"num",req:false},
+      {k:"rc",h:"RPM calculadas: Hz · 60 / PPR",kind:"calc",d:1,f:function(r,c){return r.hz*60/PPR(c);}},{k:"d",h:"HMI − calculadas",kind:"calc",d:1,f:function(r){return r.rpm-r.rc;}}],
+     chart:{x:"rpm",y:"hz",xl:"RPM en el HMI",yl:"Frecuencia (Hz)",mu:"Hz por rpm",dm:4,theo:function(c){return {m:PPR(c)/60,b:0};}}},
+    {type:"photo",id:"f_acople",l:"Encoder y su acoplamiento al eje"},
+    {type:"photo",id:"f_bornes",l:"Conexión del encoder a la CPU (I0.0, L+ y M)"}]},
+  {id:"s3",t:"Resolución de la medición de velocidad",intro:"<p>Calculen ustedes cuánto cambia la velocidad medida por cada hertz que cambia la lectura del contador rápido.</p>",
+   blocks:[{type:"fields",items:[
+     {id:"r1",l:"Con periodo de medición de 1 s: cambio de velocidad por 1 Hz (60 / PPR)",u:"rpm",kind:"num"},
+     {id:"r01",l:"Si el periodo fuera de 0.1 s, el contador vería 10 veces menos pulsos. ¿Cuál sería el paso mínimo de velocidad?",u:"rpm",kind:"num"}]}]},
+  {id:"s4",t:"Potenciómetro como sensor de posición",intro:"<p>Giren el potenciómetro a cinco posiciones aproximadas del recorrido. En cada una midan la tensión con el multímetro y anoten <code>AI_Pot</code> de la tabla de observación.</p>",
+   blocks:[
+    {type:"table",id:"pot",rows:5,cols:[{k:"pos",h:"Posición (% del giro)",kind:"num",def:["0","25","50","75","100"]},{k:"v",h:"Tensión medida (V)",kind:"num"},{k:"cnt",h:"AI_Pot (cuentas)",kind:"num"},
+      {k:"esp",h:"Cuentas esperadas: V · 27648 / 10",kind:"calc",d:0,f:function(r){return Math.round(r.v*2764.8);}},{k:"err",h:"Diferencia (cuentas)",kind:"calc",d:0,f:function(r){return r.cnt-r.esp;}}],
+     chart:{x:"pos",y:"v",xl:"Posición (% del giro)",yl:"Tensión (V)",mu:"V por %",dm:4}},
+    {type:"photo",id:"f_pot",l:"Potenciómetro y multímetro midiendo"}]},
+  {id:"s5",t:"Aceleración durante la rampa",intro:"<p>Con el motor detenido, el docente fija una consigna alta. Al dar marcha, graben en video la pantalla del HMI con un cronómetro visible, o un integrante dicta el tiempo y otro anota. Registren las RPM en al menos cinco instantes.</p>",
+   blocks:[
+    {type:"table",id:"ace",rows:6,cols:[{k:"t",h:"Tiempo (s)",kind:"num"},{k:"rpm",h:"RPM en el HMI",kind:"num"},
+      {k:"a",h:"Aceleración desde la fila anterior (rpm/s)",kind:"calc",d:1,f:function(r,c,i){return NaN;}},{k:"ar",h:"En rad/s²",kind:"calc",d:2,f:function(){return NaN;}}],
+     post:function(R){for(var i=1;i<R.length;i++){var a=(R[i].rpm-R[i-1].rpm)/(R[i].t-R[i-1].t);R[i].a=a;R[i].ar=a*2*Math.PI/60;}},
+     minRows:5,
+     sum:[{l:"Aceleración media, de la primera a la última lectura",u:"rpm/s",d:1,f:function(R){var F=R.filter(function(r){return isFinite(r.t)&&isFinite(r.rpm);});if(F.length<2)return NaN;var a=F[0],b=F[F.length-1];return (b.rpm-a.rpm)/(b.t-a.t);}},
+          {l:"Aceleración media",u:"rad/s²",d:2,f:function(R){var F=R.filter(function(r){return isFinite(r.t)&&isFinite(r.rpm);});if(F.length<2)return NaN;var a=F[0],b=F[F.length-1];return (b.rpm-a.rpm)/(b.t-a.t)*2*Math.PI/60;}}]},
+    {type:"photo",id:"f_rampa",l:"Pantalla del HMI durante la rampa"}]}
+ ],
+ mc:[
+  {id:"q1",q:"Un sensor binario entrega:",o:["Un valor proporcional a la variable","Solo dos estados, por ejemplo activado y desactivado","Siempre un tren de pulsos","Una corriente de 4 a 20 mA"]},
+  {id:"q2",q:"¿Por qué el pulsador de paro se conecta con un contacto NC?",o:["Porque consume menos corriente","Para que el PLC lo lea más rápido","Porque si se corta el cable la entrada cae a 0 y el sistema se detiene: falla segura","Porque los pulsadores rojos no tienen contacto NA"]},
+  {id:"q3",q:"Una salida de transistor NPN, cuando conduce:",o:["Conecta la señal a 0 V","Conecta la señal a +24 V","Genera una tensión de 0 a 10 V","Abre el circuito"]},
+  {id:"q4",q:"Un encoder incremental de 400 pulsos por vuelta gira a 1200 rpm. ¿Qué frecuencia entrega?",o:["3000 Hz","480 Hz","8000 Hz","20 Hz"]},
+  {id:"q5",q:"El potenciómetro usado como sensor de posición funciona como:",o:["Un divisor de tensión: la tensión de salida es proporcional al ángulo","Un interruptor de dos posiciones","Un generador de pulsos","Una resistencia que solo cambia con la temperatura"]},
+  {id:"q6",q:"Un sensor de proximidad inductivo detecta:",o:["Cualquier material, incluido el plástico","Objetos metálicos, sin contacto","Solo líquidos","Cambios de temperatura"]},
+  {id:"q7",q:"Un sensor de proximidad capacitivo, a diferencia del inductivo, puede detectar:",o:["Solo metales ferrosos","Materiales no metálicos como plástico, madera o líquidos","Solo objetos en movimiento","Solo campos magnéticos"]},
+  {id:"q8",q:"Si el periodo de medición del contador rápido baja de 1 s a 0.1 s, la lectura de velocidad:",o:["Se actualiza más rápido, pero su resolución empeora: los pasos de velocidad son más grandes","Se vuelve más exacta en todos los casos","Deja de depender de los pulsos por vuelta","No cambia"]}
+ ],
+ open:[
+  {id:"o1",q:"Con su gráfica de frecuencia contra RPM, ¿el encoder se comporta de forma lineal? Justifiquen con la pendiente y el R² que obtuvieron y compárenlos con el valor teórico PPR / 60."},
+  {id:"o2",q:"¿Qué limita la resolución de la medición de velocidad con este encoder y el contador rápido? Propongan dos formas de mejorarla."},
+  {id:"o3",q:"¿Por qué la aceleración calculada con las lecturas del HMI es aproximada? Mencionen al menos dos fuentes de error."},
+  {id:"o4",q:"Propongan un sensor binario adicional para este sistema (inductivo, capacitivo, fotoeléctrico o final de carrera). Indiquen dónde lo instalarían, para qué, y si usarían contacto NA o NC."}
+ ]
+};
+[P1,P2].forEach(function(p){p.equipoList=COMUN.equipo;p.seguridad=COMUN.seguridad;});
+return {1:P1,2:P2};
+})();
+
+var PART=1;
+(function(){
+"use strict";
+var $=U.$,$$=U.$$,esc=U.esc,C=CFG[PART],KEY="iyc:p"+PART+":avance";
+var NINT=5;
+
+function blank(){
+  var S={app:C.app,part:PART,v:1,equipo:{nombre:"",turno:"",fecha:""},int:[],f:{},g:{},t:{},mc:{},op:{},ph:{},co:[],inicio:new Date().toISOString()};
+  for(var i=0;i<NINT;i++){S.int.push({n:"",c:""});S.co.push("");}
+  C.secciones.forEach(function(s){s.blocks.forEach(function(b){if(b.type==="fields")b.items.forEach(function(it){if(it.def!==undefined)S.f[it.id]=it.def;});});});
+  return S;
+}
+var S=U.st(KEY);if(!S||S.part!==PART||S.app!==C.app)S=blank();
+var saveT=null,saved=true;
+function save(){S.saved=new Date().toISOString();var ok=U.st(KEY,S);$("#sv").textContent=ok?"Avance guardado en este navegador":"No se pudo guardar en este navegador; descarga el archivo para no perder el avance";saved=true;}
+function dirty(){saved=false;$("#sv").textContent="Guardando…";clearTimeout(saveT);saveT=setTimeout(save,500);progress();}
+window.addEventListener("pagehide",function(){if(!saved){clearTimeout(saveT);save();}});
+document.addEventListener("visibilitychange",function(){if(document.hidden&&!saved){clearTimeout(saveT);save();}});
+
+/* ---------- render ---------- */
+function sel(opts,val,attrs){return "<select "+attrs+"><option value=\"\">Elige…</option>"+opts.map(function(o){return "<option value=\""+esc(o[0])+"\""+(val===o[0]?" selected":"")+">"+esc(o[1])+"</option>";}).join("")+"</select>";}
+function render(){
+  var h='<div class="inst"><div><b>Tecnológico Nacional de México</b><br>Instituto Tecnológico de Culiacán</div><dl>'+
+   '<dt>Asignatura</dt><dd>Instrumentación y Control</dd><dt>Carrera</dt><dd>Ingeniería Mecánica</dd><dt>Periodo</dt><dd>Agosto–diciembre 2026</dd><dt>Docente</dt><dd>M.C. Alejandro Triunfo Cruz</dd></dl></div>';
+  h+='<div class="tb"><div class="u">Práctica integradora: lazo de velocidad PLC–variador–motor–HMI · Parte '+PART+'</div><h1>'+esc(C.titulo)+'</h1><div class="u">'+esc(C.unidad)+'</div></div>';
+  // equipo
+  h+='<div class="card"><h2>Equipo</h2><div class="fgrid">'+
+   '<label class="f">Nombre del equipo o número de PC<span class="in"><input type="text" data-eq="nombre" value="'+esc(S.equipo.nombre)+'" maxlength="40"></span></label>'+
+   '<label class="f">Turno<span class="in"><input type="text" data-eq="turno" value="'+esc(S.equipo.turno)+'" maxlength="20"></span></label>'+
+   '<label class="f">Fecha<span class="in"><input type="date" data-eq="fecha" value="'+esc(S.equipo.fecha)+'"></span></label></div>'+
+   '<div class="tw"><table class="team"><thead><tr><th style="width:36px">#</th><th>Nombre completo</th><th style="width:190px">Número de control</th></tr></thead><tbody>'+
+   S.int.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td><input type="text" data-int="'+i+'" data-k="n" value="'+esc(p.n)+'" maxlength="80" aria-label="Nombre del integrante '+(i+1)+'"></td><td><input type="text" data-int="'+i+'" data-k="c" value="'+esc(p.c)+'" maxlength="12" aria-label="Número de control del integrante '+(i+1)+'"></td></tr>';}).join("")+
+   '</tbody></table></div><p class="hint">Llenen solo los integrantes presentes. Cada integrante escribe su propia conclusión al final.</p></div>';
+  // objetivo, equipo, seguridad, teoría
+  h+='<div class="card"><h2>Objetivo</h2><p>'+esc(C.objetivo)+'</p><h3>Competencia</h3><p>'+esc(C.competencia)+'</p><h3>Material y equipo</h3><ul>'+C.equipoList.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+'</ul></div>';
+  h+='<div class="warn"><h3>Seguridad</h3><ul>'+C.seguridad.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+'</ul></div>';
+  h+='<details class="theory"><summary>Marco teórico breve</summary>'+C.teoria+'</details>';
+  // secciones
+  C.secciones.forEach(function(s,si){
+    h+='<section class="sec" id="'+s.id+'"><div class="sec-head"><h2>'+(si+1)+'. '+esc(s.t)+'</h2><span class="st" id="st-'+s.id+'"></span></div>'+s.intro;
+    s.blocks.forEach(function(b){h+=block(b);});
+    h+='</section>';});
+  // cuestionario
+  var n0=C.secciones.length;
+  h+='<section class="sec" id="cuest"><div class="sec-head"><h2>'+(n0+1)+'. Cuestionario</h2><span class="st" id="st-cuest"></span></div>';
+  h+=C.mc.map(function(q,i){return '<div class="q" id="q-'+q.id+'"><p class="stem"><span class="qn">'+(i+1)+'.</span>'+esc(q.q)+'</p>'+q.o.map(function(o,j){return '<label class="opt"><input type="radio" name="mc-'+q.id+'" value="'+j+'"'+(S.mc[q.id]===j?" checked":"")+'><span>'+esc(o)+'</span></label>';}).join("")+'</div>';}).join("");
+  h+=C.open.map(function(q,i){return '<div class="q" id="q-'+q.id+'"><p class="stem"><span class="qn">'+(C.mc.length+i+1)+'.</span>'+esc(q.q)+'</p><textarea data-op="'+q.id+'" aria-label="Respuesta '+(C.mc.length+i+1)+'">'+esc(S.op[q.id]||"")+'</textarea></div>';}).join("");
+  h+='</section>';
+  // conclusiones
+  h+='<section class="sec" id="concl"><div class="sec-head"><h2>'+(n0+2)+'. Conclusiones individuales</h2><span class="st" id="st-concl"></span></div><p>Cada integrante escribe con sus palabras qué aprendió y qué relación tiene con su carrera. Se califica por separado.</p>';
+  h+=S.int.map(function(p,i){return '<label class="f"><span id="cl-'+i+'">'+esc(p.n||("Integrante "+(i+1)))+'</span><textarea data-co="'+i+'">'+esc(S.co[i])+'</textarea></label>';}).join("");
+  h+='</section>';
+  h+='<div class="card noprint"><h2>Entrega</h2><p>Al terminar, descarguen el archivo de la práctica y envíenlo al docente como les indique. Si cambian de computadora, descarguen el archivo y cárguenlo en la otra para continuar.</p>'+
+     '<div class="row"><button type="button" class="primary" id="b-dl">Descargar archivo de la práctica</button><label class="row" style="gap:6px"><span class="hint">Continuar desde un archivo:</span><input type="file" id="b-load"></label></div><p class="hint" id="dl-msg" aria-live="polite"></p>'+
+     '<p style="margin-top:18px"><button type="button" id="b-reset">Borrar todo en esta computadora</button></p></div>';
+  $("#app").innerHTML=h;
+  bind();refreshAll();
+}
+function block(b){
+  if(b.type==="html")return b.h;
+  if(b.type==="fields")return '<div class="fgrid">'+b.items.map(function(it){var v=S.f[it.id]===undefined?"":S.f[it.id];
+     var inp=it.kind==="sel"?sel(it.opts,v,'data-f="'+it.id+'"'):'<input type="text" '+(it.kind==="num"?'inputmode="decimal" class="n" ':'')+'data-f="'+it.id+'" value="'+esc(v)+'">';
+     return '<label class="f">'+esc(it.l)+'<span class="in">'+inp+(it.u?'<span class="u">'+esc(it.u)+'</span>':'')+'</span></label>';}).join("")+'</div>';
+  if(b.type==="calc")return '<div class="calcs" data-calc="'+b.items.length+'">'+b.items.map(function(it,i){return '<div>'+esc(it.l)+': <b data-cv="'+i+'">—</b> '+esc(it.u)+'</div>';}).join("")+'</div>';
+  if(b.type==="grid"){var g=S.g[b.id]||{};return '<div class="tw"><table><thead><tr>'+b.head.map(function(x){return "<th>"+esc(x)+"</th>";}).join("")+'</tr></thead><tbody>'+
+     b.labels.map(function(l,i){return '<tr><td class="lab">'+esc(l)+'</td>'+b.cells.map(function(c){return '<td>'+sel(c.opts,g[i]&&g[i][c.k]||"",'data-g="'+b.id+'" data-r="'+i+'" data-k="'+c.k+'"')+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table></div>';}
+  if(b.type==="table"){var raw=S.t[b.id]||[],n=b.rows;
+     var h='<div class="tw"><table data-t="'+b.id+'"><thead><tr><th style="width:36px">#</th>'+b.cols.map(function(c){return "<th>"+esc(c.h)+"</th>";}).join("")+'</tr></thead><tbody>';
+     for(var i=0;i<n;i++){var r=raw[i]||{};h+='<tr><td>'+(i+1)+'</td>'+b.cols.map(function(c){if(c.kind==="calc")return '<td class="calc" data-tc="'+b.id+'" data-r="'+i+'" data-k="'+c.k+'">—</td>';
+       var v=r[c.k]!==undefined?r[c.k]:(c.def?c.def[i]:"");return '<td><input type="text" inputmode="decimal" class="n" data-t="'+b.id+'" data-r="'+i+'" data-k="'+c.k+'" value="'+esc(v)+'" aria-label="'+esc(c.h)+', fila '+(i+1)+'"></td>';}).join("")+'</tr>';}
+     h+='</tbody></table></div>';
+     if(b.sum)h+='<div class="sums" data-sum="'+b.id+'">'+b.sum.map(function(s,i){return '<div>'+esc(s.l)+': <b data-sv="'+i+'">—</b> '+esc(s.u)+'</div>';}).join("")+'</div>';
+     if(b.chart)h+='<div data-chart="'+b.id+'"></div>';
+     return h;}
+  if(b.type==="photo"){var im=S.ph[b.id];return '<div class="photo"><div class="thumb'+(im?" has":"")+'" id="th-'+b.id+'"'+(im?' style="background-image:url('+im+')"':'')+'>Sin foto</div><div><label class="f">'+esc(b.l)+' (JPEG o PNG)<input type="file" accept="image/jpeg,image/png,image/*" data-ph="'+b.id+'"></label><p class="err" id="pe-'+b.id+'"></p></div></div>';}
+  return "";
+}
+function findBlock(id){var r=null;C.secciones.forEach(function(s){s.blocks.forEach(function(b){if(b.id===id)r=b;});});return r;}
+function refreshCalcs(){
+  var c=U.ctx(S);
+  C.secciones.forEach(function(s){s.blocks.forEach(function(b){
+    if(b.type==="calc"){var box=$('#'+s.id+' [data-calc]');b.items.forEach(function(it,i){var v;try{v=it.f(c);}catch(e){v=NaN;}$('[data-cv="'+i+'"]',box).textContent=U.fmt(v,it.d);});}
+    if(b.type==="table"){var R=U.rows(b,S);
+      R.forEach(function(r,i){b.cols.forEach(function(col){if(col.kind==="calc"){var td=$('td[data-tc="'+b.id+'"][data-r="'+i+'"][data-k="'+col.k+'"]');if(td)td.textContent=U.fmt(r[col.k],col.d);}});});
+      if(b.sum){var box=$('[data-sum="'+b.id+'"]');b.sum.forEach(function(sm,i){var v;try{v=sm.f(R,c);}catch(e){v=NaN;}$('[data-sv="'+i+'"]',box).textContent=U.fmt(v,sm.d);});}
+      if(b.chart){$('[data-chart="'+b.id+'"]').innerHTML=U.tableChart(b,R,S);}}
+  });});
+}
+function progress(){
+  var tot=0,ok=0;
+  var team=S.int.some(function(p){return p.n.trim()&&p.c.trim();})&&S.equipo.nombre.trim()!=="";tot++;if(team)ok++;
+  C.secciones.forEach(function(s){var d=U.secDone(s,S);tot++;if(d)ok++;var e=$("#st-"+s.id);if(e){e.textContent=d?"Completo":"Pendiente";e.classList.toggle("ok",d);}});
+  var qd=C.mc.every(function(q){return S.mc[q.id]!==undefined;})&&C.open.every(function(q){return (S.op[q.id]||"").trim();});tot++;if(qd)ok++;
+  var e2=$("#st-cuest");e2.textContent=qd?"Completo":"Pendiente";e2.classList.toggle("ok",qd);
+  C.mc.forEach(function(q){var x=$("#q-"+q.id);if(x)x.classList.toggle("ok",S.mc[q.id]!==undefined);});
+  C.open.forEach(function(q){var x=$("#q-"+q.id);if(x)x.classList.toggle("ok",!!(S.op[q.id]||"").trim());});
+  var named=S.int.map(function(p,i){return i;}).filter(function(i){return S.int[i].n.trim();});
+  var cd=named.length>0&&named.every(function(i){return S.co[i].trim();});tot++;if(cd)ok++;
+  var e3=$("#st-concl");e3.textContent=cd?"Completo":"Pendiente";e3.classList.toggle("ok",cd);
+  $("#prog").textContent=ok+" de "+tot+" apartados completos";
+}
+function refreshAll(){refreshCalcs();progress();}
+
+function bind(){
+  var app=$("#app");
+  app.addEventListener("input",function(e){var t=e.target,d=t.dataset;
+    if(d.eq){S.equipo[d.eq]=t.value;}
+    else if(d.int!==undefined){S.int[+d.int][d.k]=t.value;if(d.k==="n"){var l=$("#cl-"+d.int);if(l)l.textContent=t.value||("Integrante "+(+d.int+1));}}
+    else if(d.f){S.f[d.f]=t.value;refreshCalcs();}
+    else if(d.g){S.g[d.g]=S.g[d.g]||{};S.g[d.g][d.r]=S.g[d.g][d.r]||{};S.g[d.g][d.r][d.k]=t.value;}
+    else if(d.t&&t.tagName==="INPUT"){S.t[d.t]=S.t[d.t]||[];S.t[d.t][d.r]=S.t[d.t][d.r]||{};S.t[d.t][d.r][d.k]=t.value;refreshCalcs();}
+    else if(d.op){S.op[d.op]=t.value;}
+    else if(d.co!==undefined){S.co[+d.co]=t.value;}
+    else if(t.name&&t.name.indexOf("mc-")===0){S.mc[t.name.slice(3)]=+t.value;}
+    else return;
+    dirty();});
+  app.addEventListener("change",function(e){var t=e.target;
+    if(t.tagName==="SELECT"||t.type==="radio"){t.dispatchEvent(new Event("input",{bubbles:true}));return;}
+    if(t.dataset&&t.dataset.ph){photo(t);}});
+  $("#b-dl").addEventListener("click",download);
+  $("#b-load").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{var d=JSON.parse(String(rd.result).replace(/^﻿/,""));
+      if(d.app!==C.app||d.part!==PART)throw new Error("ese archivo no es de la Parte "+PART);
+      delete d.sum;delete d.fin;S=d;save();render();$("#dl-msg").textContent="Se cargó el avance de "+(S.equipo.nombre||"el equipo")+".";}
+    catch(err){$("#dl-msg").textContent="No se pudo cargar: "+err.message+".";}};rd.readAsText(f);});
+  var rb=$("#b-reset");rb.addEventListener("click",function(){if(!rb.dataset.armed){rb.dataset.armed="1";rb.textContent="Pulsa otra vez para borrar todo";setTimeout(function(){delete rb.dataset.armed;rb.textContent="Borrar todo en esta computadora";},4000);return;}
+    U.st(KEY,null);S=blank();render();window.scrollTo(0,0);});
+}
+function photo(inp){
+  var id=inp.dataset.ph,file=inp.files&&inp.files[0],err=$("#pe-"+id);if(!file)return;err.textContent="Procesando…";
+  var url=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){var mx=1024,w=im.naturalWidth,h=im.naturalHeight,s=Math.min(1,mx/Math.max(w,h)),c=document.createElement("canvas");c.width=Math.round(w*s);c.height=Math.round(h*s);
+    var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    S.ph[id]=c.toDataURL("image/jpeg",0.72);var th=$("#th-"+id);th.style.backgroundImage="url("+S.ph[id]+")";th.classList.add("has");err.textContent="";dirty();};
+  im.onerror=function(){URL.revokeObjectURL(url);err.textContent="No se pudo abrir la imagen. Usa una foto JPEG o PNG.";};
+  im.src=url;
+}
+function download(){
+  var msg=$("#dl-msg");
+  if(!S.equipo.nombre.trim()){msg.textContent="Escriban el nombre del equipo o el número de PC antes de descargar.";$('[data-eq="nombre"]').focus();return;}
+  if(!S.int.some(function(p){return p.n.trim();})){msg.textContent="Escriban al menos un integrante.";return;}
+  var out=JSON.parse(JSON.stringify(S));delete out.saved;out.fin=new Date().toISOString();out.sum=U.sumOf(out);
+  var name="IyC_Parte"+PART+"_"+S.equipo.nombre.trim().normalize("NFD").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"")+".json";
+  try{var blob=new Blob([JSON.stringify(out)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+    msg.textContent="Se descargó "+name+". Envíenlo al docente.";}catch(e){msg.textContent="El navegador no permitió la descarga. Avisen al docente.";}
+}
+render();
+$("#sv").textContent=S.saved?"Avance recuperado de este navegador":"Los cambios se guardan solos en este navegador";
+})();
+
+</script>
+</body>
+</html>
